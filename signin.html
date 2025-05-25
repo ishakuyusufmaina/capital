@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Salim - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+ 
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    main {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #004080, #0066cc);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    header {
+      width: 100%;
+      background-color: #002f5e;
+      color: white;
+      padding: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    header img {
+      height: 50px;
+      border-radius:50%;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 40px 30px;
+      margin-top: 60px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .card h2 {
+      margin-bottom: 25px;
+      color: #004080;
+    }
+
+    .card input {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    .card button {
+      width: 100%;
+      padding: 12px;
+      background-color: #004080;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background-color 0.3s ease;
+    }
+
+    .card button:hover {
+      background-color: #003060;
+    }
+
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 1.2rem;
+      }
+
+      .card {
+        padding: 25px 20px;
+      }
+    }
+  
+  
+  header img {
+  height: auto;
+  width: 60px; /* or 100%, max-width for responsiveness */
+  max-width: 100%;
+  border-radius: 8px; /* rounded corners */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* soft shadow */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid #fff;
+
+  }
+
+header img:hover {
+  transform: scale(1.05); /* slight zoom on hover */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); /* stronger shadow */
+}
+
+  
+  
+  footer {
+  //margin-top: 50px;
+  background-color: #002f5e;
+  color: #ffffff;
+  text-align: center;
+  padding: 15px 0;
+  font-size: 0.9rem;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
+  position: sticky;
+ top: 100%;
+  width: 100%;
+}
+
+footer small {
+  opacity: 0.8;
+}
+  
+  
+
+  </style>
+</head>
+<body>
+ 
+  <header>
+    <img src="logo.jpg" alt="School Logo" />
+    <h1>Salim Global Integrated Academy Maiduguri</h1>
+  </header>
+   <main>
+  <div class="card">
+    <h2>Sign In</h2>
+    <input type="email" id="email" placeholder="Username" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button id="loginBtn" onclick="signIn()">Login</button>
+    
+  </div>
+  </main>
+ <footer>
+    <small>©Mainafly 2025</small>
+  </footer>
+    
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+        const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+ 
+  const schoolId = "salim";
+    const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+   
+
+    function onLoginSuccess(user, role) {
+      //alert("Login successful! Welcome, " + user.email);
+      if (role=="admin"){
+        window.location.href = "admin/admin.html";
+        return
+      }
+      if (role=="teacher"){
+        window.location.href = "teacher/index.html";
+        return
+      }
+      if (role=="student"){
+        window.location.href = "student/index.html";
+        return
+      }
+      if (role=="guardian"){
+        window.location.href = "guardian/index.html";
+        return
+      }
+      if (role=="alumni"){
+        window.location.href = "alumni/index.html";
+        return
+      }
+      
+      // redirect or load user-specific content here
+    }
+  
+  loginBtn.onclick = signIn;
+
+  let reg = /.*@/;
+  
+    function signIn() {
+      const username = document.getElementById("email").value;
+      const email = username.replace(/@.*/, "")+`@teacher.${schoolId}`;
+      const role = username.replace(reg, "");
+      const password = document.getElementById("password").value;
+
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          onLoginSuccess(userCredential.user, role);
+        })
+        .catch((error) => {
+          alert("Login failed: " + error.code);
+        });
+    }
+  </script>
+  
+</body>
+</html>
