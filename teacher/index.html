@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Home</title>
+  <style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f0f4f8;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    padding: 1rem;
+    background-color: #4A90E2;
+    color: white;
+    margin: 0;
+    font-size: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .load-container, .register-container {
+    background: white;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    border-radius: 10px;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  .load-container h2,
+  .register-container h2 {
+    margin-top: 0;
+    color: #4A90E2;
+    border-bottom: 2px solid #4A90E2;
+    padding-bottom: 0.5rem;
+  }
+
+  .load, .register {
+    background: #e8f0fe;
+    padding: 0.8rem 1rem;
+    margin: 0.5rem 0;
+    border-left: 5px solid #4A90E2;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+
+  .load:hover, .register:hover {
+    background: #d0e3fc;
+    cursor: pointer;
+  }
+
+  @media (max-width: 600px) {
+    .load-container, .register-container {
+      margin: 1rem;
+      padding: 1rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
+  
+  
+  
+  
+  header {
+  
+    align-items: center;
+    background: #3f51b5;
+    color: #fff;
+    padding:  15px 20px;
+    
+    margin-bottom: 10px;
+  
+    position: sticky;
+    top:0;
+    z-index: 99;
+    min-height: 60px;
+    line-height: 24px;
+  }
+  
+  
+  
+  
+  
+    #signout:hover {
+    background-color: #d32f2f;
+    transform: scale(1.05);
+  }
+
+  #signout:active {
+    transform:scale(0.98);
+  }
+  
+
+
+   
+    .menu-container.show {
+        transition: transform 0.2s ease-out;
+        transform: scaleX(100%);
+        
+    }
+  
+  
+  #menu {
+        position: absolute;
+        right:0;
+        top: 0;
+        background: none; // inherit;
+        color: inherit;
+        border: none;
+        font-size: 40px;
+    font-weight: bold;
+  z-index: 101;
+    }
+  
+  
+  
+  .menu-container {
+    max-height: 100vh;
+        position: absolute;
+        right: 0;
+        z-index: 110;
+        transform: scaleX(0);
+        text-align: left;
+        top: 0:
+    overflow: auto;
+  background-color: inherit; // #1e1e1e;
+  color: #ffffff;
+  padding: 20px;
+  width: 220px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: auto;
+  }
+
+.menu-container button#close {
+  background: transparent;
+  color: #ffffff;
+  border: none;
+  font-size: 18px;
+  float: right;
+  cursor: pointer;
+}
+
+/*.menu-container hr {
+  border: 0;
+  height: 1px;
+  background:  #444;
+  margin: 10px 0;
+}*/
+
+.menu-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-container li {
+  overflow: auto;
+  transition: background 0.3s, transform 0.2s;
+  margin: 12px 0;
+  
+}
+
+.menu-container a {
+  color: #80cbc4;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.menu-container a:hover {
+  color: #4db6ac;
+}
+
+#signout,  #switch {
+  cursor: pointer;
+  padding: 10px 20px;
+    background-color: #4caf50;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s ease;
+
+}
+  
+  button {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s ease;
+  }
+  
+  #signout1 {
+    background: none;
+    border: 0.5px solid white;
+    border-radius: 4px;
+    border-bottom: none;
+  }
+
+    hr {
+    border: 0;
+    height: 4px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(200, 200, 200, 0.75), rgba(0, 0, 0, 0));
+    }
+
+</style>
+
+</head>
+<body>
+  <header>
+    <hr>
+    <button id="signout1">Log out</button>
+
+    <button id="menu">&#9776;</button>
+     <div class="menu-container">
+            <button id="close">X</button> Menu
+            <hr>
+            <ul>
+              <li></li>
+              <li id="switch">Switch <span>Account</span></li>
+              <li id="signout">Logout <span id="username"></span></li>
+              <li><a href="../changePsw.html">Change password </a></li>
+            </ul>
+        </div>
+    <div id="session">session/term not initialized</div>
+    <div id="date"></div>
+    <hr>
+  </header>
+  <h1>
+   Good Teacher  
+  </h1>
+  <div class="load-container">
+    <h2>Academic Load</h2>
+      
+  </div>
+  <div class="register-container">
+    <h2>E-register</h2>
+    <!--div class="register">JSS 1</div>
+    <div class="register">JSS 2</div>
+    <div class="register">JSS 3</div-->
+  </div>
+  
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc, serverTimestamp} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, updateProfile, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  let teacher;
+    let d = new Date();
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day = d.getDate();
+  let sec = d.getSeconds()+1;
+  let min = d.getMinutes()+1;
+  let h = d.getHours()+1;
+  //time.innerHTML = `${h} : {}{
+  date.innerHTML = `${day}/${month}/${year}`;
+
+  const schoolId = "salim";
+  
+    let sessionsRef = doc(db, schoolId, "sessions");
+let teachersRef = doc(db, schoolId, "teachers");
+  let teachersDoc = await getDoc(teachersRef);
+  let sectionRef = doc(db, schoolId, "section");
+  let sectionDoc = await getDoc(sectionRef);
+  const attendance = {};
+
+  const terms = ["first term", "second term", "third term"];
+  
+  let sesion;
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sesion = sessions.sort((a, b)=>b.no - a.no)[0];
+    session.innerHTML = sesion.year + ", " + terms[sesion.term];
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+  
+  
+
+  
+  signout.onclick = async e=>{
+    await signOut(auth);
+  }
+  
+  
+  document.getElementById("close").onclick = _ => document.querySelector(".menu-container").classList.remove("show");
+  menu.onclick = _ => document.querySelector(".menu-container").classList.add("show");
+
+  document.body.onclick = e =>{
+    
+    if (e.target != menu )
+    document.querySelector(".menu-container").classList.remove("show");
+
+  }
+  
+  
+  onAuthStateChanged(auth, user=>{
+    let reg = /@.*/;
+    if (user){
+      let id = user.email.replace(reg, "");
+      let name = user.displayName;
+      if (!name){
+        name = window.prompt("It seems there is no name on your account, update your name: ");
+       if (name)
+       updateProfile(user, {displayName: name})
+
+      }
+      username.textContent = `(${name})`;
+      if (teachersDoc.exists()){
+        teacher = teachersDoc.data()[id];
+        if (!teacher) {
+          alert("It seems your account has not been properly created by an admin. If you think this is a mistake talk to your admin");
+          return;
+        }
+         let loadCont = document.querySelector(".load-container");
+        for (const subj in teacher.load){
+          let classes = teacher.load[subj];
+          classes.forEach(cls=>{
+            let loadElm = document.createElement("div");
+            loadElm.innerHTML =`${subj} ${cls}`;
+            loadElm.classList.add("load");
+            loadElm.onclick = e=>{
+              localStorage.setItem("class", cls);
+              localStorage.setItem("subject", subj);
+              window.location.href = "load/index.html";
+              
+          }
+            loadCont.append(loadElm);
+          });
+         //alert(classes)
+          
+        }
+        if (!Object.keys(teacher.load).length) loadCont.innerHTML +="No academic load has been assigned to you";
+        
+        let role = teacher.role ?? {};
+        let fmClasses = role.fm ?? [];
+       // alert(fmClasses);
+        let regCont = document.querySelector(".register-container");
+        fmClasses.forEach(cls=>{
+          let regElm = document.createElement("div");
+          regElm.classList.add("register");
+          regElm.innerHTML = cls;
+          regElm.onclick = e=>{
+            localStorage.setItem("class", cls);
+            window.location.href = "stdAttendance.html";
+              
+          }
+          regCont.appendChild(regElm);
+        })
+        
+      if (!fmClasses.length) regCont.innerHTML +="No form master role has been assigned to you";
+      }
+    } else {
+      window.location.href = "../signin.html";
+    }
+  })
+  
+  document.getElementById("switch").onclick = e=> {
+      window.location.href = "../admin/admin.html";
+    }
+  signout1.onclick = e=> signOut(auth);
+  </script>
+</body>
+</html>

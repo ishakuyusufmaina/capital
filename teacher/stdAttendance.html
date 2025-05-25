@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Attendance</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f7fa;
+    }
+
+    h1, select {
+      color: #333;
+      text-align: center;
+    }
+  
+  select {
+    font-weight: bold;
+    font-size: 1.5rem;
+    border: none;
+  }
+  
+  td[contenteditable] {
+      background-color: #f9f9f9;
+      border: 0.5px solid #aaa;
+      min-width: 100px;
+    }
+
+  
+
+    table {
+      width: 100%;
+     border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+    }
+
+    th, td {
+     border: 1px solid #ccc;
+      padding: 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #eaeaea;
+      text-transform: capitalize;
+    }
+    input {
+      padding: 8px;
+      width: 100px;
+     //margin-right: 10px;
+      border: 1px solid #aaa;
+      border-radius: 50%;
+    }
+
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.7rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    
+
+  
+
+    
+
+  
+ 
+    
+
+  
+  
+ h1 {
+display: inline-block;
+ } 
+  
+#save {
+text-align: right;
+display: inline-block;
+  float: right;
+}  
+  
+  
+  </style>
+</head>
+<body>
+  <p id="date"></p>
+  <p id="time"></p>
+  <p id="sessionElm"></p>
+  <p id="classElm">
+    
+  </p>
+  <h1>
+    Attendance
+  </h1>
+  
+  
+  <table id="table">
+    <tr>
+      <th>Student</th>
+      <th>Present</th>
+      <th>Comment</th>
+    </tr>
+    
+  </table>
+  <button id="submitBtn">Submit</button>
+  
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc, serverTimestamp} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  
+  const schoolId = "salim";
+    let sessionsRef = doc(db, schoolId, "sessions");
+let teachersRef = doc(db, schoolId, "teachers");
+  let teachersDoc = await getDoc(teachersRef);
+  let sectionRef = doc(db, schoolId, "section");
+  let sectionDoc = await getDoc(sectionRef);
+  const attendance = {};
+    
+  const terms = ["first term", "second term", "third term"];
+  
+  let session;
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     session = sessions.sort((a, b)=>b.no - a.no)[0];
+    sessionElm.innerHTML = session.year + ", " + terms[session.term];
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+  
+ 
+  
+  let teacher = {
+    
+  }
+  let fmRole = localStorage.getItem("class");
+  classElm.innerHTML = fmRole;
+  let stdsRef = doc(db, schoolId, key(sessionElm.textContent), key(fmRole), "students")
+  let stdsDoc = await getDoc(stdsRef);
+  
+  let students  = {};
+  if (stdsDoc.exists()){
+    students =stdsDoc.data();
+   // alert(Object.keys(students).length)
+  }
+  
+  let d = new Date();
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day = d.getDate();
+  let getTime = ()=>{
+  let sec = d.getSeconds()+1;
+  let min = d.getMinutes()+1;
+  let h = d.getHours()+1;
+    return {sec, min, h}
+  }
+  //time.innerHTML = `${h} : {}{
+  
+ 
+  date.innerHTML = `${day}/${month}/${year}`;
+  
+  function presentTable(stdKeys){
+    attendance.students = {};
+    stdKeys.forEach((key, i) => {
+      attendance.students[key] = {
+        isPresent: false,
+        name: students[key].name,
+        id: key
+      }
+      let std = students[key].name;
+      let tr = document.createElement("tr");
+      let name = document.createElement("td");
+      let comment = document.createElement("td");
+      comment.setAttribute("contenteditable", "plaintext-only");
+      let label = document.createElement("label");
+      label.innerHTML = std;
+      name.append(label);
+      let inpCont = document.createElement("td");
+      let inp = document.createElement("input");
+      inp.type = "checkbox";
+      inp.id = key;
+      
+      inp.onchange = e=>{
+        attendance.students[key].isPresent = inp.checked
+      }
+      comment.oninput = e=>{
+        attendance.students[key].comment = comment.textContent;
+      }
+      
+      label.setAttribute("for", key);
+      inpCont.append(inp);
+      tr.append(name, inpCont, comment);
+      
+      table.append(tr);
+    })
+  }
+  presentTable(Object.keys(students));
+  function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+    }
+  
+  submitBtn.onclick = async e=>{
+    let session = key(sessionElm.textContent);
+    let clas = key(fmRole);
+    let superAttendRef = doc(db, schoolId, session, clas, "attendance");
+    let superAttendDoc = await getDoc(superAttendRef);
+    let superAttendance = superAttendDoc.exists()? superAttendDoc.data() : {};
+    
+   // attendance.summitedAt = serverTimestamp();
+    attendance.time = getTime();
+    attendance.submitedBy = teacher.name;
+    let todayDate = date.textContent.replaceAll("/", "_");
+    superAttendance[todayDate] = superAttendance[todayDate] ?? [];
+    superAttendance[todayDate].push(attendance);
+    await setDoc(superAttendRef, superAttendance);
+    alert("sumitted!");   
+  }
+  
+  
+  onAuthStateChanged(auth, user=>{
+    let reg = /@.*/;
+    if (user){
+      let id = user.email.replace(reg, "");
+      if (teachersDoc.exists()){
+       teacher = teachersDoc.data()[id];
+       // alert(teacher.name);
+      }
+      
+    }
+    else window.location.href = "../signin.html";
+    
+  })
+  </script>
+</body>
+</html>
