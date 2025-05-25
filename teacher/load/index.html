@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <title>Teacher Load</title>
+  <style>
+    main {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f7f9fb;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    header {
+      background-color: #4a90e2;
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    header div {
+      margin: 10px 0;
+      font-size: 1.1em;
+    }
+
+    a.fw {
+      display: block;
+      background-color: #ffffff;
+      color: #4a90e2;
+      text-align: center;
+      padding: 15px;
+      margin: 10px auto;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.1em;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    a.fw:hover {
+      background-color: #4a90e2;
+      color: white;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+ <a href="../index.html"><i class="fas fa-home"></i></a>
+  <main>
+  <header>
+   
+    <div id="date">Date: </div>
+    <div id="session">Session: </div>
+    <div id="clas">Class: </div>
+    <div id="subject">Subject: </div>
+  </header>
+  
+  <div>
+    <a class="fw" href="teachAndSign.html">Teach and Sign</a>
+  </div>
+  <div>
+    <a class="fw" href="scoreSheet.html">Score Sheet</a>
+  </div>
+  </main>
+  
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc, serverTimestamp} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  
+  const schoolId = "salim";
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+      let sessionsRef = doc(db, schoolId, "sessions");
+let teachersRef = doc(db, schoolId, "teachers");
+  let teachersDoc = await getDoc(teachersRef);
+ // let sectionRef = doc(db, schoolId, "section");
+  //let sectionDoc = await getDoc(sectionRef);
+//  const attendance = {};
+
+  onAuthStateChanged(auth, user=>{
+    if (!user){
+      window.location.href = "../../signin.html"
+    }
+  })
+  const terms = ["first term", "second term", "third term"];
+  
+  let sesion;
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sesion = sessions.sort((a, b)=>b.no - a.no)[0];
+    session.innerHTML = sesion.year + ", " + terms[sesion.term];
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+  
+  let d = new Date();
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day = d.getDate();
+  let sec = d.getSeconds()+1;
+  let min = d.getMinutes()+1;
+  let h = d.getHours()+1;
+  //time.innerHTML = `${h} : {}{
+  date.innerHTML = `${day}/${month}/${year}`;
+
+  let cls = localStorage.getItem("class");
+  clas.innerHTML = cls;
+  let subj = localStorage.getItem("subject");
+  subject.innerHTML = subj;
+
+  </script>
+</body>
+</html>

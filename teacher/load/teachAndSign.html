@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teach and Log</title>
+</head>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f6fa;
+    margin: 20px;
+    padding: 20px;
+    color: #2c3e50;
+  }
+
+  h1 {
+    text-align: center;
+    color: #34495e;
+    margin-bottom: 30px;
+  }
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #ecf0f1;
+    border-radius: 5px;
+  }
+
+  header div {
+    flex: 1 1 200px;
+    margin: 5px 10px;
+    font-weight: bold;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  th {
+    background-color: #3498db;
+    color: white;
+  }
+
+  select, input[type="number"], input[type="text"], input[placeholder] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  div label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+  button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #27ae60;
+  }
+
+  hr {
+    margin: 30px 0;
+    border: none;
+    height: 1px;
+    background-color: #ccc;
+  }
+</style>
+
+<body>
+  <h1>
+    Teach and Sign
+  </h1>
+  <header>
+    <div id="date">Date: </div>
+    <div id="session">Session: </div>
+    <div id="clas">Class: </div>
+    <div id="subject">Subject: </div>
+  </header>
+  <table id="table">
+    <tr>
+      <th>Period</th>
+      <th>Topic(s)</th>    
+    </tr>
+    <tr>
+        <td>
+        <select id="period">
+          <option value=""> -period- </option>
+          <option>1st</option>
+          <option>2nd</option>
+          <option>3rd</option>
+          <option>4th</option>
+          <option>5th</option>
+          <option>6th</option>
+          <option>7th</option>
+          <option>8th</option>
+        </select> 
+        </td>
+      <td>
+        <input id="topic" placeholder="topic">
+      </td>
+    </tr>
+  </table>
+  <hr>
+  <div>
+    <label for="supervisor">Supervisor </label>
+    <select id="supervisor">
+      <option value=""> -select- </option>
+    </select>
+  </div>
+  <div>
+    <label for="code">Auth Code</label>
+    <input type="number" id="code" placeholder="code"> 
+  </div>
+  <button id="submit">Submit</button>
+  
+  
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+
+  const schoolId = "salim";
+  const terms = ["first term", "second term", "third term"];
+  
+  
+  let d = new Date();
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day = d.getDate();
+  let sec = d.getSeconds()+1;
+  let min = d.getMinutes()+1;
+  let h = d.getHours()+1;
+  let getTime = ()=>{
+  let sec = d.getSeconds()+1;
+  let min = d.getMinutes()+1;
+  let h = d.getHours()+1;
+    return {sec, min, h}
+  }
+  //time.innerHTML = `${h} : {}{
+  date.innerHTML = `${day}/${month}/${year}`;
+
+  let ses;
+  let sessionsRef = doc(db, schoolId, "sessions");
+  let sessionsDoc = await getDoc(sessionsRef);
+    if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+    ses= sessions.sort((a, b)=>b.no - a.no)[0];
+      session.textContent = ses.year + ", " + terms[ses.term];
+  }
+  
+  clas.textContent = localStorage.getItem("class");
+  subject.textContent = localStorage.getItem("subject");
+  
+  
+  
+  let authRef = doc(db, schoolId, "auth");
+    let authDoc = await getDoc(authRef);
+   if (authDoc.exists()){
+     let authObjs = authDoc.data();
+     for (const id in authObjs){
+       let authObj = authObjs[id];
+       let opt = document.createElement("option");
+       opt.value = id;
+       opt.innerHTML = authObj.authorizer;
+       supervisor.append(opt);
+     }
+   }
+  
+
+  submit.onclick = async e=>{
+    let time = getTime();
+    let todayDate = date.textContent.replaceAll("/", "_");
+    let cls = key(clas.textContent);
+    let sesId = key(session.textContent);
+    //alert(sesId);
+    let code1;
+    let code2;
+    let supvsor;
+    if (supervisor.children.length > 1){
+       code1 = code.value;
+      let id = supervisor.value;
+      if (!id) return;
+       code2 = authDoc.data()[id].code;
+      if (code2 != code1) {
+        alert("Wrong authorization");
+        return
+      }
+      supvsor = authDoc.data()[id].authorizer;
+      
+    }
+    
+    let per = period.value;
+    if (!per) return;
+    let top = topic.value;
+    if (!top) return;
+    let entry = {
+      subject: subject.textContent,
+      period: per,
+      topic: top,
+      supervisedBy: supvsor,
+      authCode: code1,
+      timeSubmitted: time ,
+      class: cls,
+      teacher: auth.currentUser.displayName
+    }
+    console.log(JSON.stringify(entry))
+    
+    let tsRef = doc(db, schoolId, sesId, cls, "teachAndSign");
+    let tsDoc = await getDoc(tsRef);
+    let ts = tsDoc.exists()? tsDoc.data() : {};
+    ts[todayDate] ??=[];
+    ts[todayDate].push(entry);
+    await setDoc(tsRef, ts, {merge: true});
+    alert("submitted");
+  }
+  
+  function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+    }
+  onAuthStateChanged(auth, user=>{
+    if (!user) 
+    window.location.href = "../../signin.html";
+  })
+  </script>
+</body>
+</html>
