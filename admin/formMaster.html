@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Attendance</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f7fa;
+    }
+
+    h1, select {
+      color: #333;
+      text-align: center;
+    }
+  
+  select {
+    font-weight: bold;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 15px;
+    padding: 4px;
+  }
+  
+  td[contenteditable] {
+      background-color: #f9f9f9;
+      border: 0.5px solid #aaa;
+      min-width: 100px;
+    }
+
+  
+
+    table {
+      width: 100%;
+     border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+    }
+
+    th, td {
+     border: 1px solid #ccc;
+      padding: 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #eaeaea;
+      text-transform: capitalize;
+    }
+    input {
+      padding: 8px;
+      width: 100px;
+     //margin-right: 10px;
+      border: 1px solid #aaa;
+      border-radius: 50%;
+    }
+
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.7rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    
+
+  
+
+    
+
+  
+ 
+    
+
+  
+  
+ h1 {
+display: inline-block;
+ } 
+  
+save {
+text-align: right;
+display: inline-block;
+  float: right;
+}  
+  
+  details {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 1em;
+  max-width: 500px;
+  margin: 20px auto;
+  background: linear-gradient(to right, #fefefe, #f4f4f9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: all 0.3s ease;
+}
+
+details[open] {
+  border-color: #6c63ff;
+  background: #f0f0ff;
+}
+
+details summary {
+  font-size: 1.2em;
+  font-weight: 600;
+  cursor: pointer;
+  color: #444;
+  position: relative;
+  padding-right: 20px;
+  list-style: none;
+}
+
+details summary::marker {
+  display: none;
+}
+
+details summary::after {
+  content: "➕";
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 1.2em;
+  transition: transform 0.3s ease;
+}
+
+details[open] summary::after {
+  content: "➖";
+  transform: rotate(180deg);
+}
+
+details ol {
+  margin-top: 1em;
+  padding-left: 1.2em;
+  counter-reset: step;
+}
+
+details ol li {
+  margin: 0.5em 0;
+  position: relative;
+  padding-left: 1.5em;
+  font-size: 1em;
+  color: #333;
+  border: 1px solid black;
+}
+
+details ol li::before {
+  content: counter(step) ".";
+  counter-increment: step;
+  position: absolute;
+  left: 0;
+  color: #6c63ff;
+  font-weight: bold;
+}
+
+  </style>  
+</head>
+
+<body>
+  <h1>
+    Form masters
+  </h1>
+  <table>
+    <tr>
+      <th>Class</th>
+      <th>Form master</th>
+    </tr>
+    
+    <tbody id="table">
+      
+    </tbody>
+  </table>
+  <button id="save">Save</button>
+  
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  const schoolId = "salim";
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  
+  let teacherDoc = await getDoc(doc(db, schoolId, "teachers"));
+  let teachers = teacherDoc.exists()? teacherDoc.data() : {};
+  let sectionDoc = await getDoc(doc(db, schoolId, "section"));
+  if (sectionDoc.exists()){
+    let sections = sectionDoc.data();
+    let sectKeys = Object.keys(sections).sort();
+    for (let i = 0; i< sectKeys.length; i++){
+      let section = sectKeys[i];
+      let classes = sections[section].classes.sort();
+      
+      classes.forEach(clas=>{
+        let row = table.insertRow();
+        let td = row.insertCell();
+        td.innerHTML = clas;
+        let tchListD = row.insertCell();
+        tchListD.innerHTML = "<span>none</span>";
+        let details = document.createElement("details");
+        details.innerHTML = `
+        <summary>Assign new</summary>
+        `;
+        details.name = "teachers";
+        let tchList = document.createElement("ul");
+        for (const username in teachers){
+          let teacher = teachers[username];
+          let list = document.createElement("li");
+          list.innerHTML = teacher.name;
+          tchList.append(list);
+          teachers[username].role = teachers[username].role ?? {};
+          teachers[username].role.fm = teachers[username].role.fm ?? [];
+          let fmRole = new Set(teachers[username].role.fm);
+          teachers[username].role.fm = Array.from(fmRole);
+         /* teachers[username].role = {};
+          return*/
+          let updateFM = ()=>{
+            let fm= tchListD.querySelector("span");
+            fm.textContent = teacher.name;
+            let username = fm.getAttribute("data-username");
+            fm.setAttribute("data-username", teacher.username);
+            if (!teacher.role.fm.includes(clas)) 
+            teacher.role.fm.push(clas);
+            
+            return username;
+          }
+          if (teacher.role.fm.includes(clas)){
+            updateFM();
+          }
+          list.onclick = e=>{
+            let username = updateFM();
+               //index = teachers[username].role.fm.indexOf(clas);
+            
+            details.open = false;
+            if (!username) return;
+            let index = teachers[username].role.fm.indexOf(clas);
+            teachers[username].role.fm.splice(index, 1);
+         
+          }
+        }
+        details.append(tchList);
+        tchListD.append(details);
+        
+      })
+    }
+  }
+  
+  save.onclick = async e=>{
+    let teachersRef = doc(db, schoolId, "teachers");
+    await setDoc(teachersRef, teachers);
+    alert("saved!");
+  }
+  </script>
+</body>
+</html>

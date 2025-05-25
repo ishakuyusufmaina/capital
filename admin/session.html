@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teachers - Name, Username, Password</title>
+  <style>
+    body {
+     // background-color: #121212;
+   //   color: #ffffff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    form {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    input, select {
+      padding: 8px;
+      border: 1px solid #333;
+      border-radius: 5px;
+      background-color: #1e1e1e;
+      color: #fff;
+    }
+
+  /*  button {
+      padding: 6px 12px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #555;
+    }*/
+
+    table {
+     width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #333;
+      text-align: left;
+    }
+
+    .center {
+      text-align: center;
+      margin-top: 15px;
+    }
+  
+  .modal {
+      display: none;
+      position: absolute;
+     top: 45%;
+    margin: auto;
+      width: fit-content;
+    height: fit-content;
+     background-color: #38427a; // rgba(0, 0, 0, 0.5);
+      color: black;
+    font-weight: bold;
+    border: 2px solid silver;
+    border-radius: 15px;
+    
+    
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* for Safari */
+  //border-radius: 12px;
+  padding: 30px;
+ // color: white;
+    box-sizing: border-box;
+}
+
+
+      button {
+      margin-top: 1.5rem;
+      //width: 100%;
+      padding: 0.7rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #5c6bc0;
+    }
+  
+  tbody>tr:nth-child(1){
+    background-color: #3f51b5;
+    color: white;
+  }
+
+  </style>
+</head>
+<body>
+  <h1>Sessions</h1>
+  <form id="teacherForm">
+    <table>
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Term</th>
+        </tr>
+      </thead>
+      <tbody id="fieldContainer">
+        <!--tr>
+          <td><input type="text" name="name" placeholder="Name"></td>
+          <td><input type="text" name="username" placeholder="Username"></td>
+          <td><input type="text" name="password" placeholder="Default Password"></td>
+          <td><button type="button" onclick="deleteField(this)">Delete</button></td>
+        </tr-->
+      </tbody>
+    </table>
+    <div class="center">
+      <button type="button" id="priAdd" onclick="addField()">Update</button>
+       <button type="button" id="saveBtn" onclick="save()">Save</button>
+    </div>
+ 
+  
+  </form>
+  <!-- Modal -->
+  <div id="dateModal" class="modal">
+    <div class="modal-content">
+      <label for="year">Year:</label>
+      <input type="number" id="yearFrom" name="year" min="1900" max="2100" placeholder="e.g. 2024">
+      /
+      <input type="number" id="yearTo" name="year" min="1900" max="2100" placeholder="e.g. 2025">
+      <hr>
+      <label for="term">Term:</label>
+      <select id="term">
+              <option value="0">1st Term</option>
+              <option value="1">2nd Term</option>
+             <option value="2">3rd Term</option>
+          </select>  
+      <div class="center"> 
+        <button id="add">Create</button>
+        <button id="cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+  
+  
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+ 
+ const schoolId = "salim";
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+
+  const terms = ["first term", "second term", "third term"];
+
+  var sessions = [];
+  let sessionsRef = doc(db, schoolId, "sessions");
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    sessions = sessionsDoc.data().sessions;
+    sessions.forEach(session=>addRow(session));
+  }
+  
+  priAdd.onclick = e=>addField()
+    async function addField() {
+      let result  = await openModal()
+      if (!result) return;
+      sessions.push(result);
+      addRow(result);
+      
+    }
+  
+ async function save(){
+   if (!sessions.length) return;
+    await setDoc(sessionsRef, { sessions:  sessions})
+    alert("saved");
+  }
+  saveBtn.onclick = e=>save();
+    
+  function addRow(result){
+    const container = document.getElementById('fieldContainer');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+      <td>
+      ${result.year}
+      </td>
+       <td>
+        ${terms[result.term]}  
+      </td>      
+      `;
+   
+      container.insertBefore(row, container.firstChild);
+
+  }
+
+    function deleteField(btn) {
+      const row = btn.closest('tr');
+      row.remove();
+    }
+ 
+  
+  function openModal() {
+    return new Promise(resolve => {
+      document.getElementById("dateModal").style.display = "block";
+    add.onclick = ()=>{
+      let session = getSession();
+      if (!session) return;
+      resolve(session)
+    }
+      
+     cancel.onclick = ()=>{
+       closeModal();
+       resolve(false);
+     }       
+    });
+  }
+
+    function closeModal() {
+      document.getElementById("dateModal").style.display = "none";
+    }
+  
+  // Close modal if clicked outside content
+    window.onclick = function(event) {
+      /*const modal = document.getElementById("dateModal");
+      if (event.target === modal) {
+        closeModal();
+      }*/
+    };
+  
+  
+  
+  function getSession() {
+      const start = document.getElementById("yearFrom").value;
+      const end = document.getElementById("yearTo").value;
+      if (start && end) {
+         closeModal();
+        return {
+          year: start + " / " + end,
+          term: document.getElementById("term").value,
+          no: sessions.length
+        }
+          
+      } else {
+        alert("Please fill both years.");
+      }
+    }
+  
+  </script>
+</body>
+</html>

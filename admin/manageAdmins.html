@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin Manager</title>
+  
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+  }
+
+  body {
+    padding: 2rem;
+    background: #f4f6f8;
+    color: #333;
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+  }
+
+  button {
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.2rem;
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #5c6bc0;
+  }
+
+  hr {
+    margin: 2rem 0;
+    border: none;
+    height: 1px;
+    background-color: #ddd;
+  }
+
+  details {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+
+  summary {
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+
+  th, td {
+    padding: 0.8rem;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  td label {
+    font-weight: 500;
+  }
+
+  td input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    padding: 2rem;
+    border-radius: 14px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    overflow-y: auto;
+    max-height: 80vh;
+  }
+
+  .modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+    color: #2c3e50;
+  }
+
+  #closeBtn {
+    position: absolute;
+    top: 0;
+    right: 1rem;
+    font-size: 1.2rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: black;
+  }
+
+  .modal input[type="search"] {
+    width: 100%;
+    padding: 0.7rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  #save {
+    background-color: #27ae60;
+  }
+
+  #save:hover {
+    background-color: #2ecc71;
+  }
+</style>
+
+</head>
+<body>
+  <h1>
+    Admins Management
+  </h1>
+  <div id="admins">
+   
+  </div>
+        
+  <hr>
+  <button id="newAdd">Please wait..</button>
+  
+    <!-- Modal -->
+  <div  id="modal" class="modal">
+    <div class="modal-content"> 
+      <h3>New Admin</h3>
+      <button id="closeBtn">X</button>
+      <input id="s" type="search">
+      <table id="table">
+        
+      </table>
+      
+    </div>
+  </div>
+  <button id="save">Save</button>
+  
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  
+  const schoolId = "salim";
+  let teacherDoc = await getDoc(doc(db, schoolId, "teachers"));
+  let teachers = teacherDoc.exists()? teacherDoc.data() : {};
+  let sectionDoc = await getDoc(doc(db, schoolId, "section"));
+  
+  
+  const adminFunctions = {
+    teachers: "Manage teachers",
+    students: "Manage students",
+    rc: "Manage report cards",
+    admins: "Manage admins",
+    fm: "Assign form master",
+    session: "Launch academic session",
+    section: "Manage school sections",
+    subjects: "Manage school subjects",
+    auth: "Authorize teach and sign",
+    monTAS: "Monitor teach and sign",
+    monSA: "Monitor Student Attendance",
+  };
+  
+  
+  newAdd.innerHTML = "New admin";
+  save.onclick = async e=>{
+   await setDoc(doc(db, schoolId, "teachers"), teachers);
+    alert("saved!");
+  }
+  
+  
+  let teacherList = [];
+  for (const username in teachers){
+    let teacher = teachers[username];
+    teacherList.push(teacher);
+    if (teacher.isAdmin){
+      presentAdmin(teacher);
+    }
+  }
+  
+  function presentAdmin(admin){
+    let teacher = admin;
+    let name= teacher.name;
+      let adminFxns = teacher.adminFunctions;
+    let details = document.createElement("details");
+    let summary = document.createElement("summary");
+    summary.innerHTML = name + " can ..";
+    
+      let tb = document.createElement("table");
+      let supFxns = Array.from(Object.keys(adminFunctions));
+    adminFxns.forEach((fxn, i)=>{
+      let id = `${teacher.username}${fxn.replaceAll(" ","")}${i}`;
+        let row = tb.insertRow();
+        let tdFx = row.insertCell();
+        let tdCan = row.insertCell();
+        tdFx.innerHTML = `<label for="${id}">${adminFunctions[fxn]}</label>`;
+        tdCan.innerHTML = `<input id="${id}" type="checkbox" checked value="${fxn}">`;
+        let index = supFxns.indexOf(fxn);
+        supFxns.splice(index, 1);
+      
+      tdCan.querySelector("input").onchange = e=>{
+                if (e.target.checked){
+          teacher.isAdmin = true;
+          teacher.adminFunctions.push(fx);
+        }
+      }
+        
+      });
+    supFxns.forEach((fx, i)=>{
+      let id = `${teacher.username}${fx.replaceAll(" ","")}${i}no`;
+      let row = tb.insertRow();
+        let tdFx = row.insertCell();
+        let tdCan = row.insertCell();
+        tdFx.innerHTML = `<label for="${id}">${adminFunctions[fx]}</label>`;
+        tdCan.innerHTML = `<input id="${id}" type="checkbox" value="${fx}">`;
+      tdCan.querySelector("input").onchange = e=>{
+        if (e.target.checked){
+          teacher.isAdmin = true;
+          teacher.adminFunctions.push(fx);
+        }
+      }
+    })
+    details.append(summary, tb);
+    admins.append(details);
+    
+    
+   }
+  //let list = ["ux11 ma", "u12 xa", "ux t 3"];
+  teacherList.forEach(teacher =>{
+    if (teacher.isAdmin) return;
+    let row = table.insertRow();
+     let name = row.insertCell();
+     name.innerHTML = teacher.name;
+     let addCell = row.insertCell();
+     let btn = document.createElement("button");
+     addCell.append(btn);
+     btn.innerHTML = "add";
+     btn.onclick = e=>{
+       row.remove();
+       teacher.isAdmin = true;
+       teacher.adminFunctions = [];
+       presentAdmin(teacher);
+     }
+    // table.innerHTML +=`<tr><td>${teacher.name}</td> <td><button>add</button></td></tr>`;
+   }) 
+  s.oninput = e=>{
+    let val = s.value;
+    let reg = new RegExp(`${val}`, "i");
+   let sublist = teacherList.filter(el => reg.test(el.name))
+    table.innerHTML = "";
+   sublist.forEach(list =>{
+     if (list.isAdmin) return;
+     let row = table.insertRow();
+     let name = row.insertCell();
+     name.innerHTML = list.name;
+     let addCell = row.insertCell();
+     let btn = document.createElement("button");
+     addCell.append(btn);
+     btn.innerHTML = "add";
+     btn.onclick = e=>{
+       let teacher = list;
+       row.remove();
+       teacher.isAdmin = true;
+       teacher.adminFunctions = [];
+       presentAdmin(teacher);
+   
+     }
+     //table.innerHTML +=`<tr><td>${list.name}</td> <td><button>add</button></td></tr>`;
+   }) 
+  }
+  
+  
+  function openModal() {
+    modal.style = "display: block";
+  }
+
+    function closeModal() {
+      document.getElementById("modal").style = "display: none";
+    }
+  newAdd.onclick = e=> openModal();
+  closeBtn.onclick = e=> closeModal();
+  </script>
+</body>
+</html>
