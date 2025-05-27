@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Capital - Login</title>
+  <title>School - Login</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
  
   <style>
@@ -144,7 +144,6 @@ footer small {
   <header>
     <img src="logo.jpg" alt="School Logo" />
     <h1>Maiduguri Capital School</h1>
-    
   </header>
    <main>
   <div class="card">
@@ -163,7 +162,7 @@ footer small {
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
   import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
-  import {getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+  import {getAuth, createUserWithEmailAndPassword, updateProfile, deleteUser, onAuthStateChanged, signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
         const firebaseConfig = {
   apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
@@ -175,15 +174,34 @@ footer small {
   measurementId: "G-3MGCDH4FRF"
 };
  
-  const schoolId = "capital";
+  const schoolId = "school";
     const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
       const auth = getAuth(app);
+  const db = getFirestore(app);
+  
+  let teachersRef = doc(db, schoolId, "teachers");
+  let teacherDoc = await getDoc(teachersRef);
+   let teachers = teacherDoc.exists()? teacherDoc.data() : {};
+  
+  var schoolGeneratedUsername;
+  
+ async function onLoginSuccess(user, role) {
+   alert(user.email);
    
-
-    function onLoginSuccess(user, role) {
-      //alert("Login successful! Welcome, " + user.email);
-      if (role=="admin"){
+   if (!teachers[schoolGeneratedUsername]){
+     if (!(user.email=="dev@teacher."+schoolId)){
+     await deleteUser(user);
+     alert("Not on staff list, talk to admin if you this is a mistake");
+     return;
+     }
+   }
+ 
+   
+   
+    
+   
+   if (role=="admin"){
         window.location.href = "admin/admin.html";
         return
       }
@@ -211,17 +229,31 @@ footer small {
 
   let reg = /.*@/;
   
-    function signIn() {
+  async function signIn() {
+      
       const username = document.getElementById("email").value;
       const email = username.replace(/@.*/, "")+`@teacher.${schoolId}`;
+     schoolGeneratedUsername = username.replace(/@.*/, "");
       const role = username.replace(reg, "");
       const password = document.getElementById("password").value;
-
+   
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           onLoginSuccess(userCredential.user, role);
         })
-        .catch((error) => {
+        .catch( async (error) => {
+          let user = teachers[schoolGeneratedUsername];
+          
+          if (user && user.psw==password){
+              await createUserWithEmailAndPassword(auth, email, password);
+             let createdUser = auth.currentUser;
+            
+              await updateProfile(createdUser, {displayName: user.name});
+            alert(user.name);
+              onLoginSuccess(createdUser, role);
+              return;
+      
+          }
           alert("Login failed: " + error.code);
         });
     }
