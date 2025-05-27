@@ -220,6 +220,7 @@ button.delete:hover {
     <table class="p-table">
       <thead>
         <tr>
+          <th>SN</th>
           <th>Name</th>
           <th id="subjHead"> 
             <table>
@@ -280,25 +281,30 @@ button.delete:hover {
 };
   
   
-  const schoolId = "capital";
+  const schoolId = "school";
+  const test = true;
       const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
       const auth = getAuth(app);
       const db = getFirestore(app);
   
+  
+ add.textContent = "Loading.."; 
   onAuthStateChanged(auth, user=>{
-    if (!user) {
+    if (!user && !test) {
       window.location.href = "../signin.html";
       return;
     }
+    
   })
   
     //let sessionsRef = doc(db, schoolId, "sessions");
-  let teachersRef = doc(db, schoolId, "teachers");
-  let teachersDoc = await getDoc(teachersRef);
-  let sectionRef = doc(db, schoolId, "section");
+    let sectionRef = doc(db, schoolId, "section");
   let sectionDoc = await getDoc(sectionRef);
   var subjectDict = new Map();
+     let teachersRef = doc(db, schoolId, "teachers");
+    let teachersDoc = await getDoc(teachersRef);
+
   var teachers = {};
   let subjs = [];
   
@@ -306,33 +312,33 @@ button.delete:hover {
   let sections = sectionDoc.data();
     for (const key in sections){
     let section = sections[key];
-    //console.log(section.classes)
-    let subjects = section.subjects;
+    let subjects = section.subjects.sort();
     
-    let classes = section.classes;
+    let classes = section.classes.sort();
       
     subjects.forEach(subject=>{
       if (!subjs.includes(subject))
       subjs.push(subject)
-     // let classet = subjectDict.get(subject);
-     // console.log(subject);
+    
       if (subjectDict.has(subject))
       subjectDict.set(subject, subjectDict.get(subject).concat(classes));
      else
       subjectDict.set(subject, classes);
       
-      //console.log(subject, subjectDict.get(subject));
+     
     })
   }
-  //console.log(JSON.stringify(subjectDict.get(""));
+  
   }
+
   
-  
-  if (teachersDoc.exists()){
-    teachers = teachersDoc.data();
-    for (const username in teachers){
-     //teachers[username] = teachersDoc.data()[username]
-      let teacher = teachers[username];
+  function presentTeachers(teachs){
+    teachers = teachs;
+    let container = document.getElementById('fieldContainer');
+    container.innerHTML = "";
+    let vals = Object.values(teachers).sort((a, b) => a.name.localeCompare(b.name) )
+      vals.forEach(val=>{
+      let teacher = val
       teacher.load ??= {};
       subjs.forEach(subj =>{
         teacher.load[subj] ??=[];
@@ -340,22 +346,19 @@ button.delete:hover {
       })
             
       addField(teacher);
-      console.log(JSON.stringify(teachers[username].load))
-      let loadSelect = document.querySelector(`select[data-username="${username}"]`);
-      loadSelect.onchange = e=>{
-        console.log(e.target.value);
-        
-      }
-    }
+      
+    }); 
   }
   
+  
+ presentTeachers(teachersDoc.data())
+  
+  add.textContent = "New Teacher";
   save.onclick = async e=>{
-    
     save.innerHTML = "Saving..";
     await setDoc(teachersRef, teachers);
     save.innerHTML = "Saved!";
     setTimeout(_=>save.innerHTML = "Save", 1500);
-    
   }
   
   usernameIn.oninput = e=>{
@@ -363,87 +366,52 @@ button.delete:hover {
     val = val.replaceAll(" ", "").toLowerCase();
     usernameIn.value=val;
   }
+  
   add.onclick =  e=>{
-    addTeacher();
-   async function addTeacher(){
-     let teacher = {
-      name: "",
-      psw: "123456",
-      username: "",
-      load: {}
-    }
-    let addFxn = this;
     openModal();
-    let result = new Promise(resolve=>{
-      closeBtn.onclick= e=>resolve(false);
-      createBtn.onclick =async e=>{
-        let name = nameIn.value;
+    createBtn.onclick = e=>{
+      let name = nameIn.value;
         let username = usernameIn.value;
         if (!username) return;
         if (!name) return;
-        createUserWithEmailAndPassword(auth, `${username}@teacher.${schoolId}`, "123456").
-        then(userCred=>{
-          resolve({name, username});
-          teacher.name = name;
-          teacher.username=username;
-          addField(teacher);
-          addTeacher();
-        }).
-        catch(error=>{
-          if (error.code=="auth/email-already-in-use" && !teachers[username]){
-            resolve({name, username});
-            addTeacher();
-            
-          } else {
-          message.innerHTML = error.code.toLowerCase().replaceAll("auth/", "").replaceAll("-", " ");
+      
+        if (teachers[username]){
+          message.innerHTML = username + " alreay exists!";
           message.classList.add("show", "error");
           setTimeout(e=>message.classList.remove("show", "error"), 2000);
-          }
-        });
-        
-      }
-    })
-    result = await result;
-    if (result){
-      teacher.name = result.name;
-      teacher.username = result.username;
-    } else {
-      closeModal();
-      return;
+          return;
+        }
+        let teacher = {
+          name: name,
+          psw: "123456",
+          username: username,
+          load: {}
+       }
+        addField(teacher);
+      teachers[username] = teacher;
+        nameIn.value="";
+       usernameIn.value = "";
+        message.innerHTML = `${name}'s account has been created!`;
+       message.classList.add("show");
+       setTimeout(e=>message.classList.remove("show"), 2000);
+
     }
     
-     teachers[teacher.username] = teacher;
-     await setDoc(teachersRef, teachers);
-     nameIn.value="";
-     usernameIn.value = "";
-     message.innerHTML = `${teacher.name}'s account has been created!`;
-     message.classList.add("show");
-     setTimeout(e=>message.classList.remove("show"), 2000);
+    closeBtn.onclick = closeModal;
    
-    //if (teachers[teacher.username]) return;
-    let rows0 = document.querySelectorAll(".entry");
-    let lastI0 = rows0.length-1;
-    let row0 = rows0[lastI0];
-    let username0 = row0.querySelector(".username");
-    if (!username0.value) return;
-    username0.disabled = true;
-         
-    addField(teacher)
-    let rows = document.querySelectorAll(".entry");
-    let lastI = rows.length-1;
-    }
   }
  
     function addField(teacher) {
       const container = document.getElementById('fieldContainer');
       const row = document.createElement('tr');
       row.classList.add("entry");
+      
       let name = teacher.name;
       let psw = teacher.psw;
       let username = teacher.username;
      
       row.innerHTML = `
-       
+       <td class="sn"></td>
           <td><input type="text" disabled class="name" value="${name}" name="name" placeholder="Name"></td>
        <td class="subject">
           <table class="cell-table">
@@ -467,12 +435,13 @@ button.delete:hover {
           `;
 
       container.appendChild(row);
-       
+       row.querySelector(".sn").textContent = container.children.length;
       row.querySelector(".delete").onclick = e=>deleteField(e.target);
       let subject = row.querySelector(".subjectSelect");
+      
       subjectDict.forEach((classes, subj)=>{
         
-        if (teacher.load[subj].length){
+        if (teacher.load[subj] && teacher.load[subj].length){
           let intbody = row.querySelector("table>tbody");
         intbody.innerHTML += `
         <tr>
@@ -524,7 +493,6 @@ button.delete:hover {
       else subjDict.set(key, [val]);
       teachers[un].load[key] ??=[];
       teachers[un].load[key].push(val);
-//alert(teachers[un].load[key]);
       
     })
     tBody.innerHTML = "";
@@ -544,11 +512,9 @@ button.delete:hover {
       const row = btn.closest('tr');
       let username = row.querySelector(".username > input").value;
       delete teachers[username];
-      //alert(teachers[username]);
-      row.remove();
+      presentTeachers(teachers);
+     // row.remove();
     }
-  
-  
   
     function openModal() {
     modal.style = "display: block";
