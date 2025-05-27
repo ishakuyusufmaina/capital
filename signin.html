@@ -174,7 +174,7 @@ footer small {
   measurementId: "G-3MGCDH4FRF"
 };
  
-  const schoolId = "capital";
+  const schoolId = "school";
     const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
       const auth = getAuth(app);
@@ -187,7 +187,7 @@ footer small {
   var schoolGeneratedUsername;
   
  async function onLoginSuccess(user, role) {
-   alert(user.email);
+  
    
    if (!teachers[schoolGeneratedUsername]){
      if (!(user.email=="dev@teacher."+schoolId)){
