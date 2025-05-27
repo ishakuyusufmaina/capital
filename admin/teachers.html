@@ -291,7 +291,7 @@ button.delete:hover {
   
  add.textContent = "Loading.."; 
   onAuthStateChanged(auth, user=>{
-    if (!user && !test) {
+    if (!user) {
       window.location.href = "../signin.html";
       return;
     }
@@ -305,7 +305,7 @@ button.delete:hover {
      let teachersRef = doc(db, schoolId, "teachers");
     let teachersDoc = await getDoc(teachersRef);
 
-  var teachers = {};
+  
   let subjs = [];
   
   if (sectionDoc.exists()){
@@ -322,23 +322,24 @@ button.delete:hover {
     
       if (subjectDict.has(subject))
       subjectDict.set(subject, subjectDict.get(subject).concat(classes));
-     else
+      else
       subjectDict.set(subject, classes);
       
-     
     })
   }
   
   }
 
   
-  function presentTeachers(teachs){
-    teachers = teachs;
+  function presentTeachers(){
+  
     let container = document.getElementById('fieldContainer');
     container.innerHTML = "";
+    let an=0;
     let vals = Object.values(teachers).sort((a, b) => a.name.localeCompare(b.name) )
       vals.forEach(val=>{
-      let teacher = val
+      let teacher = val;
+      
       teacher.load ??= {};
       subjs.forEach(subj =>{
         teacher.load[subj] ??=[];
@@ -348,10 +349,12 @@ button.delete:hover {
       addField(teacher);
       
     }); 
+    
   }
   
+ const teachers = teachersDoc.data();
   
- presentTeachers(teachersDoc.data())
+    presentTeachers()
   
   add.textContent = "New Teacher";
   save.onclick = async e=>{
@@ -376,7 +379,7 @@ button.delete:hover {
         if (!name) return;
       
         if (teachers[username]){
-          message.innerHTML = username + " alreay exists!";
+          message.innerHTML = username + " alreay exists as "+teachers[username].name;
           message.classList.add("show", "error");
           setTimeout(e=>message.classList.remove("show", "error"), 2000);
           return;
@@ -390,9 +393,9 @@ button.delete:hover {
         addField(teacher);
       teachers[username] = teacher;
         nameIn.value="";
-       usernameIn.value = "";
+        usernameIn.value = "";
         message.innerHTML = `${name}'s account has been created!`;
-       message.classList.add("show");
+        message.classList.add("show");
        setTimeout(e=>message.classList.remove("show"), 2000);
 
     }
@@ -512,8 +515,10 @@ button.delete:hover {
       const row = btn.closest('tr');
       let username = row.querySelector(".username > input").value;
       delete teachers[username];
-      presentTeachers(teachers);
-     // row.remove();
+      //alert(teachers[username]);
+      //btn.textContent = "removing..";
+      //presentTeachers(teachers);
+     row.remove();
     }
   
     function openModal() {
