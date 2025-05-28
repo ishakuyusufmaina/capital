@@ -171,7 +171,7 @@ details ol li::before {
 
 <body>
   <h1>
-    Form masters
+    Form Masters/Class Teachers
   </h1>
   <table>
     <tr>
@@ -232,7 +232,7 @@ details ol li::before {
         Object.values(teachers).sort((a,b)=>a.name.localeCompare(b.name)).forEach(teacher=>{
           //let teacher = teachers[username];
           let list = document.createElement("li");
-          list.innerHTML = teacher.name;
+          list.innerHTML = teacher.name+"<hr>";
           tchList.append(list);
           teacher.role = teacher.role ?? {};
           teacher.role.fm = teacher.role.fm ?? [];
@@ -242,7 +242,7 @@ details ol li::before {
           return*/
           let updateFM = ()=>{
             let fm= tchListD.querySelector("span");
-            fm.textContent = teacher.name;
+            fm.textContent = teacher.name ;
             let username = fm.getAttribute("data-username");
             fm.setAttribute("data-username", teacher.username);
             if (!teacher.role.fm.includes(clas)) 
