@@ -31,7 +31,7 @@
       border: 1px solid #333;
       border-radius: 5px;
       background-color: inherit; //#1e1e1e;
-    color: white;
+            color: white;
     }
 
     
@@ -192,11 +192,14 @@ let sectionDoc = await getDoc(sectionRef);
       let id = "std"+result.sn;
       let nameIn = row.querySelector(".name");
       nameIn.oninput = e=>{
+          let n = nameIn.textContent.trim().replaceAll("  ", " ");
           currentStudents[id].name = nameIn.textContent;
       }
       let genderIn = row.querySelector(".gender");
       genderIn.onchange = e=>{
+          
           currentStudents[id].gender = genderIn.value;
+          
       }
      if (result.gender) 
       row.lastElementChild.querySelector(`select>option[value=${result.gender}]`).selected = true;
@@ -230,8 +233,8 @@ add.onclick = e=>{
       let gender = row.querySelector(".gender").value
       return {
         name: name,
-        gender: gender
-        //subjects: subjs
+        gender: gender,
+               
       }
       
     });
@@ -250,7 +253,7 @@ add.onclick = e=>{
   }
     
  
-    async function loadStudents(){
+ async function loadStudents(){
         table.innerHTML = "";
         let clas = key(classSelect.value);
     let session = key(sessionSelect.value);
@@ -258,14 +261,16 @@ add.onclick = e=>{
     
     let stdsRef = doc(db, schoolId, session, clas, "students");
     let stdsDoc = await getDoc(stdsRef);
+        
     if (stdsDoc.exists()){
       currentStudents = stdsDoc.data();
-      for (const id in currentStudents){
-          let student = currentStudents[id];
-          addRow(student)
-      } 
-      //students.forEach(student=>addRow(student));
       
+      Object.values(currentStudents).sort((a, b)=>a.name.localeCompare(b.name)).forEach(student=>{
+          console.log(student);
+          addRow(student)
+      });
+      
+            
     } else 
         currentStudents = {};
     }
@@ -274,6 +279,22 @@ add.onclick = e=>{
     return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
   }
  
+    
+    function generateNextId(lastId) {
+  // Convert the last ID to a number and add 1
+  const nextIdNumber = parseInt(lastId, 10) + 1;
+  
+  // Pad the number with leading zeros to ensure it's 3 digits
+  const nextId = nextIdNumber.toString().padStart(3, '0');
+  
+  return nextId;
+}
+
+// Example usage:
+console.log(generateNextId("001")); // "002"
+console.log(generateNextId("009")); // "010"
+console.log(generateNextId("099")); // "100"
+
   </script>
 </body>
 </html>
