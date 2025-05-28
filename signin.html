@@ -265,6 +265,11 @@ footer small {
           alert("Login failed: " + error.code);
         });
     }
+
+      if ('setAppBadge' in navigator) {
+  // Set badge (e.g., with a number)
+  navigator.setAppBadge(5); // number is optional
+      }
   </script>
   
 </body>
