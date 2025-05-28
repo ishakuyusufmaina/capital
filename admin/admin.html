@@ -88,6 +88,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
     transition: transform 0.2s;
+    display: none;
   }
 
   .card:hover {
@@ -394,11 +395,11 @@ const adminFunctions = [
     "monSA"
   ];
   
-adminFunctions.forEach(fx=>{
+/*adminFunctions.forEach(fx=>{
   let elm = document.querySelector("."+fx);
   if (elm) elm.style = "display: none;"
   
-})
+})*/
   let d = new Date();
   let year = d.getFullYear();
   let month = d.getMonth() + 1;
