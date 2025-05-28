@@ -215,7 +215,7 @@ details ol li::before {
     let sectKeys = Object.keys(sections).sort();
     for (let i = 0; i< sectKeys.length; i++){
       let section = sectKeys[i];
-      let classes = sections[section].classes.sort();
+      let classes = sections[section].classes.sort((a, b)=>a.localeCompare(b));
       
       classes.forEach(clas=>{
         let row = table.insertRow();
@@ -229,15 +229,15 @@ details ol li::before {
         `;
         details.name = "teachers";
         let tchList = document.createElement("ul");
-        for (const username in teachers){
-          let teacher = teachers[username];
+        Object.values(teachers).sort((a,b)=>a.name.localeCompare(b.name)).forEach(teacher=>{
+          //let teacher = teachers[username];
           let list = document.createElement("li");
           list.innerHTML = teacher.name;
           tchList.append(list);
-          teachers[username].role = teachers[username].role ?? {};
-          teachers[username].role.fm = teachers[username].role.fm ?? [];
-          let fmRole = new Set(teachers[username].role.fm);
-          teachers[username].role.fm = Array.from(fmRole);
+          teacher.role = teacher.role ?? {};
+          teacher.role.fm = teacher.role.fm ?? [];
+          let fmRole = new Set(teacher.role.fm);
+          teacher.role.fm = Array.from(fmRole);
          /* teachers[username].role = {};
           return*/
           let updateFM = ()=>{
@@ -263,11 +263,12 @@ details ol li::before {
             teachers[username].role.fm.splice(index, 1);
          
           }
-        }
+        })
         details.append(tchList);
         tchListD.append(details);
         
       })
+     
     }
   }
   
