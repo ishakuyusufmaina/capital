@@ -2,45 +2,83 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="apple-touch-icon" sizes="180x180" href="asset/favicon-180x180.png">
-<link rel="icon" type="image/png" sizes="32x32" href="asset/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="asset/favicon-16x16.png">
-<link rel="manifest" href="asset/site.webmanifest">
-<link rel="mask-icon" href="asset/favicon-512x512.png" color="#ffffff">
-<meta name="msapplication-TileColor" content="#ffffff">
-<meta name="msapplication-TileImage" content="asset/mstile-150x150.png">
-<meta name="theme-color" content="#ffffff">
-  <title>Install School In The Box</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
+  <!-- Favicon & Manifest -->
+  <link rel="apple-touch-icon" sizes="180x180" href="asset/favicon-180x180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="asset/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="asset/favicon-16x16.png">
+  <link rel="manifest" href="asset/site.webmanifest">
+  <link rel="mask-icon" href="asset/favicon-512x512.png" color="#ffffff">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="asset/mstile-150x150.png">
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <title>Install School In The Box</title>
+
+  <!-- Modern Styling -->
   <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f4f8fb, #ffffff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      color: #333;
+    }
+
+    h1 {
+      font-size: 2rem;
+      max-width: 600px;
+      margin-bottom: 2rem;
+      padding: 0 20px;
+      line-height: 1.4;
+    }
+
     #install-btn {
       display: none;
-      padding: 10px 20px;
+      padding: 12px 28px;
       font-size: 16px;
+      font-weight: 600;
       background-color: #0078d7;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 120, 215, 0.2);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    #install-btn:hover {
+      background-color: #005bb5;
+      transform: translateY(-2px);
+    }
+
+    #install-btn:active {
+      transform: scale(0.98);
     }
   </style>
 </head>
 <body>
-  <h1>Welcome to SIB version Maiduguri Capital School Installation</h1>
+
+  <h1>Welcome to <strong>SIB</strong> -v Maiduguri Capital School Installation</h1>
   <button id="install-btn">Install App</button>
-  
+
   <script>
     let deferredPrompt;
     const installBtn = document.getElementById('install-btn');
 
-    // Listen for the beforeinstallprompt event
     window.addEventListener('beforeinstallprompt', (e) => {
-      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      // Stash the event so it can be triggered later.
       deferredPrompt = e;
-      // Show the install button
       installBtn.style.display = 'inline-block';
     });
 
@@ -49,17 +87,17 @@
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
-          alert("Capital School Version of SIB is being installed on your device, patience.")
+          alert("Capital School Version of SIB is being installed on your device, patience.");
           console.log('User accepted the install prompt');
         } else {
-          alert("Thank you for dismissing installation of Capital School Version of SIB on your device.")
+          alert("Thank you for dismissing installation of Capital School Version of SIB on your device.");
           console.log('User dismissed the install prompt');
         }
-        // Clear the deferred prompt
         deferredPrompt = null;
         installBtn.style.display = 'none';
       }
     });
   </script>
+
 </body>
 </html>
