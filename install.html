@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="apple-touch-icon" sizes="180x180" href="asset/favicon-180x180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="asset/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="asset/favicon-16x16.png">
+<link rel="manifest" href="asset/site.webmanifest">
+<link rel="mask-icon" href="asset/favicon-512x512.png" color="#ffffff">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="asset/mstile-150x150.png">
+<meta name="theme-color" content="#ffffff">
+  <title>Install School In The Box</title>
+  
+  <style>
+    #install-btn {
+      display: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #0078d7;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to My Web App</h1>
+  <button id="install-btn">Install App</button>
+  
+  <script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('install-btn');
+
+    // Listen for the beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      deferredPrompt = e;
+      // Show the install button
+      installBtn.style.display = 'inline-block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        // Clear the deferred prompt
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
