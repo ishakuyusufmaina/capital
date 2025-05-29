@@ -4,12 +4,6 @@
 <head>
   <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Light theme -->
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-
-<!-- Dark theme -->
-<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
-
   <title>School Admin</title>
 <style>
   * {
@@ -243,6 +237,15 @@
     border-radius: 4px;
     border-bottom: none;
   }
+  
+  
+  /* Dark theme */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #f0f0f0;
+  }
+}
 </style>
 
 
@@ -319,6 +322,11 @@
       <h2>Teachers</h2>
       <a href="teachers.html">Manage Teachers</a>
     </div>
+      
+    <div class="card fmHOD">
+      <h2>Form Master (HOD)</h2>
+      <a href="formMasterHOD.html">Manage form masters specific to you as an HOD</a>
+    </div>
 
     <div class="card students">
       <h2>Students</h2>
@@ -328,6 +336,11 @@
     <div class="card fm">
       <h2>Form Masters</h2>
       <a href="formMaster.html">Assign Form Masters</a>
+    </div>
+      
+      <div class="card hod">
+      <h2>HODs</h2>
+      <a href="assignHOD.html">Assign HOD</a>
     </div>
 
     <div class="card admins">
@@ -393,12 +406,16 @@ const adminFunctions = [
     "rc",
     "admins",
     "fm",
+    "hod",
     "session",
     "section",
     "subjects",
     "auth",
     "monTAS",
-    "monSA"
+    "monSA",
+    
+    "fmHOD"
+    
   ];
   
 /*adminFunctions.forEach(fx=>{
@@ -506,6 +523,11 @@ const adminFunctions = [
     let teachers = teachersDoc.data();
     let teacher = teachers[id];
  //   alert(teacher.adminFunctions);
+    teacher.role ??={};
+    teacher.role.hod ??={};
+    let classes = teacher.role.hod.classes ?? [];
+    if (classes.length)
+    teacher.adminFunctions.push("fmHOD");
   teacher.adminFunctions.forEach(fx=>{
     let elm = document.querySelector("."+fx);
     if (elm) elm.style = "display: block";
