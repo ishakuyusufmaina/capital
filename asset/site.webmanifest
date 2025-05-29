@@ -1,6 +1,7 @@
 {
   "name": "Maiduguri Capital School",
   "short_name": "CAPITAL",
+  "start_url": "/signin.html",
   "icons": [
     {
       "src": "favicon-192x192.png",
