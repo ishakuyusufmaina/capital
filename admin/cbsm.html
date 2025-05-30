@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>STUDENT</title>
+  
+  <style>
+  
+  button {
+      margin-top: 1.5rem;
+     // width: 100%;
+      padding: 0.7rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #5c6bc0;
+    }
+    
+    
+        input[type="text"] {
+      padding: 8px;
+      border: 1px solid #333;
+      border-radius: 5px;
+      background-color: inherit; //#1e1e1e;
+    color: white;
+    }
+
+    
+
+    .p-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td{
+      padding: 10px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+      body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+  select {
+    background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      border: none;
+  }
+    
+    .name {
+        width: fit-content;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    Students
+  </h1>
+  <select id="sessionSelect">
+    <option> -select session- </option>
+  </select>
+  <!--4select>
+    <option> -select term- </option>
+    <option>1<sup>st</sup> term</option>
+    <option>2<sup>nd</sup> term</option>
+    <option>3<sup>rd</sup> term</option>
+  </select-->
+  <select id="classSelect">
+    <option value=""> -select class- </option>
+    
+  </select>
+  <!--a href="#">View all</a-->
+  
+  <table>
+    <tr>
+      <th>S/N</th>
+      <th>Name</th>
+      <th>Gender</th>
+    </tr>
+      <tbody id="table">
+          
+      </tbody>
+  </table>
+  
+
+  <button id="add">Add</button>
+  <button id="saveBtn">Save</button>
+    <!--button id="printBtn">download</button-->
+  
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+    
+    
+    const schoolId = "salim";
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    let currentStudents = null;
+    
+    const terms = ["first term", "second term", "third term"];
+
+  let sessionsRef = doc(db, schoolId, "sessions");
+  //let studentsRef = doc(db, schoolId, "classes");
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sessions= sessions.sort((a, b)=>b.no - a.no);
+    sessions.forEach((session, i)=>{
+        let year = session.year;
+      let opt = document.createElement("option");
+      opt.innerHTML = year + ", " + terms[session.term];
+      sessionSelect.appendChild(opt);
+        if (i==0)
+        opt.selected = true;
+    });
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+  
+  
+  let sectionRef = doc(db, schoolId, "section");
+let sectionDoc = await getDoc(sectionRef);
+ if (sectionDoc.exists()){
+   let sections = sectionDoc.data();
+     
+   let keys = Object.keys(sections);
+   
+   keys.forEach(key=>{
+       let optG = document.createElement("optgroup");
+       optG.label = key;
+       let classes = sections[key].classes;
+       classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
+       classSelect.append(optG);
+   });
+
+ }
+  
+  
+
+  function addRow(result){
+      console.log(result.gender=="Male");
+    const container = document.getElementById('table');
+      const row = document.createElement('tr');
+    let clas = key(classSelect.value);
+      if (!clas) return;
+    row.classList.add("record");
+    let sn= container.children.length;
+      row.innerHTML = `
+      <td>
+      ${sn+1}
+      </td>
+       <td class="name" contenteditable>
+        ${result.name}
+      </td> 
+      <td>
+         <select class="gender">
+            <option> -select gender- </option>
+            <option value="Female">Female</option>
+           <option value="Male">Male</option>
+
+        </select>
+    </td>    
+      `;
+      container.appendChild(row);
+      let id = "std"+result.sn;
+      let nameIn = row.querySelector(".name");
+      nameIn.oninput = e=>{
+          currentStudents[id].name = nameIn.textContent;
+      }
+      let genderIn = row.querySelector(".gender");
+      genderIn.onchange = e=>{
+          currentStudents[id].gender = genderIn.value;
+      }
+     if (result.gender) 
+      row.lastElementChild.querySelector(`select>option[value=${result.gender}]`).selected = true;
+  
+
+  }
+add.onclick = e=>{
+  let result ={
+    sn: table.children.length,
+    name: "",
+    gender: ""
+  }
+  addRow(result);
+  currentStudents["std"+result.sn] = result;
+}
+  
+   /* printBtn.onclick = e=>{
+        window.print();
+    }*/
+  saveBtn.onclick = async e=>{
+    
+    
+    let clas = key(classSelect.value);
+    let session = key(sessionSelect.value);
+    if (!(clas && session)) return;
+   // let subjs = await getSubjects();
+    let stdsRef = doc(db, schoolId, session, clas, "students");
+    
+    let students = Array.from(document.querySelectorAll(".record")).map( row=> {
+      let name = row.querySelector(".name").textContent
+      let gender = row.querySelector(".gender").value
+      return {
+        name: name,
+        gender: gender
+        //subjects: subjs
+      }
+      
+    });
+    if (!currentStudents) return;
+     await setDoc(stdsRef, currentStudents);
+    alert("save");
+    console.log(JSON.stringify(students));
+     
+  }
+  
+  classSelect.onchange = async e=>{
+    loadStudents();
+  }
+    sessionSelect.onchange = async e=>{
+    loadStudents();
+  }
+    
+ 
+    async function loadStudents(){
+        table.innerHTML = "";
+        let clas = key(classSelect.value);
+    let session = key(sessionSelect.value);
+    if (!(clas && session)) return;
+    
+    let stdsRef = doc(db, schoolId, session, clas, "students");
+    let stdsDoc = await getDoc(stdsRef);
+    if (stdsDoc.exists()){
+      currentStudents = stdsDoc.data();
+      for (const id in currentStudents){
+          let student = currentStudents[id];
+          addRow(student)
+      } 
+      //students.forEach(student=>addRow(student));
+      
+    } else 
+        currentStudents = {};
+    }
+  
+  function key(token){
+    return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+  }
+ 
+  </script>
+</body>
+</html>
