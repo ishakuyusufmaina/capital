@@ -4,12 +4,6 @@
 <head>
   <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <!-- Light theme -->
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-
-<!-- Dark theme -->
-<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
-  
   <title>School Admin</title>
 <style>
   * {
@@ -245,9 +239,12 @@
   }
   
   
-  /* Dark mode */
+  /* Dark theme */
 @media (prefers-color-scheme: dark) {
-  
+  body {
+    background-color: #121212;
+    color: #f0f0f0;
+  }
 }
 </style>
 
@@ -283,7 +280,83 @@
       <button id="save" style="display:none">Save</button>
       
     </div>
+      
+      
+      
+        <div class="card hosa">
+          <h2>Head of Section Assignment</h2>
+          <a href="assignHOS.html">Assign HOS</a>
+        </div>
+      
+    <div class="card sbtm">
+      <h2>Section-Based Time Management</h2>
+      <a href="sbs.html">Perform section-based time management</a>
+    </div>
+     
+      <div class="card sbsm">
+      <h2>Section-Based Subject Management</h2>
+      <a href="sbsm.html">Perform section-based subject management</a>
+    </div>
+      
+    <div class="card tsa">
+      <h2>Teacher - Section Allocation</h2>
+      <a href="tsa.html">Allocate teacher to section</a>
+    </div>
 
+     <div class="card ygla">
+      <h2>Year Group Leader Assignment</h2>
+      <a href="assignYGL.html">Assign year group leader</a>
+    </div>
+      
+      
+    <div class="card hoda">
+      <h2>HOD Assignment</h2>
+      <a href="assignHOD.html">Assign HOD</a>
+    </div>
+      
+    <div class="card cbsm">
+      <h2>Class-Based Subject Management</h2>
+      <a href="cbsm.html">Perform class-based subject management</a>
+    </div>
+      
+    <div class="card tca">
+      <h2>Teacher - Class Allocation (TCA)</h2>
+      <a href="tca.html">Allocate teacher to class</a>
+    </div>
+
+      
+     <div class="card fma">
+      <h2>Form Master Assignment</h2>
+      <a href="formMasterHOD.html">Assign form master</a>
+    </div>
+      
+     <div class="card cta">
+      <h2>Class Teacher Assignment</h2>
+      <a href="formMasterHOD.html">Assign class teacher</a>
+    </div>
+     
+     
+      
+   <div class="card cbsm">
+      <h2>Class-based Student Management</h2>
+      <a href="cbsm.html">Perform class-based student management</a>
+    </div>
+
+      
+      <div class="card tsa">
+      <h2>Teacher - Subject Allocation</h2>
+      <a href="sbs.html">Perform Teacher - Subject Allocation</a>
+    </div>
+      
+      
+    <div class="card spa">
+      <h2>Subject Period Allocation</h2>
+      <a href="sbs.html">Perform Subject - Period Allocation</a>
+    </div>
+      
+      
+      
+      <hr>
       <div class="card monTAS">
         <h2>Teach and Sign</h2>
         <a href="teachAndLog.html">Monitor Teach and Sign</a>
@@ -323,28 +396,28 @@
 
     <div class="card teachers">
       <h2>Teachers</h2>
-      <a href="teachers.html">Manage Teachers</a>
+      <a href="teachers.html">Manage Teachers (Master List)</a>
     </div>
       
-    <div class="card fmHOD">
-      <h2>Form Master (HOD)</h2>
-      <a href="formMasterHOD.html">Manage form masters specific to you as an HOD</a>
-    </div>
+
 
     <div class="card students">
-      <h2>Students</h2>
+      <h2>Students (generic)</h2>
       <a href="students.html">Manage Students</a>
     </div>
 
     <div class="card fm">
-      <h2>Form Masters</h2>
+      <h2>Form Masters (Generic)</h2>
       <a href="formMaster.html">Assign Form Masters</a>
     </div>
       
-      <div class="card hod">
-      <h2>HODs</h2>
-      <a href="assignHOD.html">Assign HOD</a>
-    </div>
+      
+  
+      
+      
+      
+ 
+
 
     <div class="card admins">
       <h2>Manage Admins</h2>
@@ -408,8 +481,7 @@ const adminFunctions = [
     "students",
     "rc",
     "admins",
-    "fm",
-    "hod",
+    
     "session",
     "section",
     "subjects",
@@ -417,7 +489,13 @@ const adminFunctions = [
     "monTAS",
     "monSA",
     
-    "fmHOD"
+    "cta",
+    "fma",
+    "hosa",
+    "hoda",
+    "sbsm",
+    "ygla",
+    "tsa"
     
   ];
   
@@ -531,12 +609,20 @@ const adminFunctions = [
     let classes = teacher.role.hod.classes ?? [];
     if (classes.length)
     teacher.adminFunctions.push("fmHOD");
+   
+    teacher.role.hos ??={};
+    let sections = teacher.role.hos.sections;
+    localStorage.setItem("sections", JSON.stringify(sections));
+  
   teacher.adminFunctions.forEach(fx=>{
     let elm = document.querySelector("."+fx);
     if (elm) elm.style = "display: block";
   })
     
+    
+    
   })
   </script>
 </body>
-</html>
+  </html>
+  
