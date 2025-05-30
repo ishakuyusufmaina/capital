@@ -198,13 +198,23 @@
     students: "Manage students",
     rc: "Manage report cards",
     admins: "Manage admins",
-    fm: "Assign form master",
+    fm: "Assign form master (generic)",
     session: "Launch academic session",
     section: "Manage school sections",
     subjects: "Manage school subjects",
     auth: "Authorize teach and sign",
     monTAS: "Monitor teach and sign",
     monSA: "Monitor Student Attendance",
+    hoda: "Assign HOD",
+    ygla: "Assign Year Group Leader",
+    fma: "Assign Form Master",
+    cta: "Assign Class Teacher",
+    hosa: "Assign Head of Section",
+    sbsm: "Manage Section-based Subject",
+    cbsm: "Manage Class-based Subject",
+    tsa: "Perform teacher - section allocation"
+
+    
   };
   
   
@@ -216,13 +226,13 @@
   
   
   let teacherList = [];
-  for (const username in teachers){
-    let teacher = teachers[username];
+  Object.keys(teachers).sort((a, b)=>teachers[a].name.localeCompare(teachers[b].name)).forEach(id=>{
+    let teacher = teachers[id];
     teacherList.push(teacher);
     if (teacher.isAdmin){
       presentAdmin(teacher);
     }
-  }
+  });
   
   function presentAdmin(admin){
     let teacher = admin;
@@ -230,7 +240,7 @@
       let adminFxns = teacher.adminFunctions;
     let details = document.createElement("details");
     let summary = document.createElement("summary");
-    summary.innerHTML = name + " can ..";
+    summary.innerHTML = name + " can:";
     
       let tb = document.createElement("table");
       let supFxns = Array.from(Object.keys(adminFunctions));
@@ -247,7 +257,12 @@
       tdCan.querySelector("input").onchange = e=>{
                 if (e.target.checked){
           teacher.isAdmin = true;
-          teacher.adminFunctions.push(fx);
+          teacher.adminFunctions.push(fxn);
+        } else {
+          let index = teacher.adminFunctions.indexOf(fxn);
+          teacher.adminFunctions.splice(index, 1);
+          console.log(teacher.adminFunctions);
+       
         }
       }
         
@@ -263,6 +278,10 @@
         if (e.target.checked){
           teacher.isAdmin = true;
           teacher.adminFunctions.push(fx);
+        } else {
+          let index = teacher.adminFunctions.indexOf(fx);
+          teacher.adminFunctions.splice(index, 1);
+          console.log(teacher.adminFunctions);
         }
       }
     })
