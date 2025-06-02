@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Time Table</title>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #3f51b5;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+
+    details {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    summary {
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    th {
+      background-color: #e3eafc;
+      font-weight: bold;
+      color: #222;
+    }
+
+    td input[type="number"],
+    td input[type="time"] {
+      width: 80px;
+      padding: 4px;
+      font-size: 0.9rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    td input[type="number"]:focus,
+    td input[type="time"]:focus {
+      outline: none;
+      border-color: #3f51b5;
+      box-shadow: 0 0 5px rgba(63, 81, 181, 0.2);
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 1.5rem;
+    }
+
+    button:hover {
+      background-color: #303f9f;
+    }
+
+    hr {
+      margin: 2rem 0;
+      border: none;
+      height: 1px;
+      background-color: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Class Timetable</h1>
+  <h2 id="clas"></h2>
+  
+ 
+
+  <hr>
+  <table id="table"></table>
+  <hr>
+  <button id="save">Update</button>
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+ const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  
+      const schoolId = "capital";
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+  
+  
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  var timetable = [];
+  
+  var section;
+  var periods = [0, 6, 6, 6, 6, 5, 0];
+  const sectionRef = doc(db, schoolId, "section");
+  const sectionDoc = await getDoc(sectionRef);
+  const teachersRef = doc(db, schoolId, "teachers");
+  const teachersDoc = await getDoc(teachersRef);
+  var sections;
+  
+ let user = await new Promise(async resolve=> onAuthStateChanged(auth, user=> resolve(user)));
+  let id = user.email.replace(/@.*/, "");
+  let teachers = teachersDoc.exists()? teachersDoc.data() : {};
+  const teacher = teachers[id];
+  var session;
+ 
+  const terms = ["first term", "second term", "third term"];
+
+  let sessionsRef = doc(db, schoolId, "sessions");
+  //let studentsRef = doc(db, schoolId, "classes");
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     session= sessions.sort((a, b)=>b.no - a.no)[0];
+   
+  }
+
+  let cls = teacher.role.fm[0]; //JSON.parse(localStorage.getItem("sections"));
+  clas.textContent = cls;
+  //var classes = [];
+  if (sectionDoc.exists()){ 
+    let sections = sectionDoc.data();
+    for (const id in sections){
+      if (sections[id].classes.includes(cls)){
+        section = sections[id];
+        break;
+      }
+    }   
+  }    
+  
+  
+  if (section.timetable) {
+    let clsK = key(cls);
+    let sesKey = key(session.year + terms[session.term]);
+    let classTTDoc = await getDoc(doc(db, schoolId, sesKey, clsK, "timetable"));
+    let classTT;
+    if (!classTTDoc.exists()){
+      classTT=section.timetable.map(periods=>
+    }
+  }
+  alert("No timetable from superior!");
+  
+  
+  function presentTimetable(tmodel, subjsmodel){
+    tmodel.forEach((periods, d)=>{
+      periods.forEach((p, j)=>{
+        periods[j].subject = subjsmodel[day][j];
+      })
+    })
+    table.innerHTML = "";
+    let th = table.insertRow();
+    th.innerHTML = "<th>Period</th>"
+    let maxPeriods = Array(Math.max(...tmodel.map(row=>row.length))).fill("period");
+    maxPeriods.forEach((p, i)=>{
+      let pHead = document.createElement("th");
+      pHead.textContent = i+1;
+      th.append(pHead);
+
+    })
+    
+       
+    tmodel.forEach((periods, d)=>{
+      let day = days[d];
+      
+      if (!periods.length) return;
+      let row = table.insertRow();
+      let hElm = document.createElement("th");
+      hElm.textContent = day;
+      row.append(hElm);
+      periods.forEach((unit, i) =>{
+        let cell = row.insertCell();
+        cell.innerHTML  = `${unit.from} - ${unit.to}`;
+        let select = document.createElement("select");
+        cell.append(select);
+        select.onchange=e=>{
+          let subj = e.target.value;
+          subjsmodel[d][i] = subj;
+        };
+        section.subjects.forEach(s=>{
+          let opt = document.createElement("option");
+          opt.textContent = s;
+          select.append(opt);
+        })
+        
+        
+      })
+    })
+    
+  }
+  
+  
+ 
+  save.onclick = async e=>{
+    section.timetable = JSON.stringify(timetable);
+    
+    
+    await setDoc(sectionRef, sections, {merge: true});
+    alert("saved")
+  }
+  
+  
+  function key(token){
+    return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+  }
+  </script>
+</body>
+</html>

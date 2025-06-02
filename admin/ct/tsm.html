@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Select Table</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    select {
+      width: 100%;
+      padding: 4px;
+    }
+  
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.7rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Subject - Teacher Matching</h1>
+  <h2 id="clas"></h2>
+  <table id="students-table">
+    <thead>
+      <tr>
+        <th>Subject</th>
+        <th>Teacher</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <button id="save">Save</button>
+     <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+ const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  
+  const schoolId = "capital";
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+    let teachersRef = doc(db, schoolId, "teachers");
+  let teachersDoc = await getDoc(teachersRef);
+  let sectionRef = doc(db, schoolId, "section");
+  let sectionDoc = await getDoc(sectionRef);
+ 
+  var combSectsTeachers = [];
+    let user = await new Promise(async resolve=> onAuthStateChanged(auth, user=> resolve(user)));
+  let id = user.email.replace(/@.*/, "");
+  let teachers = teachersDoc.exists()? teachersDoc.data() : {};
+  const teacher = teachers[id];
+
+  let section;
+  let cls = teacher.role.fm[0]; //JSON.parse(localStorage.getItem("sections"));
+  clas.textContent = cls;
+  //var classes = [];
+  if (sectionDoc.exists()){ 
+    let sections = sectionDoc.data();
+    for (const id in sections){
+      if (sections[id].classes.includes(cls)){
+        section = sections[id];
+        break;
+      }
+    }   
+  }    
+  
+    //const classOptions = ['Math', 'Science', 'History', 'Art', 'PE'];
+     
+    function presentModel(model) {
+      
+      renderTable();
+    }
+
+  presentModel();
+    
+   function renderTable() {
+      const tbody = document.querySelector('#students-table tbody');
+      tbody.innerHTML = '';
+
+      section.subjects.forEach((subj, index) => {
+        const tr = document.createElement('tr');
+        
+        const subjTd = document.createElement('td');
+        subjTd.textContent = subj;
+
+        const teacherTd = document.createElement('td');
+        const select = document.createElement('select');
+     
+        Object.keys(teachers).sort((a,b)=>teachers[a].name.localeCompare(teachers[b].name)).forEach(tId => {
+          if (!section.teachers.includes(tId)) return;
+          let teacher = teachers[tId];
+          teacher.load ??={};
+          teacher.load[subj] ??=[];
+          const option = document.createElement('option');
+          option.value = tId;
+          option.textContent = teacher.name;
+          if (teacher.load[subj].includes(cls)) {
+            option.selected = true;
+            select.setAttribute("current-tid", tId);
+            //select.setAttribute("data-current-teacher", tId);
+          }
+          select.appendChild(option);
+          
+          
+        });
+        
+        
+        select.addEventListener('change', (e) => {
+            let prevTid = select.getAttribute("current-tid");
+          if (prevTid){
+            teachers[prevTid].load[subj] = Array.from(new Set(teachers[prevTid].load[subj]));
+            let ind = teachers[prevTid].load[subj].indexOf(cls);
+            teachers[prevTid].load[subj].splice(ind, 1);
+          }
+          if (select.value) {
+            let id = select.value;
+              teachers[id].load[subj].push(cls);
+              teachers[id].load[subj] = Array.from(new Set(teachers[id].load[subj]));
+              select.setAttribute("current-tid", id);
+             }
+          });
+
+        
+
+        teacherTd.appendChild(select);
+        
+        tr.appendChild(subjTd);
+        tr.appendChild(teacherTd);
+        
+        tbody.appendChild(tr);
+        })
+      
+    }
+  
+  save.onclick = async _ =>{
+    await setDoc(teachersRef, teachers);
+    alert("saved!");
+  }
+  </script>
+</body>
+</html>
