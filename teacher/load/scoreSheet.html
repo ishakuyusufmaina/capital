@@ -102,7 +102,9 @@
     <tr>
       <th>SN</th>
       <th>Name</th>
-      <th>Test</th>
+      <th>1st CA</th>
+      <th>2nd CA</th>
+      <th>3rd CA</th>
       <th>Exam</th>
       <th>Total</th>
     </tr>
@@ -180,8 +182,8 @@
    container.innerHTML = "";
    if (subjK) {
       
-     Object.keys(students).forEach((key, i)=>{
-       let student = students[key];
+     Object.values(students).sort((a, b)=>a.name.localeCompare(b.name)).forEach((student, i)=>{
+       //let student = students[key];
        student.subjects ??={};
        student.subjects[subjK] ??= [{}, {}, {}];
        student.subjects[subjK][termIndex].name ??= subj;
@@ -190,9 +192,11 @@
        
           const row = document.createElement('tr');
        let name = student.name;
-       let [test, exam]=[0,0];
+       let [test1, test2, test3, exam]=[0,0,0,0];
          
-       test = student.subjects[subjK][termIndex].test ?? 0;
+       test1 = student.subjects[subjK][termIndex].test1 ?? 0;
+       test2 = student.subjects[subjK][termIndex].test2 ?? 0;
+       test3 = student.subjects[subjK][termIndex].test3 ?? 0;
        exam = student.subjects[subjK][termIndex].exam ?? 0;
        
     row.classList.add("record");
@@ -205,35 +209,48 @@
          ${student.name}
       </td> 
       <td>
-        <input id="test${i}" type="number" min="0" max="40" value="${test? test : 0}">
-    </td>    
+        <input id="test1-${i}" type="number" min="0" max="40" value="${test1? test1 : 0}">
+    </td> 
+    <td>
+        <input id="test2-${i}" type="number" min="0" max="40" value="${test2? test2 : 0}">
+    </td>   
+    <td>
+        <input id="test3-${i}" type="number" min="0" max="40" value="${test3? test3 : 0}">
+    </td>        
        <td >
         <input id="exam${i}" type="number" min="0" max="100" value="${exam? exam : 0}">
     </td>  
     <td id="total${i}">
         ${function (){
-          test = test? test : 0;
+          test1 = test1? test1 : 0;
+          test2 = test2? test2 : 0;
+          test3 = test3? test3 : 0;
           exam = exam? exam : 0;
-          return Number(test) + Number(exam);
+          return Number(test1) + Number(test2) + Number(test3) + Number(exam);
          }()}
     </td>            
       `;
 
       container.appendChild(row);
-       let testInp = document.getElementById("test"+ i);
+       let testInp1 = document.getElementById("test1-"+ i);
+       let testInp2 = document.getElementById("test2-"+ i);
+       let testInp3 = document.getElementById("test3-"+ i);
        let examInp = document.getElementById("exam"+ i);
        let totalElm = document.getElementById("total"+ i);
-       [testInp, examInp].forEach(inp=> {
+       [testInp1, testInp2, testInp3, examInp].forEach(inp=> {
          inp.oninput = e=>{
-         let test = Number(testInp.value);
+         let test1 = Number(testInp1.value);
+         let test2 = Number(testInp2.value);
+         let test3 = Number(testInp3.value);
          let exam = Number(examInp.value);
-         let total = test + exam;
+         let total = test1 + test2 + test3 + exam;
          totalElm.innerHTML = total;
-           student.subjects[subjK][termIndex].test = test;;
+           student.subjects[subjK][termIndex].test1 = test1;
+           student.subjects[subjK][termIndex].test2 = test2;
+           student.subjects[subjK][termIndex].test3 = test3;
            student.subjects[subjK][termIndex].exam = exam;
            student.subjects[subjK][termIndex].name = subj;
-           
-
+          
            
        }
        });
