@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>School Admin</title>
+  <title>Admin - Head Master</title>
 <style>
   * {
     margin: 0;
@@ -88,7 +88,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
     transition: transform 0.2s;
-    display: none;
+    
   }
 
   .card:hover {
@@ -263,7 +263,7 @@
               <li></li>
              <li id="switch">Switch <span>Account</span></li>
               <li id="signout">Logout <span id="username"></span></li>
-              <li><a href="../changePsw.html">Change password </a></li>
+              <li><a href="../../changePsw.html">Change password </a></li>
             </ul>
      </div>
     <div id="sess">session/term not initialized</div>
@@ -271,150 +271,85 @@
     <hr>
   </header>
   <main>
-  <h1>Admin  </h1>
+  <h1>Head Master</h1>
     
-    <div class="card-container">
+    
+    
+    <div class="card-container">  
     <div class="card auth">
       Authorization code: <span id="code"></span>
       <button id="generate">Generate new</button>
       <button id="save" style="display:none">Save</button>
       
-    </div>
-      
-      
-      
-        <div class="card hosa">
-          <h2>Head of Section Assignment</h2>
-          <a href="assignHOS.html">Assign HOS</a>
-        </div>
-      
-    <div class="card sbtm">
-      <h2>Section-Based Time Management</h2>
-      <a href="sbs.html">Perform section-based time management</a>
+    </div>      
+        
+    <div class="card">
+      <h2>Time Management</h2>
+      <a href="time.html">Manage time and period</a>
     </div>
      
-      <div class="card sbsm">
-      <h2>Section-Based Subject Management</h2>
-      <a href="sbsm.html">Perform section-based subject management</a>
+    <div class="card">
+      <h2>Subject Management</h2>
+      <a href="sbsm.html">Update subjects</a>
     </div>
       
-    <div class="card tsa">
-      <h2>Teacher - Section Allocation</h2>
-      <a href="tsa.html">Allocate teacher to section</a>
+      <div class="card">
+      <h2>Religion-based Subjects Differentiation</h2>
+      <a href="rbsd.html">Differentiate subjects by religion for easy report card computation</a>
+    </div>
+      
+    <div class="card">
+      <h2>Teachers Selection</h2>
+      <a href="tsa.html">Update teachers selection</a>
     </div>
 
-     <div class="card ygla">
-      <h2>Year Group Leader Assignment</h2>
-      <a href="assignYGL.html">Assign year group leader</a>
+     <div class="card">
+      <h2>HODs Assignment</h2>
+      <a href="assignYGL.html">Update HODs</a>
     </div>
       
-      
-    <div class="card hoda">
-      <h2>HOD Assignment</h2>
-      <a href="assignHOD.html">Assign HOD</a>
-    </div>
-      
-    <div class="card cbsm">
-      <h2>Class-Based Subject Management</h2>
-      <a href="cbsm.html">Perform class-based subject management</a>
-    </div>
-      
-    <div class="card tca">
-      <h2>Teacher - Class Allocation (TCA)</h2>
-      <a href="tca.html">Allocate teacher to class</a>
-    </div>
-      
-    <div class="card sbfma">
-      <h2>Section-based Form Master Assignment</h2>
-      <a href="sbfma.html">Assign form master (<span id="sbfma-sections"></span>)</a>
-    </div>
-      
-      
-     <div class="card fma">
-      <h2>Form Master Assignment</h2>
-      <a href="formMasterHOD.html">Assign form master</a>
-    </div>
-      
-     <div class="card cta">
+   
+    <div class="card">
       <h2>Class Teacher Assignment</h2>
-      <a href="formMasterHOD.html">Assign class teacher</a>
+      <a href="sbfma.html">Update class teachers</a>
     </div>
-     
-     
       
-   <div class="card fmssm">
-      <h2>Class-based Student Management</h2>
-      <a href="cbsm.html">Manage students (<span id="classesElm"></span>)</a>
+      
+   <div class="card">
+      <h2>Pupils Management</h2>
+      <a href="students.html">Manage pupils</a>
     </div>
 
-      
-      <div class="card tsa">
-      <h2>Teacher - Subject Allocation</h2>
-      <a href="sbs.html">Perform Teacher - Subject Allocation</a>
+    <div class="card">
+      <h2>Pupils List</h2>
+      <a href="studentlist.html">Update pupils list</a>
     </div>
       
-      
-    <div class="card spa">
-      <h2>Subject Period Allocation</h2>
-      <a href="sbs.html">Perform Subject - Period Allocation</a>
-    </div>
-      
-      
+      <div class="card">
+      <h2>Pupils Summary Statistics</h2>
+      <a href="stat/pupils.html">View realtime class-based summary statistic of pupils</a>
+    </div>  
+          
       
       <hr>
-      <div class="card monTAS">
-        <h2>Teach and Sign</h2>
-        <a href="teachAndLog.html">Monitor Teach and Sign</a>
-      </div>
       
-    <div class="card monSA">
-      <h2>Student Attendace</h2>
-      <a href="stdAttendance.html">Monitor Student Attendance</a>
-    </div>
       
        
-      
-    
-    <div class="card rc">
-      <h2>Academic Performance</h2>
-      <a href="reportCards.html">Report Cards</a>
-      <a href="reportOverview.html">Overview</a>
-     
-    </div>
+  
       
     
 
-    <div class="card session">
-      <h2>Academic Session</h2>
-      <a href="session.html">Manage Session</a>
-    </div>
+  
+   
 
-    <div class="card section">
-      <h2>School Sections</h2>
-      <a href="section.html">Manage Sections</a>
-    </div>
+    
 
-    <div class="card subjects">
-      <h2>Subjects</h2>
-      <a href="subjects.html">Manage Subjects</a>
-    </div>
-
-    <div class="card teachers">
-      <h2>Teachers</h2>
-      <a href="teachers.html">Manage Teachers (Master List)</a>
-    </div>
-      
+    
 
 
-    <div class="card students">
-      <h2>Students (generic)</h2>
-      <a href="students.html">Manage Students</a>
-    </div>
+    
 
-    <div class="card fm">
-      <h2>Form Masters (Generic)</h2>
-      <a href="formMaster.html">Assign Form Masters</a>
-    </div>
+    
       
       
   
@@ -424,11 +359,7 @@
  
 
 
-    <div class="card admins">
-      <h2>Manage Admins</h2>
-      <a href="manageAdmins.html">Admin Settings</a>
-    </div>
-      
+
     <!--/div>
       <div class="card">
       <h2>Fees Management</h2>
@@ -584,14 +515,14 @@ const adminFunctions = [
   
   onAuthStateChanged(auth, async (user)=>{
     if (!user){
-      window.location.href = "../signin.html";
+      window.location.href = "../../signin.html";
       return;
     }
     signout1.onclick = e=>{
       signOut(auth);
     }
     document.getElementById("switch").onclick = e=> {
-      window.location.href = "../teacher/index.html";
+      window.location.href = "../../teacher/index.html";
     }
     let name = user.displayName;
     if (!name){
@@ -612,18 +543,7 @@ const adminFunctions = [
     let teacher = teachers[id];
  //   alert(teacher.adminFunctions);
     teacher.role ??={};
-    let role = teacher.role;
-    if (role.hos){
-     if (id=="kachalla"){
-       window.location.href = "principal/index.html";
-     } else if (id=="kamilu") {
-       window.location.href = "headmaster/index.html";
-     } else if (teacher.role.fm)
-      window.location.href = "fm/index.html";
-    }
-    //alert(teacher.role.fm
-    return;
-   // teacher.role.hod ??={};
+    teacher.role.hod ??={};
     let classes = teacher.role.hod.classes ?? [];
     if (classes.length)
     teacher.adminFunctions.push("fmHOD");
