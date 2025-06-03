@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -104,6 +104,7 @@
       }
     }   
   }    
+ 
   
     //const classOptions = ['Math', 'Science', 'History', 'Art', 'PE'];
      
@@ -126,7 +127,7 @@
 
         const teacherTd = document.createElement('td');
         const select = document.createElement('select');
-     
+        select.innerHTML = "<option value=''>None</option>";
         Object.keys(teachers).sort((a,b)=>teachers[a].name.localeCompare(teachers[b].name)).forEach(tId => {
           if (!section.teachers.includes(tId)) return;
           let teacher = teachers[tId];
