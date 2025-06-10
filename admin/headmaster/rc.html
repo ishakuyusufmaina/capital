@@ -187,6 +187,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     students.forEach(student=>{
        
       student.score=0;
+      student.sc = 0;
       let subjects = student.subjects;
       let stdReg = student.religion;
       if (!stdReg) {
@@ -211,7 +212,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
           let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
           student.score += test1 + test2 +t3 + Number(subjects[subj][termIndex].exam);
           subHeads.add(subjects[subj][termIndex].name);
-          
+          student.sc++;
         } catch(e) {
           console.log(subj + "is  not recorded for", student.name);
         }
@@ -278,6 +279,12 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       let hr = document.createElement("hr");
       wrapper.className = "table-container";
 wrapper.appendChild(reportCard);
+      let p = document.createElement("p");
+      p.innerHTML = `
+      Total Score: ${std.score}<br>
+      Average: ${std.score/std.sc}
+      `;
+      wrapper.append(p);
 container.append(hr, wrapper);
     });
     
@@ -316,14 +323,14 @@ container.append(hr, wrapper);
   
   
    function assignPositions(students){
-    students.sort((a, b)=>b.score -a.score);
+    students.sort((a, b)=>b.score/b.sc - a.score/a.sc);
   students.forEach((student, i)=>{
     student.position = i+1
     if (students[i+1])
     student.next = students[i+1];
     if (students[i-1])
     student.prev = students[i-1];
-    if ((!!student.prev) && (student.score == student.prev.score))
+    if ((!!student.prev) && (student.score/student.sc == student.prev.score/student.prev.sc))
     student.position = student.prev.position;
     console.log(student.position);
   });
