@@ -236,6 +236,7 @@
     border: 0.5px solid white;
     border-radius: 4px;
     border-bottom: none;
+    border-top: none;
   }
   
   
@@ -247,8 +248,14 @@
   }
 }
   
-  .auth {
-    display: none;
+
+  #d {
+    color: gold;
+    font-weight: bold;
+  }
+  
+  .class {
+    //display: none;
   }
 </style>
 
@@ -258,7 +265,11 @@
       
   <header>
     <hr>
-    <button id="signout1">Logout</button>
+    <button id="signout1">
+      MAIDUGURI CAPITAL SCHOOL
+      <!--br>
+      <span id="d">DIRECTOR</span-->
+    </button>
     <button id="menu">&#9776;</button>
      <div class="menu-container">
             <button id="close">X</button> Menu
@@ -270,33 +281,16 @@
               <li><a href="../changePsw.html">Change password </a></li>
             </ul>
      </div>
-    <div id="sess">session/term not initialized</div>
+    <div id="sess">session loading...</div>
     <div id="date"></div>
+    <div class="class"></div>
     <hr>
   </header>
   <main>
   <h1>Form Master</h1>
     
-    
-    
     <div class="card-container">  
-    <div class="card auth">
-      Authorization code: <span id="code"></span>
-      <button id="generate">Generate new</button>
-      <button id="save" style="display:none">Save</button>
-      
-    </div>      
-        
-    <!--div class="card">
-      <h2>Time Management</h2>
-      <a href="time.html">Manage time and period</a>
-    </div-->
-     
-    <!--div class="card">
-      <h2>Subject Management</h2>
-      <a href="sbsm.html">Update subjects</a>
-    </div-->
-      
+                
     <div class="card">
       <h2>Subject - Teacher Matching</h2>
       <a href="tsm.html">Match Subject to Teacher</a>
@@ -308,58 +302,15 @@
       
    <div class="card">
       <h2>Student Management</h2>
-      <a href="students.html">Manage students</a>
+      <a href="students.html">Manage <span class="class"></span> students</a>
+    </div>
+      
+      <div class="card">
+      <h2>Timetable</h2>
+      <a href="time.html">Update Class Timetable</a>
     </div>
 
-    <!--div class="card">
-      <h2>Student List</h2>
-      <a href="studentlist.html">Update student list</a>
-    </div-->
-
-      
-      
-       
-      
       <hr>
-      
-      
-       
-  
-      
-    
-
-  
-   
-
-    
-
-    
-
-
-    
-
-    
-      
-      
-  
-      
-      
-      
- 
-
-
-
-    <!--/div>
-      <div class="card">
-      <h2>Fees Management</h2>
-      <p>[Work in Progress (20%)]</p>
-    </div-->
-
-    <!--div class="card">
-      <h2>Parents</h2>
-      <p>(Coming soon)</p>
-    </div-->
-
   
 </main>
    <script type="module">
@@ -401,36 +352,7 @@ const schoolId= "capital";
     
 
 
-const adminFunctions = [
-    "teachers",
-    "students",
-    "rc",
-    "admins",
-    
-    "session",
-    "section",
-    "subjects",
-    "auth",
-    "monTAS",
-    "monSA",
-    
-    "cta",
-    "fma",
-    "hosa",
-    "hoda",
-    "sbsm",
-    "ygla",
-    "tsa",
-    "cbsm",
-    "fmssm"
-    
-  ];
-  
-/*adminFunctions.forEach(fx=>{
-  let elm = document.querySelector("."+fx);
-  if (elm) elm.style = "display: none;"
-  
-})*/
+
   let d = new Date();
   let year = d.getFullYear();
   let month = d.getMonth() + 1;
@@ -441,51 +363,10 @@ const adminFunctions = [
   //time.innerHTML = `${h} : {}{
   date.innerHTML = `${day}/${month}/${year}`;
 
-  function randint(low, high) {
-    let num = Math.random();
-    num = num*high + 1;
-    num = Math.floor(num);
-    if(num < low)
-    num =  randint(low, high);
-    return num
-}
   
-  function generate4N(){
-    let n1 = randint(0,9);
-    let n2 = randint(0,9);
-    let n3 = randint(0,9);
-    let n4 = randint(0,9);
-    return `${n1}${n2}${n3}${n4}`;
-  }
-    generate.onclick = e=>{
-      code.innerHTML = generate4N();
-      save.style = "display: inline";
-      save.textContent = "save";
-    }
-  save.onclick = async e=>{
-    let user = auth.currentUser;
-    if (!user) return;
-    let email = user.email;
-    let name = user.displayName;
-    if (!name) {
-     name = window.prompt("It seems there is no name on your account, update your name: ");
-     if (!name) return;
-      await updateProfile(user, {
-        displayName: name
-      })
-    }
-    let c = code.textContent;
-    let authRef = doc(db, schoolId, "auth");
-    let data = {};
-    data[email] = {
-      authorizer: name,
-      code: c
-    }
-    await setDoc(authRef, data, {merge: true});
-    save.textContent = "saved!"
-    setTimeout(e=>save.style = "display: none", 1000);
     
-  }
+    
+  
   signout.onclick = e=>{
    // window.location.href = "../signin.html";
     signOut(auth);
@@ -507,9 +388,9 @@ const adminFunctions = [
       window.location.href = "../../signin.html";
       return;
     }
-    signout1.onclick = e=>{
+    /*signout1.onclick = e=>{
       signOut(auth);
-    }
+    }*/
     document.getElementById("switch").onclick = e=> {
       window.location.href = "../../teacher/index.html";
     }
@@ -523,38 +404,15 @@ const adminFunctions = [
     let authRef = doc(db, schoolId, "auth");
     let authDoc = await getDoc(authRef);
     
-    let authData = authDoc.exists()? authDoc.data()[user.email] : {}
-    let c = authData? authData.code : "no code";
-    code.textContent = c;
     
     let id = user.email.replace(/@.*/, "");
     let teachers = teachersDoc.data();
     let teacher = teachers[id];
  //   alert(teacher.adminFunctions);
     teacher.role ??={};
-    teacher.role.hod ??={};
-    let classes = teacher.role.hod.classes ?? [];
-    if (classes.length)
-    teacher.adminFunctions.push("fmHOD");
-    
-    classes = teacher.role.fm ?? [];
-    if (classes.length){
-      
-      teacher.adminFunctions.push("fmssm");
-      classesElm.textContent = classes;
-    }
-
-   
-    teacher.role.hos ??={};
-    let sections = teacher.role.hos.sections;
-    localStorage.setItem("sections", JSON.stringify(sections));
-  
-  teacher.adminFunctions.forEach(fx=>{
-    let elm = document.querySelector("."+fx);
-    if (elm) elm.style = "display: block";
-  })
-    
-    
+    let c = teacher.role.fm[0];
+    Array.from(document.querySelectorAll(".class"))
+    .forEach(clElm => clElm.textContent = c);
     
   })
   </script>
