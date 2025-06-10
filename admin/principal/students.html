@@ -156,11 +156,12 @@ let sectionDoc = await getDoc(sectionRef);
        let teacher = teachers[id];
        if (sectionDoc.exists()){
            let sections = sectionDoc.data();
-           let hosSects = teacher.role.hos.sections;
+           let hosSects = new Set(teacher.role.hos.sections);
            let keys = Object.keys(sections);
            hosSects.forEach(key=>{
                let optG = document.createElement("optgroup");
-               optG.label = key;
+               optG.label = key.toUpperCase();
+               //console.log(key);
                let classes = sections[key].classes;
                classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
                classSelect.append(optG);
