@@ -319,7 +319,7 @@ async function  saveScores(){
   let clas = key(cls);
     let session = key(ses.year + terms[ses.term]);
     if (!(clas && session)) return null;
-   if (!students) return;
+   if (!Object.values(students).length) return;
  
   
  let stdsRef = doc(db, schoolId, session, clas, "students");
@@ -329,10 +329,12 @@ async function  saveScores(){
   }
   
   saveBtn.onclick= async e=>{
+    if (Object.values(students).length){
     e.target.textContent = "Saving..";
     await saveScores();
     e.target.textContent = "Saved!";
     setTimeout(_=>e.target.textContent = "Save", 1500);
+    }
 
 
   }
