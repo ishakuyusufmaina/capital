@@ -329,6 +329,7 @@ async function  saveScores(){
   }
   
   saveBtn.onclick= async e=>{
+    if (!students) return;
     if (Object.values(students).length){
     e.target.textContent = "Saving..";
     await saveScores();
