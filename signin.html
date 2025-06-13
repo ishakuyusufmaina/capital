@@ -186,7 +186,7 @@ footer small {
   measurementId: "G-3MGCDH4FRF"
 };
 
-   //   alert("Welcome");
+     loginBtn.textContent = "Please wait..";
   const schoolId = "capital";
     const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
@@ -196,7 +196,8 @@ footer small {
   let teachersRef = doc(db, schoolId, "teachers");
   let teacherDoc = await getDoc(teachersRef);
    let teachers = teacherDoc.exists()? teacherDoc.data() : {};
-  
+
+      loginBtn.textContent = "Login";
   var schoolGeneratedUsername;
   
  async function onLoginSuccess(user, role) {
