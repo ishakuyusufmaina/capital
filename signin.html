@@ -245,7 +245,7 @@ footer small {
   let reg = /.*@/;
   
   async function signIn() {
-      logBtn.textContent = "Loggin..";
+      logBtn.textContent = "Logging..";
       const username = document.getElementById("email").value;
       const email = username.replace(/@.*/, "")+`@teacher.${schoolId}`;
      schoolGeneratedUsername = username.replace(/@.*/, "");
