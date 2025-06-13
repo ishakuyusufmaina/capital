@@ -183,7 +183,7 @@ let sectionDoc = await getDoc(sectionRef);
   
   
 
-  function addRow(result){
+  function addRow(result, id){
      
     const container = document.getElementById('table');
       const row = document.createElement('tr');
@@ -202,7 +202,7 @@ let sectionDoc = await getDoc(sectionRef);
          
       `;
       container.appendChild(row);
-      let id = "std"+result.sn;
+      //let id = "std"+result.sn;
       let delBtn = row.querySelector(".del");
       delBtn.onclick = e=>{
           delete currentStudents[id]; //.name = nameIn.textContent;
@@ -222,12 +222,14 @@ add.onclick = e=>{
     gender: "",
       religion: ""
   }
-  addRow(result);
+  
     let lastN = Number(result.sn);
     while (currentStudents["std"+lastN]){
         lastN++;
     }
-  currentStudents["std"+lastN] = result;
+    let id = "std"+lastN;
+    currentStudents[id] = result;
+    addRow(result, id);
 }
   
    /* printBtn.onclick = e=>{
@@ -253,8 +255,9 @@ add.onclick = e=>{
       
     });*/
     if (!currentStudents) return;
+      if (!Object.values(currentStudents).length) return;
      await setDoc(stdsRef, currentStudents);
-    alert("save");
+    alert("saved");
    // console.log(JSON.stringify(students));
      
   }
@@ -277,10 +280,15 @@ add.onclick = e=>{
     let stdsDoc = await getDoc(stdsRef);
     if (stdsDoc.exists()){
       currentStudents = stdsDoc.data();
-        Object.keys(currentStudents).sort((a,b)=>currentStudents[a].name.localeCompare(currentStudents[b].name)).forEach(id=>{
+        Object.keys(currentStudents)
+        .sort((a,b)=>currentStudents[a]
+        .name
+        .localeCompare(currentStudents[b]
+        .name))
+        .forEach(id=>{
    
           let student = currentStudents[id];
-          addRow(student)
+          addRow(student, id)
       });
       //students.forEach(student=>addRow(student));
       
