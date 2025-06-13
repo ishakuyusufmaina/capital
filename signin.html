@@ -16,7 +16,7 @@
 <!-- Dark theme -->
 <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
 
-  <title>School - Login</title>
+  <title>Capital - Login</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
  
   <style>
@@ -237,12 +237,13 @@ footer small {
       // redirect or load user-specific content here
     }
   
-  loginBtn.onclick = signIn;
+  const logBtn = document.getElementById("loginBtn");
+  logBtn.onclick = signIn;
 
   let reg = /.*@/;
   
   async function signIn() {
-      
+      logBtn.textContent = "Loggin..";
       const username = document.getElementById("email").value;
       const email = username.replace(/@.*/, "")+`@teacher.${schoolId}`;
      schoolGeneratedUsername = username.replace(/@.*/, "");
@@ -252,6 +253,7 @@ footer small {
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           onLoginSuccess(userCredential.user, role);
+          logBtn.textContent = "Login";
         })
         .catch( async (error) => {
           let user = teachers[schoolGeneratedUsername];
@@ -267,6 +269,7 @@ footer small {
       
           }
           alert("Login failed: " + error.code);
+          logBtn.textContent = "Login";
         });
     }
 
