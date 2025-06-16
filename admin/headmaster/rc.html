@@ -241,7 +241,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </caption>
          <tr>
           <th>Subject</th>
-          <th>Test</th>
+          <th>1<sup>st</sup> CA</th>
+          <th>2<sup>nd</sup> CA</th>
           <th>Exam</th>
           <th>Total</th>
           <th>Grade</th>
@@ -266,7 +267,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         let row =document.createElement("tr");
         row.innerHTML = `
         <td>${subjects[subj][termIndex].name}</td>
-        <td>${t1 + t2 + t3}</td>
+        <td>${t1}</td>
+        <td>${t2}</td>
         <td>${subjects[subj][termIndex].exam}</td>
         <td>${t1 + t2 +t3 + Number(subjects[subj][termIndex].exam)}</td>
         <td>${grade(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
@@ -422,7 +424,6 @@ td {
       width: fit-content;
       border-collapse: collapse;
       margin-top: 20px;
-      margin: auto;
     }
 
     th, td{
@@ -487,7 +488,6 @@ text-align: center;
     }
     .table-container, .table-container > *{
       margin: auto;
-      color: black;
     }
     .table-container > * {}
 
