@@ -282,36 +282,13 @@
       <button id="save" style="display:none">Save</button>
       
     </div>      
-        
-    <!--div class="card">
-      <h2>Time Management</h2>
-      <a href="time.html">Manage time and period</a>
-    </div-->
-     
-    <!--div class="card">
-      <h2>Subject Management</h2>
-      <a href="sbsm.html">Update subjects</a>
-    </div-->
       
-      <!--div class="card">
-      <h2>Religion-based Subjects Differentiation</h2>
-      <a href="rbsd.html">Differentiate subjects by religion for easy report card computation</a>
-    </div-->
+      <div class="card">
+      <h2>Teaching History</h2>
+      <button id="plh" style="display:none">View Periodic Lesson History</button>
+    </div>
       
-    <!--div class="card">
-      <h2>Teachers Selection</h2>
-      <a href="tsa.html">Update teachers selection</a>
-    </div-->
-
-     
-      
-   
-    <!--div class="card">
-      <h2>Class Teacher Assignment</h2>
-      <a href="sbfma.html">Update class teachers</a>
-    </div-->
-      
-      
+          
    <div class="card">
       <h2>Pupils Management</h2>
       <a href="students.html">Manage pupils</a>
@@ -337,45 +314,7 @@
       <a href="rc.html">View report cards computation progress</a>
     </div>  
       <hr>
-      
-      
-       
-  
-      
     
-
-  
-   
-
-    
-
-    
-
-
-    
-
-    
-      
-      
-  
-      
-      
-      
- 
-
-
-
-    <!--/div>
-      <div class="card">
-      <h2>Fees Management</h2>
-      <p>[Work in Progress (20%)]</p>
-    </div-->
-
-    <!--div class="card">
-      <h2>Parents</h2>
-      <p>(Coming soon)</p>
-    </div-->
-
   
 </main>
    <script type="module">
@@ -550,25 +489,15 @@ const adminFunctions = [
     teacher.role ??={};
     teacher.role.hod ??={};
     let classes = teacher.role.hod.classes ?? [];
-    if (classes.length)
-    teacher.adminFunctions.push("fmHOD");
-    
-    classes = teacher.role.fm ?? [];
-    if (classes.length){
-      
-      teacher.adminFunctions.push("fmssm");
-      classesElm.textContent = classes;
-    }
+    plh.style.display = "block";
+    plh.onclick = e=>{
+        localStorage.setItem("classes", JSON.stringify(classes));
+        window.location.href = "../headmaster/teachAndLog.html";
+      }
 
    
-    teacher.role.hos ??={};
-    let sections = teacher.role.hos.sections;
-    localStorage.setItem("sections", JSON.stringify(sections));
+    
   
-  teacher.adminFunctions.forEach(fx=>{
-    let elm = document.querySelector("."+fx);
-    if (elm) elm.style = "display: block";
-  })
     
     
     
