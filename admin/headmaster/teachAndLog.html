@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teach and Sign</title>
+  
+  <style>
+  /* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* Body Styling */
+body {
+  background-color: #f9f9f9;
+  padding: 20px;
+  color: #333;
+}
+
+/* Header */
+h1 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+/* Select Dropdowns */
+select {
+  padding: 10px;
+  margin: 10px 5px 20px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 16px;
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: auto;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-top: 20px;
+}
+
+caption {
+  background-color: #2980b9;
+  color: #fff;
+  font-weight: bold;
+  padding: 10px;
+ text-align: center;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f1f1f1;
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Optional Styling for Summary Section (if re-enabled) */
+div > h2, div > h3 {
+  margin-top: 20px;
+  color: #34495e;
+}
+
+ol {
+  margin: 10px 0 20px 20px;
+}
+
+li {
+  margin-bottom: 5px;
+}
+  
+
+  </style>
+  
+</head>
+<body>
+  <h1>
+    Teach and Sign
+  </h1>
+  
+  <select id="sessionSelect">
+    <option>
+      -session-
+    </option>
+  </select>
+ <select id="classSelect">
+    <option value=""> -select class- </option>
+    
+  </select>
+  </select>
+  <select id="dateSelect">
+    <option value="">
+      -date-
+    </option>
+  </select>
+  
+
+<div id="tableContainer">
+  <table>
+    <tr>
+      <th>period</th>
+      <th>subject</th>
+      <th>topic</th>
+      <th>teacher</th>
+      <th>supervised by</th>
+      <th>time submitted</th>
+    </tr>
+    <tbody id="table"></tbody>
+  </table>
+</div>
+  
+  
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc, serverTimestamp} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+ 
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  
+let schoolId = "capital";
+let classes = JSON.parse(localStorage.getItem("classes"));
+
+    let sessionsRef = doc(db, schoolId, "sessions");
+let teachersRef = doc(db, schoolId, "teachers");
+  let teachersDoc = await getDoc(teachersRef);
+  let sectionRef = doc(db, schoolId, "section");
+  let sectionDoc = await getDoc(sectionRef);
+  const attendance = {};
+  
+function getDate(){
+  let d = new Date();
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day = d.getDate();
+  return `${day}/${month}/${year}`
+}
+
+
+  const terms = ["first term", "second term", "third term"];
+  
+  let session;
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sessions= sessions.sort((a, b)=>b.no - a.no);
+    sessions.forEach((session, i)=>{
+        let year = session.year;
+      let opt = document.createElement("option");
+      opt.innerHTML = year + ", " + terms[session.term];
+      sessionSelect.appendChild(opt);
+        if (i==0)
+        opt.selected = true;
+    });
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+  
+classes.forEach(cls=>
+classSelect.innerHTML +=`
+<option value="${cls}">${cls}</option>
+`)    
+/* if (sectionDoc.exists()){
+   let sections = sectionDoc.data();
+     
+   let keys = Object.keys(sections);
+   
+   keys.forEach(key=>{
+       let optG = document.createElement("optgroup");
+       optG.label = key;
+       let classes = sections[key].classes;
+       classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
+       classSelect.append(optG);
+   });
+ }*/
+ 
+
+  
+  classSelect.onchange= async e=>{
+     presentAllAttendance();
+  }
+
+
+sessionSelect.onchange = e=>{
+  presentAllAttendance();
+}
+dateSelect.onchange = e=>{
+  if (dateSelect.value)
+  presentAllAttendance();
+  else
+  table.innerHTML = "";
+}
+  function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+    }
+function present(attendance){
+  table.innerHTML = "";
+  attendance.forEach(entry=>{
+    let t = `${to12Hour(entry.timeSubmitted.h)} : ${entry.timeSubmitted.min} : ${entry.timeSubmitted.sec} ${getAMPM(entry.timeSubmitted.h)}`
+    let row = table.insertRow();
+    let [
+    period,
+    subject, 
+    topic, 
+    teacher, 
+    supv, 
+    time]  = [
+    row.insertCell(),
+    row.insertCell(),
+    row.insertCell(),
+    row.insertCell(),
+    row.insertCell(),
+    row.insertCell()];
+    [
+    period.textContent,
+    subject.textContent,
+    topic.textContent,
+    teacher.textContent,
+    supv.textContent,
+    time.textContent
+    ] = [
+    entry.period,
+    entry.subject,
+    entry.topic,
+    entry.teacher,
+    entry.supervisedBy,
+    t
+    ];
+    
+  })
+}
+
+async function presentAllAttendance(){
+  //tableContainer.innerHTML = "";
+  session = key(sessionSelect.value);
+    let clas = key(classSelect.value);
+    let superAttendRef = doc(db, schoolId, session, clas, "teachAndSign");
+    let superAttendDoc = await getDoc(superAttendRef);
+    if (superAttendDoc.exists()){
+      let attendance = superAttendDoc.data();
+      let dates = Object.keys(attendance).sort();
+      let date = dateSelect.value;
+      if (date) {
+        let ts = attendance[date];
+        present(ts);
+      } else {
+        dateSelect.innerHTML = "<option value=''> -date- </option>"
+        dates.forEach(date=>{
+          let opt = document.createElement("option");
+          opt.textContent = (date.replaceAll("_", "/") == getDate())? "today" : date.replaceAll("_", "/");
+          dateSelect.append(opt);
+          opt.value = date;
+          if (opt.textContent=="today"){
+            opt.selected = true;
+            let ts = attendance[date];
+            present(ts);
+          }
+          console.log(JSON.stringify(attendance[date][0]));
+        })
+        if (!dateSelect.value)
+        table.innerHTML = "NO TEACHER HAS SIGNED TODAY";
+        
+      }
+    }
+}
+
+
+function to12Hour(hour24) {
+  if (hour24 === 0 || hour24 === 24) {
+    return 12;
+  } else if (hour24 > 12) {
+    return hour24 - 12;
+  } else {
+    return hour24;
+  }
+}
+
+function getAMPM(hour24) {
+  return (hour24 >= 12 && hour24 < 24) ? "PM" : "AM";
+}
+
+  </script>
+</body>
+</html>
