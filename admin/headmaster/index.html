@@ -254,7 +254,7 @@
       
   <header>
     <hr>
-    <button id="signout1">MAIDUGURI CAPITAL SCHOOL</button>
+    <button id="signout1">Logout</button>
     <button id="menu">&#9776;</button>
      <div class="menu-container">
             <button id="close">X</button> Menu
@@ -281,7 +281,12 @@
       <button id="generate">Generate new</button>
       <button id="save" style="display:none">Save</button>
       
-    </div>      
+    </div>
+    <div class="card">
+      <h2>Teaching History</h2>
+      <button id="plh" style="display:none">View Periodic Lesson History</button>
+    </div>
+      
         
     <div class="card">
       <h2>Time Management</h2>
@@ -329,61 +334,18 @@
       <h2>Pupils Summary Statistics</h2>
       <a href="stat/pupils.html">View realtime class-based summary statistic of pupils</a>
     </div>  
-   <div class="card">
+          
+      <div class="card">
       <h2>Teachers</h2>
-      <a href="teachers0.html">View teachers' account</a>
-    </div>         
-   <div class="card">
-      <h2>Teachers beta</h2>
       <a href="teachers.html">View teachers' account</a>
     </div>  
-
-
-        <div class="card">
+      
+      <div class="card">
       <h2>Academic Performance</h2>
       <a href="rc.html">View report cards computation progress</a>
     </div>  
-      
       <hr>
-      
-      
-       
-  
-      
-    
-
-  
-   
-
-    
-
-    
-
-
-    
-
-    
-      
-      
-  
-      
-      
-      
- 
-
-
-
-    <!--/div>
-      <div class="card">
-      <h2>Fees Management</h2>
-      <p>[Work in Progress (20%)]</p>
-    </div-->
-
-    <!--div class="card">
-      <h2>Parents</h2>
-      <p>(Coming soon)</p>
-    </div-->
-
+     
   
 </main>
    <script type="module">
@@ -425,36 +387,7 @@ const schoolId= "capital";
     
 
 
-const adminFunctions = [
-    "teachers",
-    "students",
-    "rc",
-    "admins",
-    
-    "session",
-    "section",
-    "subjects",
-    "auth",
-    "monTAS",
-    "monSA",
-    
-    "cta",
-    "fma",
-    "hosa",
-    "hoda",
-    "sbsm",
-    "ygla",
-    "tsa",
-    "cbsm",
-    "fmssm"
-    
-  ];
-  
-/*adminFunctions.forEach(fx=>{
-  let elm = document.querySelector("."+fx);
-  if (elm) elm.style = "display: none;"
-  
-})*/
+
   let d = new Date();
   let year = d.getFullYear();
   let month = d.getMonth() + 1;
@@ -555,24 +488,29 @@ const adminFunctions = [
     let teachers = teachersDoc.data();
     let teacher = teachers[id];
  //   alert(teacher.adminFunctions);
-    teacher.role ??={};
-    teacher.role.hod ??={};
-    let classes = teacher.role.hod.classes ?? [];
-    if (classes.length)
-    teacher.adminFunctions.push("fmHOD");
-    
-    classes = teacher.role.fm ?? [];
-    if (classes.length){
-      
-      teacher.adminFunctions.push("fmssm");
-      classesElm.textContent = classes;
-    }
+     
+ 
 
    
     teacher.role.hos ??={};
     let sections = teacher.role.hos.sections;
-    localStorage.setItem("sections", JSON.stringify(sections));
-  
+     let sectionRef = doc(db, schoolId, "section");
+    getDoc(sectionRef)
+    .then(doc=>{
+      if (!doc.exists()) return;
+      let sects = doc.data();
+      let classes = [];
+      sections.forEach(k=>{
+        classes = classes.concat(sects[k].classes);
+      })
+      plh.style.display = "block";
+      plh.onclick = e=>{
+        localStorage.setItem("classes", JSON.stringify(classes));
+        window.location.href = "teachAndLog.html";
+      }
+    })
+    
+
   teacher.adminFunctions.forEach(fx=>{
     let elm = document.querySelector("."+fx);
     if (elm) elm.style = "display: block";
