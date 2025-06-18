@@ -170,9 +170,9 @@
   let min = d.getMinutes()+1;
   let h = d.getHours()+1;
   let getTime = ()=>{
-  let sec = d.getSeconds()+1;
-  let min = d.getMinutes()+1;
-  let h = d.getHours()+1;
+  let sec = d.getSeconds();
+  let min = d.getMinutes();
+  let h = d.getHours();
     return {sec, min, h}
   }
   //time.innerHTML = `${h} : {}{
@@ -247,6 +247,7 @@
   submit.onclick = async e=>{
     
     let time = getTime();
+    console.log(JSON.stringify(time));
     let todayDate = date.textContent.replaceAll("/", "_");
     let cls = key(clas.textContent);
     let sesId = key(session.textContent);
