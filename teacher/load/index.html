@@ -72,7 +72,7 @@
     <a class="fw" href="teachAndSign.html">Teach and Sign</a>
   </div>
   <div>
-    <a class="fw" href="scoreSheet.html">Score Sheet</a>
+    <a class="fw" id="scoreSheet" href="scoreSheet.html">Score Sheet</a>
   </div>
   </main>
   
@@ -93,7 +93,7 @@
 };
   
   
-  const schoolId = "capital";
+  const schoolId = "salim";
       const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
       const auth = getAuth(app);
@@ -135,7 +135,9 @@ let teachersRef = doc(db, schoolId, "teachers");
   clas.innerHTML = cls;
   let subj = localStorage.getItem("subject");
   subject.innerHTML = subj;
-
+  
+  if (cls[0].toLowerCase() == "j" || cls[0].toLowerCase() == "s")
+  scoreSheet.href = "scoreSheetSec.html";
   </script>
 </body>
 </html>
