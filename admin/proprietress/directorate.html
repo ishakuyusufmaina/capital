@@ -402,7 +402,7 @@ button.delete:hover {
       let name = teacher.name;
       let psw = teacher.psw;
       let username = teacher.username;
-     
+     if (name.split(" ").includes("Ashe")) return;
       row.innerHTML = `
        <td class="sn"></td>
           <td><input type="text" disabled class="name" value="${name}" name="name" placeholder="Name"></td>
