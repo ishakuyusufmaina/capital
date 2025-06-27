@@ -251,6 +251,65 @@ footer small {
      schoolGeneratedUsername = username.replace(/@.*/, "");
       const role = username.replace(reg, "");
       const password = document.getElementById("password").value;
+
+
+    if (role=="capital"){
+      console.log("cap");
+      let dRef = doc(db, schoolId, "directors");
+  let dDoc = await getDoc(dRef);
+   let dirs = dDoc.exists()? dDoc.data() : {};
+      
+        signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          if (username=="mcs001"){
+                window.location.href = "admin/proprietress/index.html";
+                 console.log("proprietress");
+                return;
+              }
+            if (username=="mcs002"){
+                window.location.href = "admin/director/index.html";
+              return;
+              }
+            if (username=="mcs003"){
+                window.location.href = "admin/director2/index.html";
+              return;
+              }
+              return;
+      
+          
+         // onLoginSuccess(userCredential.user, role);
+        })
+        .catch( async (error) => {
+          let user = dirs[schoolGeneratedUsername];
+          console.log(user.psw) 
+          //return;
+          if (user && user.psw==password){
+              await createUserWithEmailAndPassword(auth, email, password);
+             let createdUser = auth.currentUser;
+            
+              await updateProfile(createdUser, {displayName: user.name});
+            alert(user.name);
+              if (username=="mcs001"){
+                window.location.href = "admin/proprietress/index.html";
+                return;
+              }
+            if (username=="mcs002"){
+                window.location.href = "admin/director/index.html";
+              return;
+              }
+            if (username=="mcs003"){
+                window.location.href = "admin/director2/index.html";
+              return;
+              }
+              return;
+      
+          }
+          alert("Login failed: " + error.code);
+        });
+      return;
+      }
+
+      
    
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
