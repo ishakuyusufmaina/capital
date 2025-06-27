@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Section-based Subject Reg</title>
+    <style>
+  *{
+    box-sizing: border-box;
+  }
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+  select {
+    background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+  }
+
+    form {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    td > span {
+      padding: 8px;
+      border: 1px solid #333;
+      border-radius: 5px;
+      background-color: #1e1e1e;
+      color: #fff;
+      display: inline-block;
+      width: 100%;
+      
+    }
+
+    
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td{
+      padding: 2px;
+      border: 1px solid #333;
+      text-align: left;
+      width: fit-content;
+      
+    }
+ 
+  .save-container {
+    float: right;
+  }
+
+   
+  
+  
+    .p-table {
+  min-width: 600px; /* ensures large enough width for scrolling */
+}
+
+.table-container {
+  overflow-x: auto;
+  margin: 30px auto;
+}
+  
+  
+button {
+      margin-top: 1.5rem;
+     // width: 100%;
+      padding: 0.7rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #5c6bc0;
+    }
+  
+  button.delete {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.delete:hover {
+  background-color: #c82333;
+}
+
+  </style>
+</head>
+<body>
+  <!--h1>
+    Hello, World!
+  </h1-->
+  <select id="setSelect">
+
+    <option value=""> -select set- </option>
+    <!--option>Primary</option>
+    <option>Junior</option>
+    <option>Senior</option-->
+  </select>
+  <!--a href="#">View all</a-->
+  <div class="table-container">
+  <table>
+    <tr><th>Subject</th><th>Offered to</th></tr>
+    <tbody id="table"></tbody>
+  </table>
+</div>
+  <button id="addBtn" onclick="add()">Add</button>
+  <button id="saveBtn">Save</button>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  const schoolId = "capital";
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
+  let teachers = teachersDoc.data();
+  let user = await new Promise(async resolve=> onAuthStateChanged(auth, user=> resolve(user)));
+  let id = user.email.replace(/@.*/, "");
+  const teacher = teachers[id];
+  let data;
+  var srp; //subject religion profile
+  
+  let sections = JSON.parse(localStorage.getItem("section"));
+  if (Object.keys(sections).length){
+     Object.keys(sections).forEach(set=>{
+       let opt = document.createElement("option");
+       opt.innerHTML = set.toUpperCase();
+       setSelect.append(opt);
+     })
+  } else  data = {
+      //"primary": ["class 1", "class 2"],
+     // "junior": ["jss 1", "jss2", "jss 3"]
+    }
+  
+  function add(){
+    addRow("");
+  
+  }
+  addBtn.onclick = e => add();
+  function addRow(subject){
+    let subjFaith = srp[subject] ?? "";
+    let row = document.createElement("tr");
+      row.innerHTML = `
+      <td><span class="subject" contenteditable>${subject}</span></td>
+      <td>
+    <select class="rel">
+    <option value="">Both</option>
+    <option value="Muslim">Muslim</option>
+    <option value="Christian">Christian</option>
+    </select>
+    </td>`;
+      table.appendChild(row);
+    if (subjFaith) 
+      row.querySelector(`select>option[value=${subjFaith}]`).selected = true;
+
+    row.querySelector(".rel").onchange=e=>{
+      console.log(e.target.value)
+      srp[subject] = e.target.value;
+      //row.remove();
+    }
+  }
+  
+  setSelect.onchange = async e=>{
+    let sectionK = setSelect.value;
+    if (sectionK){
+      sectionK = sectionK.toLowerCase();
+      let sectionRef = doc(db, schoolId, "section");
+      let sectDoc = await getDoc(sectionRef);
+      table.innerHTML = "";
+      if (sectDoc.exists()){
+        let subjects = sectDoc.data()[sectionK].subjects;
+        srp = sectDoc.data()[sectionK].srp ?? {};
+        
+        subjects.forEach(subj=>addRow(subj));
+      }
+    }
+       
+  }
+  
+  saveBtn.onclick = async e=>{
+    let set = setSelect.value;
+    if (!set) return;
+    let subjs = [];
+    Array.from(table.querySelectorAll(".subject")).forEach(inp=>{
+      let subj = inp.textContent.trim();
+      if (subj)
+      subjs.push(subj);
+    });
+    console.log(subjs);
+    set = set.toLowerCase();
+    let sectionRef = doc(db, schoolId, "section");
+    let dataDoc = await getDoc(sectionRef);
+    data = dataDoc.exists()? dataDoc.data() : {};
+    data[set].subjects = subjs;
+    data[set].srp = srp;
+    await setDoc(sectionRef, data, {merge: true});
+    alert("saved");
+  }
+  </script>
+</body>
+</html>
