@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <title>School Directorate</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f6f9;
+    color: #333;
+    //padding: 20px;
+  }
+  main {
+    padding: 20px;
+  }
+
+  header {
+  //  display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #3f51b5;
+    color: #fff;
+    padding: 15px 20px;
+    //border-radius: 10px;
+    margin-bottom: 30px;
+  
+    position: sticky;
+    top:0;
+    z-index: 99;
+    min-height: 80px;
+    line-height: 24px;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    color: #3f51b5;
+  }
+
+  #code {
+    font-weight: bold;
+    font-size: 1.3rem;
+    color: #d32f2f;
+  }
+
+  button {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #388e3c;
+  }
+
+  a {
+    text-decoration: none;
+    color: #1a237e;
+    font-weight: 500;
+    display: block;
+    margin-top: 10px;
+  }
+
+  .card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    transition: transform 0.2s;
+    //display: none;
+    overflow: auto;
+    padding: 1rem;
+   text-align: center;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+  }
+
+  h2 {
+    color: #303f9f;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+  }
+  
+  
+  p {
+  //  text-align: right;
+   // color: teal;
+  }
+  hr {
+    border: 0;
+    height: 2px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(200, 200, 200, 0.75), rgba(0, 0, 0, 0));
+}
+ 
+
+ 
+
+  #signout:hover {
+    background-color: #d32f2f;
+    transform: scale(1.05);
+  }
+
+  #signout:active, #switch:active {
+    transform:scale(0.98);
+  }
+  
+
+
+   
+    .menu-container.show {
+        transition: transform 0.2s ease-out;
+        transform: scaleX(100%);
+        
+    }
+
+#menu {
+        position: absolute;
+        right:0;
+        top: 0;
+        background: none; // inherit;
+        color: inherit;
+        border: none;
+        font-size: 40px;
+    font-weight: bold;
+  z-index: 101;
+    }
+  
+  
+  
+  .menu-container {
+    max-height: 100vh;
+        position: absolute;
+        right: 0;
+        z-index: 110;
+        transform: scaleX(0);
+        text-align: left;
+        top: 0:
+    overflow: auto;
+  background-color: inherit; // #1e1e1e;
+  color: #ffffff;
+  padding: 20px;
+  width: 220px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: auto;
+  }
+
+.menu-container button#close {
+  background: transparent;
+  color: #ffffff;
+  border: none;
+  font-size: 18px;
+  float: right;
+  cursor: pointer;
+}
+
+.menu-container hr {
+
+  margin: 10px 0;
+  border: 0;
+  height: 4px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(200, 200, 200, 0.75), rgba(0, 0, 0, 0));
+
+}
+
+.menu-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-container li {
+  overflow: auto;
+  transition: background 0.3s, transform 0.2s;
+  margin: 12px 0;
+  
+}
+
+.menu-container a {
+  color: #80cbc4;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.menu-container a:hover {
+  color: #4db6ac;
+}
+
+#signout, #switch {
+  color: white;
+    border: none;
+    padding: 14px 20px;
+    font-size: 16px;
+    top:0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+
+  cursor: pointer;
+  padding: 10px 20px;
+    background-color: #4caf50;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s ease;
+
+}
+  
+  #signout1 {
+    background: none;
+    border: 0.5px solid white;
+    border-radius: 4px;
+    border-bottom: none;
+    border-top: none;
+   // color: red;
+    user-select: none;
+  }
+  
+  #dir {
+    color: gold;
+  }
+  
+
+
+  
+  /* Dark theme */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #f0f0f0;
+  }
+}
+  
+  
+  
+  caption {
+  background-color: #2980b9;
+  color: #fff;
+  font-weight: bold;
+  padding: 10px;
+ text-align: center;
+}
+
+th, td {
+  padding: 7px 10px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f1f1f1;
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: #f9f9f9;
+}
+
+
+.card th {
+  font-size: 0.75rem;
+}  
+
+
+  /* Select Dropdowns */
+select {
+  padding: 10px;
+  margin: 10px 5px 20px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 16px;
+}
+  
+  
+  
+  .grid-container {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  padding: 1.5rem;
+}
+
+.grid-container {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  padding: 1.5rem;
+}
+
+.grid-container .card {
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.grid-container .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Color Variants */
+.grid-container .card-1  { background: #6D83F2; }
+.grid-container .card-2  { background: #F26D8F; }
+.grid-container .card-3  { background: #4BC0C8; }
+.grid-container .card-4  { background: #FFD166; color: #333; }
+.grid-container .card-5  { background: #70C1B3; }
+.grid-container .card-6  { background: #FF6B6B; }
+.grid-container .card-7  { background: #B388EB; }
+.grid-container .card-8  { background: #FF9F1C; }
+.grid-container .card-9  { background: #3DA5D9; }
+.grid-container .card-10 { background: #9EE493; color: #1a1a1a; }
+.grid-container .card-11 { background: #FFCAD4; color: #333; }
+.grid-container .card-12 { background: #A2D2FF; color: #1a1a1a; }
+.grid-container .card-13 { background: #CDB4DB; color: #1a1a1a;}
+
+.card {
+  font-family: 'Poppins', sans-serif;
+}
+table {
+  margin: auto;
+}
+  
+  
+  
+  .waiting {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid #ccc;
+  border-top: 2px solid #3498db; /* blue spinner top */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+</style>
+
+
+</head>
+<body>
+      
+  <header>
+    <hr>
+    <button id="signout1">
+      <span>MAIDUGURI CAPITAL SCHOOL</span> <br>
+      <span id="dir">DIRECTOR</span>
+    </button>
+    <button id="menu">&#9776;</button>
+     <div class="menu-container">
+            <button id="close">X</button> Menu
+            <hr>
+            <ul>
+              <li></li>
+             <li id="switch">Switch <span>Account</span></li>
+              <li id="signout">Logout <span id="username"></span></li>
+              <li><a href="../changePsw.html">Change password </a></li>
+            </ul>
+     </div>
+    <div id="sess">session/term not initialized</div>
+    <div id="date"></div>
+    <hr>
+  </header>
+ 
+  <h1>Admin  </h1>
+    
+    <div class="card-container">
+    <div class="card auth">
+      Authorization code: <span id="code"></span>
+      <button id="generate">Generate new</button>
+      <button id="save" style="display:none">Save</button>
+      
+    </div>
+      <div class="card">
+        <h2>Teachers Performance Per Period (TPPP)</h2>
+        <select id="datesSelect">
+          <option value=""> -date- </option>
+        </select>
+          <table>
+           
+            <tr>
+              <th>Period</th>
+              <th>Status</th>
+              <th>MECIP</th>
+              <th>CHIP</th>
+              <th>TPPP</th>
+            </tr>
+             <tbody id="table">
+            </tbody>
+          </table>
+        
+        <a href="periodLessonHx.html">
+          Periodic Lesson Histories
+        </a>
+      </div>
+      
+   
+
+ 
+<main class="grid-container">
+  <!--div class="card card-1">Directorate</div-->
+  <div class="card card-1" id="princ">Principal <p id="princSects"><span class="waiting"</p></div>
+  <div class="card card-3" id="hm">Head Master <p id="hmSects"><span class="waiting"></span></p></div>
+  <div class="card card-4" id="ygl">Year Group Leaders (Secondary School Sections)</div>
+  <div class="card card-5" id="hod">HODs (Nursery & Primary School Sections)</div>
+  <div class="card card-6" id="fm">Form Masters</div>
+  <div class="card card-7" id="ct">Class Teachers</div>
+  <div class="card card-8" id="st">Subject Teachers</div>
+  <div class="card card-9" onclick="window.location.href='teachers.html'">Teachers</div>
+  <div class="card card-10">
+    <h2>Students</h2>
+    <div onclick="window.location.href='stdAttendance.html'">Attendance</div>  
+  </div>
+  <div class="card card-11" id="session" onclick="window.location.href='session.html'">Session</div>
+  <div class="card card-12" onclick="window.location.href='section.html'">Sections</div>
+  <div class="card card-13">
+    <h2>Academic Performance</h2>
+    <div onclick="window.location.href='rc (1).html'">Report Cards</div>
+    <div onclick="window.location.href='reportOverview1.html'">Overview</div>
+    
+  </div>
+  <hr>
+  <div class="card card-2" id="hos" onclick="window.location.href='assignHOS.html'">Heads of Sections</div>
+
+</main>
+
+
+
+
+    
+    
+
+  
+   <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, onSnapshot, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, updateProfile, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+
+  
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+const schoolId= "capital";
+    let sectionRef = doc(db, schoolId, "section");
+  let sectionDoc = await getDoc(sectionRef);
+      let hmSection = {};
+      let princSection = {};
+
+  
+  const terms = ["first term", "second term", "third term"];
+  const pLabels = [
+  "1st",
+  "2nd",
+  "3rd",
+  "4th",
+  "5th",
+  "6th",
+  "7th",
+  "8th",
+  "9th",
+  "10th"
+  ]
+      
+    var unsubcribes =[]; 
+    
+    let d = new Date();
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day = d.getDate();
+  let sec = d.getSeconds()+1;
+  let min = d.getMinutes()+1;
+  let h = d.getHours()+1;
+  let getTime = ()=>{
+  let sec = d.getSeconds()+1;
+  let min = d.getMinutes()+1;
+  let h = d.getHours()+1;
+    return {sec, min, h}
+  }
+      
+ const dates2025 = generateDatesForYear(2025);
+//console.log(dates2025);
+    
+   
+    
+   var sessions = [];
+      var sections;
+  let sessionsRef = doc(db, schoolId, "sessions");
+    let sessionsDoc = await getDoc(sessionsRef);
+    if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sessions= sessions.sort((a, b)=>b.no - a.no);
+    sess.innerHTML = sessions[0].year + ", " +terms[sessions[0].term]
+      session.innerHTML += "<br>"+sess.textContent;
+        }
+      
+      if (sectionDoc.exists()){
+        sections = sectionDoc.data();
+        let sectKeys = Object
+        .keys(sections);
+        
+      }
+
+  
+  let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
+  let teachers = teachersDoc.data();
+function generateDatesForYear(year) {
+  const dates = [];
+  const startDate = new Date(`${year}-01-01`);
+  const endDate = new Date(`${year}-12-31`);
+  const todate = `${year}-${month}-${day}`
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1); //.padStart(2, '0'); // Months are 0-indexed
+    const dd = String(d.getDate()); //.padStart(2, '0');
+    let date0 = `${yyyy}-${mm}-${dd}`;
+
+    let date1 = `${dd.padStart(2, '0')}-${mm.padStart(2, '0')}-${yyyy}`;
+    dates.push(date1);
+    let opt  = document.createElement("option");
+    opt.innerHTML+=`${date1}`;
+    opt.value = `${dd}_${mm}_${yyyy}`;
+    datesSelect.prepend(opt);
+     if ( date0==todate) {
+       opt.selected = true;
+     //  updateTPPP();
+       break;
+     }
+  }
+
+  return dates;
+}
+
+ let secKeys;   
+datesSelect.onchange = e=>{
+  updateTPPP()
+} 
+  updateTPPP();
+function updateTPPP(){
+  let date = datesSelect.value;
+  if (!date) return;
+  if (!sectionDoc.exists()) return;
+  let sections = sectionDoc.data();
+  let dateElms  = date.split("_").reverse().map(token=>token.padStart(2, "0"));
+  let date1 = dateElms[0]+"-"+dateElms[1]+"-"+dateElms[2];
+  let d = new Date(date1);
+  let dI = d.getDay();
+  let secKeys = Object
+  .keys(sections)
+  .sort((a, b) =>{
+    let sectA = sections[a];
+    let sectB = sections[b];
+    let periodsA = JSON
+    .parse(sectA
+    .timetable)[dI];
+    let periodsB = JSON
+    .parse(sectB
+    .timetable)[dI];
+    return periodsB.length - periodsA.length;    
+  });
+  //let mergePeriods = [];
+  let stdPeriods = JSON
+  .parse(sections[secKeys[0]]
+  .timetable)[dI]
+  .map((p, i)=>{
+    let sectK = secKeys[0];
+    let sect = sections[sectK];
+    p.status = {};
+    p.status[sectK] = getStatus(p);
+    p.mec = {};
+    p.mec[sectK] = sect.classes.length;
+    return p;
+  })
+ secKeys.forEach((k, i)=>{
+   if (k[0].toLowerCase()=="t") return;
+   if (!i) return;
+   let sect = sections[k];
+   let subPeriods = JSON
+   .parse(sect
+   .timetable)[dI];
+   subPeriods.forEach((subP, i)=>{
+     let stdP = stdPeriods[i];
+     stdP.mec[k] = sect.classes.length;
+     stdP.status[k] = getStatus(subP);
+   })
+ });
+  console.log(datesSelect.value);
+  
+  presentTPPP(stdPeriods, datesSelect.value);
+ }  
+
+   
+  function presentTPPP(stdPeriods, date){
+   // let heading = table.children[0];
+    table.innerHTML = "";
+    unsubcribes.forEach(unsubcribe=>unsubcribe())
+    unsubcribes = [];
+   // table.appendChild(heading);
+    stdPeriods.forEach((p, i)=>{
+      let pName = pLabels[i];
+      let status = "";
+      let mecip = "";
+      let stdStatus = p.status;
+      let stdMecip = p.mec;
+      let row = table.insertRow();
+      
+      let pCell = row.insertCell();
+      let sCell = row.insertCell();
+      let mCell = row.insertCell();
+      let cCell = row.insertCell();
+      let tCell = row.insertCell();
+      pCell.innerHTML = pName;
+     let statusSet = new Set();
+      Object
+      .keys(stdStatus)
+      .forEach(k=>{
+        status +=`${k.slice(0, 3).toUpperCase()}: ${stdStatus[k]}<br>`;
+        statusSet.add(stdStatus[k]);       
+      });
+      sCell.innerHTML = `
+      <details>
+        <summary>${Array.from(statusSet).toString()}</summary>
+      <hr>
+        ${status}
+      </details>`;
+      
+      let mecipSum = 0;
+      Object
+      .keys(stdMecip)
+      .forEach(k=>{
+        mecip +=`${k.slice(0, 3).toUpperCase()}: ${stdMecip[k]}<br>`;
+        mecipSum +=stdMecip[k];
+      });
+      mCell.innerHTML = `
+      <details>
+        <summary>${mecipSum}</summary>
+      <hr>
+        ${mecip}
+      </details>`;
+      if (i==3){
+         mCell.innerHTML = "BREAK";
+        cCell.innerHTML = "BREAK"
+         tCell.innerHTML = "BREAK";
+        return;
+      }
+
+        //let date = datesSelect
+      let sesId = key(sess.textContent);
+      
+     let pLHxRef = doc(db, schoolId, sesId, `d${date}p${i}`, "lessonHistory"); //ref to periodic lesson history;
+      console.log(`d${date}p${i}`);
+     let unsubcribe = onSnapshot(pLHxRef, plhxDoc=>{
+       if (plhxDoc.exists()){
+         let chip = Object.values(plhxDoc.data()).length;
+         cCell.innerHTML = chip;
+         tCell.innerHTML = Math.round((chip/mecipSum)*100) +"%";
+       } else {
+         cCell.innerHTML = 0;
+         tCell.innerHTML = 0+"%";
+       }
+     })
+      unsubcribes.push(unsubcribe);
+        
+  
+   //  console.log(status, mecip);    
+    })
+   }      
+
+  function generate4N(){
+    let n1 = randint(0,9);
+    let n2 = randint(0,9);
+    let n3 = randint(0,9);
+    let n4 = randint(0,9);
+    return `${n1}${n2}${n3}${n4}`;
+  }
+    generate.onclick = e=>{
+      code.innerHTML = generate4N();
+      save.style = "display: inline";
+      save.textContent = "save";
+    }
+  save.onclick = async e=>{
+    let user = auth.currentUser;
+    if (!user) return;
+    let email = user.email;
+    console.log(email);
+    let name = user.displayName;
+    if (!name) {
+     name = window.prompt("It seems there is no name on your account, update your name: ");
+     if (!name) return;
+      await updateProfile(user, {
+        displayName: name
+      })
+    }
+    let c = code.textContent;
+    let authRef = doc(db, schoolId, "auth");
+    let data = {};
+    data[email] = {
+      authorizer: name,
+      code: c
+    }
+    await setDoc(authRef, data, {merge: true});
+    save.textContent = "saved!"
+    setTimeout(e=>save.style = "display: none", 1000);
+    
+  }
+  signout.onclick = e=>{
+   // window.location.href = "../signin.html";
+    signOut(auth);
+  }
+  
+  
+  document.getElementById("close").onclick = _ => document.querySelector(".menu-container").classList.remove("show");
+  menu.onclick = _ => document.querySelector(".menu-container").classList.add("show");
+
+  document.body.onclick = e =>{
+    
+    if (e.target != menu )
+    document.querySelector(".menu-container").classList.remove("show");
+
+  }
+  
+  onAuthStateChanged(auth, async (user)=>{
+   
+    if (!user){
+      window.location.href = "../signin.html";
+      return;
+    }
+    signout1.onclick = e=>{
+      signOut(auth);
+    }
+    document.getElementById("switch").onclick = e=> {
+      window.location.href = "../teacher/index.html";
+    }
+    let name = user.displayName;
+    if (!name){
+      name = window.prompt("It seems there is no name on your account, update your name: ");
+     if (name)
+     updateProfile(user, {displayName: name})
+    }
+    username.textContent = name;
+    let authRef = doc(db, schoolId, "auth");
+    let authDoc = await getDoc(authRef);
+    
+    let authData = authDoc.exists()? authDoc.data()[user.email] : {}
+    let c = authData? authData.code : "no code";
+    code.textContent = c;
+    
+    let id = user.email.replace(/@.*/, "");
+     //teachers = teachersDoc.data();
+    let teacher = teachers[id]; 
+    
+    
+  
+      if (sectionDoc.exists()){
+        let sections = sectionDoc.data();
+        hmSects.innerHTML = "";
+        princSects.innerHTML = "";
+        Object.keys(sections)
+        .forEach(key=>{
+          if (key.toLowerCase() =="test") return;
+          if (key[0].toLowerCase() == "p" || key[0].toLowerCase() == "n"){
+            hmSection[key] = sections[key];
+            hmSects.innerHTML +=  " | "+key.toUpperCase() ;
+          } else {
+            princSection[key] = sections[key];
+            princSects.innerHTML +=" | "+key.toUpperCase();
+
+          }
+        })
+        hmSects.innerHTML += "|";
+        princSects.innerHTML += "|";
+     //  console.log("HM:", JSON.stringify(hmSection));
+     //   console.log("PRINC:", JSON.stringify(princSection));
+        
+      }
+    })
+    
+
+    
+    
+  function getDate(){  
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day = d.getDate();
+  return `${day}/${month}/${year}`
+}
+ 
+  const sectPeriods =[];
+    
+      
+   let sesId = key(sess.textContent);
+      let colsRef = doc(db, schoolId, sesId);
+//      `d${"17_6_2025"}p${per}`, "lessonHistory");
+     
+function getStatus(period){
+  //let currPeriods = Object.values(sectPeriods).map(dayPeriods=>dayPeriods[p])
+ // try {
+  let [t1, t2] = [period.from, period.to];
+  if (!t1 || !t2) return undefined;
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const [h1, m1] = t1.split(':').map(Number);
+  const [h2, m2] = t2.split(':').map(Number);
+  const start = h1 * 60 + m1;
+  const end = h2 * 60 + m2;
+
+  if (nowMinutes < start) return 'future';
+  if (nowMinutes > end) return 'past';
+  return 'present';
+   
+}
+    let mecip = []//maximum expected class in period;
+
+let todayDate = getDate().replaceAll("/", "_");
+
+//let pLHxDocs = await Promise.all(pLHxRefs.map(pLHxRef=> getDoc(pLHxRef)));
+
+function key(token){
+      return token.trim().replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+    }
+  
+  princ.onclick = e=>{
+   
+    if (Object.values(princSection).length){
+     // console.log(JSON.stringify(princSection));
+     // return;
+      localStorage.setItem("section", JSON.stringify(princSection));
+      window.location.href = "principal/index.html";
+    }
+  }
+  ygl.onclick = e=>{
+   
+      //localStorage.setItem("section", JSON.stringify(princSection));
+      window.location.href = "../principal/assignHOD.html";
+  
+  }
+  fm.onclick = e=>{
+   
+    if (Object.values(princSection).length){
+     // console.log(JSON.stringify(princSection));
+     // return;
+      localStorage.setItem("section", JSON.stringify(princSection));
+      window.location.href = "principal/sbfma.html";
+    }
+  }
+  ct.onclick = e=>{
+   
+    if (Object.values(hmSection).length){
+     // console.log(JSON.stringify(hmSection));
+     // return;
+      localStorage.setItem("section", JSON.stringify(hmSection));
+      window.location.href = "headmaster/sbfma.html";
+    }
+  }
+  hod.onclick = e=>{
+   
+     // localStorage.setItem("section", JSON.stringify(princSection));
+      window.location.href = "../headmaster/assignHOD.html";
+  
+  }
+  
+  hm.onclick = e=>{
+   
+    if (Object.values(hmSection).length){
+     // console.log(JSON.stringify(hmSection));
+     // return;
+      localStorage.setItem("section", JSON.stringify(hmSection));
+      window.location.href = "headmaster/index.html";
+    }
+  }
+  st.onclick = e=>{
+    if (!teachers) return;
+    if (!Object.values(teachers)) return;
+    if (!Object.values(teachers).length) return;
+    if (!sectionDoc.exists()) return;
+    let academics = {
+      teachers: teachers,
+      sections: sectionDoc.data()
+    }
+    localStorage.setItem("academics", JSON.stringify(academics));
+    window.location.href = "subjectTeachers.html";
+    
+  }
+  
+  </script>
+</body>
+</html>

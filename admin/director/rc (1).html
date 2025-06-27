@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Position</title>
+</head>
+<body>
+  <h1 class="no-print">
+    Report Cards
+  </h1>
+     <div class="select-container no-print">
+   <select id="sessionSelect">
+    <option> -select session- </option>
+  </select>
+  <select id="classSelect">
+    <option value=""> -select class- </option>
+    
+  </select>
+  
+  
+  </div>
+  
+  <div id="container">
+    
+  </div>
+  
+
+  <div class="no-print">
+    <button id="print" onclick="window.print()">Download</button>
+  </div>
+   <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+
+  const schoolId = "capital";
+  const schoolName = "Maiduguri Capital School"
+  class StdList extends Array {
+  constructor() {
+    super();
+  }
+  push(elm) {
+    if (this.length == 0) {
+      elm.position = 1;
+    } else {
+      this.position(elm);
+    }
+    super.unshift(elm);
+    super.sort((a, b) => {
+      return b.score - a.score;
+    });
+  }
+
+  position(elm) {
+    for (let i = 0; i < this.length; i++) {
+      if (Number(this[i].score) == Number(elm.score)) {
+        elm.position = this[i].position;
+        return;
+      } else if (Number(this[i].score) < Number(elm.score)) {
+        elm.position = this[i].position;
+        for (let j = i; j < this.length; j++) {
+          this[j].position++;
+        }
+        return;
+      } else {
+        elm.position = this[this.length - 1].position + 1;
+      }
+    }
+  }
+}
+  
+  
+   var students;
+  const terms = ["first term", "second term", "third term"];
+
+  let sessionsRef = doc(db, schoolId, "sessions");
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sessions= sessions.sort((a, b)=>b.no - a.no);
+    sessions.forEach((session, i)=>{
+        let year = session.year;
+      let opt = document.createElement("option");
+      opt.innerHTML = year + ", " + terms[session.term];
+      sessionSelect.appendChild(opt);
+      opt.setAttribute("data-year", year);
+      opt.setAttribute("data-term", session.term);
+        if (i==0)
+        opt.selected = true;
+    });
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+  
+  
+let sectionRef = doc(db, schoolId, "section");
+  let sectionDoc = await getDoc(sectionRef);
+let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
+  
+
+  let user = auth.currentUser;
+  let id = user.email.replace(/@.*/, "");
+   let hos = teachersDoc.data()[id];
+  const sections = {};
+  var srp;
+   if (sectionDoc.exists()){
+   let sects = sectionDoc.data()// JSON.parse(localStorage.getItem("section"));
+     
+   let keys = Object.keys(sects);   
+   keys.forEach(key=>{
+     //if (!hos.role.hos.sections.includes(key)) return;
+       sections[key] =  sects[key];
+     let optG = document.createElement("optgroup");
+       optG.label = key;
+       let classes = sects[key].classes;
+       classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
+       classSelect.append(optG);
+   });
+
+ }
+  
+  async function loadStudents() {
+   
+    let clas = key(classSelect.value);
+    let session = key(sessionSelect.value);
+    if (!(clas && session)) return null;
+    let sectK = classSelect.selectedOptions[0].parentElement.label;
+    srp = sections[sectK].srp;
+    console.log(srp);
+    let stdsRef = doc(db, schoolId, session, clas, "students");
+    let stdsDoc = await getDoc(stdsRef);
+    if (stdsDoc.exists()){
+      students = Object.values(stdsDoc.data());
+     // console.log(JSON.stringify(students));
+      
+      //return students
+      
+    } else
+    students = null;
+    
+    
+    
+    function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+    }
+    
+  }
+  
+ 
+  classSelect.onchange= async e=>{
+    await loadPositions();
+   }
+  sessionSelect.onchange =async  e=>{
+    await loadPositions();
+  }
+  
+  async function loadPositions(){
+    container.innerHTML = "";
+      //document.getElementById("table-body").innerHTML = "";
+      await loadStudents();
+    if (!students) return;
+    let ssi = sessionSelect.selectedIndex;
+    let termIndex = sessionSelect.options[ssi].getAttribute("data-term");
+ // alert(termIndex);
+    let stdList = new StdList();
+    let subHeads = new Set();
+   
+    students.forEach(student=>{
+       
+      student.score=0;
+      student.sc = 0;
+      let subjects = student.subjects;
+      let stdReg = student.religion;
+      if (!stdReg) {
+     // alert("STUDENT " + student.name +"NRS"); 
+      //return;
+      }
+      let faith = stdReg == "Islam"? "Muslim" : "Christrian";
+      for (const subj in subjects) {
+        
+        let sN = subjects[subj][termIndex].name;
+     //   console.log(sN);
+        if (srp[sN]) {
+       // console.log("sss");
+       //   console.log(JSON.stringify(srp), "---", subj);
+          if (!(srp[sN]==faith))
+          delete subjects[subj]
+        }
+       // console.log(JSON.stringify(subjects[subj]))
+        try {
+          let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
+          let test2 = Number(subjects[subj][termIndex].test2 ?? 0);
+          let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
+          student.score += test1 + test2 +t3 + Number(subjects[subj][termIndex].exam);
+          subHeads.add(subjects[subj][termIndex].name);
+          student.sc++;
+        } catch(e) {
+          console.log(subj + "is  not recorded for", student.name);
+        }
+      }
+      //stdList.push(student);
+    })       
+   // console.log(JSON.stringify(stdList));
+    assignPositions(students);
+    students.forEach(std=>{
+     // console.log(std.religion);
+      let reportCard = document.createElement("table");
+      reportCard.innerHTML = `
+      <caption>
+      <h2>${schoolName}</h2>
+      <img class="logo" src="../../logo.jpg">
+      <h3>Terminal Report</h3>
+      Name of Student: ${std.name.toUpperCase()} <br>
+      Sex: ${std.gender}<br>
+      Class: ${classSelect.value} <br>
+      Session: ${sessionSelect.value} <br>
+      <!--Term: ${"?"}<br-->
+      Number in Class: ${students.length} <br>
+      Position: ${std.position}
+     
+      
+      </caption>
+         <tr>
+          <th>Subject</th>
+          <th>1<sup>st</sup> CA</th>
+          <th>2<sup>nd</sup> CA</th>
+          <th>Exam</th>
+          <th>Total</th>
+          <th>Grade</th>
+          <th>Remark</th>
+        </tr>
+      `;
+      let subjects = std.subjects;
+      let stdReg = std.religion;
+      if (!stdReg) {
+     // alert("STUDENT " + std.name + "NRS"); 
+     // return;
+      }
+      let faith = stdReg == "Islam"? "Muslim" : "Christrian";
+ 
+      for (const subj in subjects) {
+        
+      let t1= Number(subjects[subj][termIndex].test1 ?? 0);
+      let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
+        let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
+
+ //     subjects.forEach(subj=>{
+        let row =document.createElement("tr");
+        row.innerHTML = `
+        <td>${subjects[subj][termIndex].name}</td>
+        <td>${t1}</td>
+        <td>${t2}</td>
+        <td>${subjects[subj][termIndex].exam}</td>
+        <td>${t1 + t2 +t3 + Number(subjects[subj][termIndex].exam)}</td>
+        <td>${grade(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
+        <td>${remark(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
+        
+        `;
+        reportCard.appendChild(row);
+      }//);
+      let wrapper = document.createElement("div");
+      let hr = document.createElement("hr");
+      wrapper.className = "table-container";
+wrapper.appendChild(reportCard);
+      let p = document.createElement("p");
+      p.innerHTML = `
+      Total Score: ${std.score}<br>
+      Average: ${std.score/std.sc}
+      `;
+      wrapper.append(p);
+container.append(hr, wrapper);
+    });
+    
+    function remark(test, exam){
+      let total = test+exam;
+      let dict= {
+        "F": "Fail",
+        "E": "Poor",
+        "D": "Fair", 
+        "C": "Good", 
+        "B": "Very Good",
+        "A": "Excellent"
+      };
+      let g = grade(test, exam);
+      return dict[g]
+    }
+    
+    function grade(test, exam){
+      let total = test + exam;
+      /* <40 F, <=45 E,  <=49 D, <=59 C, <= 69 B, * 70 A */
+      let grade = null;
+        if (total < 40){ grade="F"}
+        else if (total <= 45) {grade="E"}
+        else if (total <= 49 ) {grade="D"}
+        else if (total <= 59 ) {grade="C"}
+        else if (total <= 69 ) {grade="B"}
+        else grade = "A";
+        
+          
+          return grade;
+    }
+
+  }
+  
+  
+  
+  
+   function assignPositions(students){
+    students.sort((a, b)=>b.score/b.sc - a.score/a.sc);
+  students.forEach((student, i)=>{
+    student.position = i+1
+    if (students[i+1])
+    student.next = students[i+1];
+    if (students[i-1])
+    student.prev = students[i-1];
+    if ((!!student.prev) && (student.score/student.sc == student.prev.score/student.prev.sc))
+    student.position = student.prev.position;
+    console.log(student.position);
+  });
+   
+    
+  }
+  
+  
+  
+/*  print.onclick = e=>{
+    alert();
+    window.print();
+  }*/
+  
+  </script>
+  
+<style>
+ table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+ th,
+td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.vertical-header-table .thead th.subject {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  background: #004080;
+  color: white;
+  height: 150px;
+  vertical-align: center;
+  text-transform: uppercase;
+  text-align: left;
+  border: 1px solid grey;
+}
+  #gtotal, #position {
+    writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  
+  height: 150px;
+  vertical-align: center;
+    text-transform: uppercase;
+  text-align: left;
+  }
+
+ tbody tr:nth-child(even) {
+//  background-color: #f9f9f9;
+}
+
+ tbody tr:hover {
+  background-color: #eef;
+   color: black;
+}
+
+  body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+  select {
+    background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+  }
+  
+  
+      button {
+      padding: 6px 12px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+
+    table {
+      width: fit-content;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td{
+      padding: 4px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+ h1, .save-container {
+ //   display: inline-block;
+text-align: center;
+    
+  }
+ 
+ 
+   .select-container, .table-container {
+    text-align: center;
+    margin: auto;
+    padding: 10px;
+    //border: 1px solid white;
+    width: 100%;
+    overflow-x: auto;
+  }
+ 
+ 
+ select {
+    background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      border: none;
+    font-size: 24px;
+    text-align: center;
+    width: 100%;
+    display: inline-block;
+  }
+    
+  hr {
+    border: 0;
+    height: 4px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(200, 200, 200, 0.75), rgba(0, 0, 0, 0));
+}
+  
+  .logo {
+    border-radius: 50%;
+    height: 100px;
+    width:100px;
+  }
+  tr:nth-child(1) {
+    padding: 0.7rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+  }
+
+  @media print {
+    hr {
+      page-break-after: always;
+    }
+    .no-print {
+      display: none;
+    }
+    .table-container, .table-container > *{
+      margin: auto;
+    }
+    .table-container > * {}
+
+    .logo {
+      border-radius: 0%;
+    }
+  }
+  </style>
+</body>
+</html>
