@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Section</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f7fa;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+     // border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #eaeaea;
+      text-transform: capitalize;
+    }
+
+    input {
+      padding: 8px;
+      width: 200px;
+      margin-right: 10px;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+    }
+
+    button {
+      margin-top: 1.5rem;
+     // width: 100%;
+      padding: 0.7rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .section-remove {
+      background-color: #dc3545;
+    }
+
+    .section-remove:hover {
+      background-color: #a71d2a;
+    }
+
+    td table {
+      width: 100%;
+    }
+
+    td table td {
+      border: none;
+      padding: 4px;
+      
+    }
+  
+  .class-add {
+    width: 100%;
+    
+  }
+
+    td[contenteditable] {
+      background-color: #f9f9f9;
+      border: 0.5px solid #aaa;
+      min-width: 100px;
+    }
+
+    #btn, .section-remove, td button {
+      margin-top: 5px;
+    }
+
+    #sect {
+      margin-top: 20px;
+    }
+
+    div {
+      margin-top: 20px;
+    }
+  div > * {
+    display: inline-block;
+    
+  }
+  
+ h1 {
+display: inline-block;
+ } 
+  
+#save {
+text-align: right;
+display: inline-block;
+  float: right;
+}  
+  
+  
+  </style>
+</head>
+<body>
+  <h1>Sections</h1>
+   <button id="save">Save changes</button>
+  <table id="tb"></table>
+
+  <div>
+    <input id="sect" placeholder="section">
+    <button id="btn">Add section</button>
+  </div>
+  
+ 
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  
+  const schoolId="capital";
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    
+    const terms = ["first term", "second term", "third term"];
+
+  let data;
+  let sessionsRef = doc(db, schoolId, "sessions");
+  let sectionRef = doc(db, schoolId, "section");
+  let section = await getDoc(sectionRef);
+  if (section.exists()){
+    data = section.data();
+   // delete data.primary;
+  } else
+  data = {
+      //"primary": {
+   // "classes": ["class 1", "class 2"],
+   // "subjects" : []
+    
+  //}
+     // "junior": ["jss 1", "jss2", "jss 3"]
+    }
+
+    btn.onclick = e => {
+      let section = sect.value;
+      if (!section) return;
+      section = section.replaceAll(" ", "").toLowerCase();
+      if (data[section]) return;
+      data[section] = {
+        "classes": [], 
+        "subjects": []
+      };
+      sect.value = "";
+      presentTable(data);
+    }
+  
+  save.onclick = async e=>{
+    await setDoc(sectionRef, data);
+    alert("saved!");
+  }
+
+//  data = {};
+    presentTable(data);
+
+    function presentTable(data) {
+      
+      tb.innerHTML = "";
+      for (const section in data) {
+        presentRow(section, data[section]);
+      }
+
+      function presentRow(section, sectObj) {
+       // try {
+        let classes = sectObj.classes;
+        if (!classes) return;
+       // } catch(e) {console.error(e);return}
+        let tr = document.createElement("tr");
+        let sectD = document.createElement("th");
+        sectD.innerHTML = section;
+
+        let classD = document.createElement("td");
+        let addBtn = document.createElement("button");
+        addBtn.innerHTML = "Add";
+        addBtn.classList.add("class-add");
+        addBtn.onclick = e => {
+          let lastIndex = data[section].classes.length - 1;
+          if (!data[section][lastIndex] && data[section].length) return;
+          data[section].classes.push("");
+          presentTable(data);
+        }
+
+        let removeCont = document.createElement("td");
+        let remove = document.createElement("button");
+        remove.innerHTML = "Remove"
+        remove.classList.add("section-remove");
+        removeCont.append(remove);
+        remove.onclick = e => {
+          delete data[section];
+          presentTable(data);
+        }
+
+        tr.append(sectD, classD, removeCont);
+        presentClasses();
+        classD.append(addBtn);
+        tb.append(tr);
+
+        function presentClasses() {
+          let table = document.createElement("table");
+          presentClass();
+          classD.append(table);
+
+          function presentClass() {
+            classes.forEach((clas, i) => {
+              let tr = document.createElement("tr");
+              tr.classList.add("in-row");
+              let classContainer = document.createElement("td");
+              classContainer.innerHTML = clas;
+              classContainer.setAttribute("contenteditable", "plaintext-only");
+              classContainer.oninput = e => {
+                data[section].classes[i] = classContainer.textContent;
+              }
+
+              let removeContainer = document.createElement("td");
+              let remove = document.createElement("button");
+              remove.onclick = e => {
+                data[section].classes.splice(i, 1);
+                presentTable(data);
+              }
+              remove.innerHTML = "remove";
+              removeContainer.append(remove);
+              tr.append(classContainer, removeContainer);
+              table.append(tr);
+            });
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>

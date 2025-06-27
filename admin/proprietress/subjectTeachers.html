@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <title>SUBJECT TEACHERS</title>
+  <style>
+  /* General styles */
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f2f6f9;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 30px;
+  }
+
+  /* Style for teacher sections */
+  details {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 10px 15px;
+  }
+
+  summary {
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #2e86de;
+    margin-bottom: 10px;
+  }
+
+  summary:hover {
+    color: #1b4f72;
+  }
+
+  /* Style for timetable table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background-color: #f0f8ff;
+    color: #2e86de;
+    font-weight: 600;
+  }
+
+  td {
+    background-color: #fafafa;
+  }
+
+  @media (max-width: 600px) {
+    table, th, td {
+      font-size: 0.85rem;
+    }
+
+    summary {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+</head>
+<body>
+  <h1>
+    SUBJECT TEACHERS
+  </h1>
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, onSnapshot, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, updateProfile, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+
+  
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+const schoolId= "capital";
+    
+  let academics = JSON.parse(localStorage.getItem("academics"));
+  let sections = academics.sections;
+  let teachers = academics.teachers;
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+  
+  Object
+  .values(sections)
+  .forEach(section=>{
+    let sectTeachers = section.teachers.sort((a, b)=>teachers[a].name.localeCompare(teachers[b].name));
+     
+    sectTeachers.forEach(tI=>{
+      let teacher = teachers[tI];
+      let details = document.createElement("details");
+    let summary = document.createElement("summary");
+   
+      summary.innerHTML = teachers[tI].name;
+      let table = document.createElement("table");
+      details.append(summary, table);
+      document.body.append(details);
+
+      let classes = [];
+      let subjs = [];
+     Object.keys(teacher.load)
+      .forEach(subj=>{
+        if (teacher.load[subj].length){
+          subjs.push(subj);
+          classes = classes.concat(teacher.load[subj]);
+          
+        }
+      })
+      
+      
+       Object.keys(teacher.load)
+    .forEach(subj=>{
+      teacher.load[subj]
+      .forEach(cls=>{
+      let cK = key(cls);
+      
+     
+      getDoc(doc(db, schoolId, cK))
+      .then(classDoc=>{
+        if (classDoc.exists()){
+          let classData = classDoc.data();
+          let timetable = JSON.parse(classData.timetable);
+          timetable.forEach((periods, day)=>{
+            periods.forEach((period, p)=>{
+              if (period.subject == subj){
+                let row = table.insertRow();
+                console.log(subj)
+               row.innerHTML = `
+                <th>${cls}</th>
+                <td>${subj}</td>
+                <td>
+                ${days[day]}<br>
+                ${period.from} - ${period.to}
+                </td>
+                `;
+                
+              }
+            })
+            //console.log(cls, JSON.stringify(periods), day);      
+          })//end of for each period
+          }// end rof if class Doc exists
+      }) //end of after getting class doc
+      });// end of for each subject
+      }) //end of for each class
+    }) //end of for each section teacher id
+  })//end of each section
+    
+  
+  function getTimetable(load, section){
+    for (const subj in load){
+      
+    }
+  }
+  
+  
+      function key(token) {
+      return token.replaceAll(" ", "").replaceAll("/", "").replaceAll(",", "");
+    }
+  
+  </script>
+</body>
+</html>
