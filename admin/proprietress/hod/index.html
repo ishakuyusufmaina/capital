@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Head Master</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f6f9;
+    color: #333;
+    //padding: 20px;
+  }
+  main {
+    padding: 20px;
+  }
+
+  header {
+  //  display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #3f51b5;
+    color: #fff;
+    padding: 15px 20px;
+    //border-radius: 10px;
+    margin-bottom: 30px;
+  
+    position: sticky;
+    top:0;
+    z-index: 99;
+    min-height: 80px;
+    line-height: 24px;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    color: #3f51b5;
+  }
+
+  #code {
+    font-weight: bold;
+    font-size: 1.3rem;
+    color: #d32f2f;
+  }
+
+  button {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #388e3c;
+  }
+
+  a {
+    text-decoration: none;
+    color: #1a237e;
+    font-weight: 500;
+    display: block;
+    margin-top: 10px;
+  }
+
+  .card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.2s;
+    
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+  }
+
+  h2 {
+    color: #303f9f;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+  }
+  
+  
+  p {
+    text-align: right;
+    color: teal;
+  }
+  hr {
+    border: 0;
+    height: 4px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(200, 200, 200, 0.75), rgba(0, 0, 0, 0));
+}
+ 
+
+ 
+
+  #signout:hover {
+    background-color: #d32f2f;
+    transform: scale(1.05);
+  }
+
+  #signout:active, #switch:active {
+    transform:scale(0.98);
+  }
+  
+
+
+   
+    .menu-container.show {
+        transition: transform 0.2s ease-out;
+        transform: scaleX(100%);
+        
+    }
+
+#menu {
+        position: absolute;
+        right:0;
+        top: 0;
+        background: none; // inherit;
+        color: inherit;
+        border: none;
+        font-size: 40px;
+    font-weight: bold;
+  z-index: 101;
+    }
+  
+  
+  
+  .menu-container {
+    max-height: 100vh;
+        position: absolute;
+        right: 0;
+        z-index: 110;
+        transform: scaleX(0);
+        text-align: left;
+        top: 0:
+    overflow: auto;
+  background-color: inherit; // #1e1e1e;
+  color: #ffffff;
+  padding: 20px;
+  width: 220px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: auto;
+  }
+
+.menu-container button#close {
+  background: transparent;
+  color: #ffffff;
+  border: none;
+  font-size: 18px;
+  float: right;
+  cursor: pointer;
+}
+
+.menu-container hr {
+
+  margin: 10px 0;
+  border: 0;
+  height: 4px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(200, 200, 200, 0.75), rgba(0, 0, 0, 0));
+
+}
+
+.menu-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-container li {
+  overflow: auto;
+  transition: background 0.3s, transform 0.2s;
+  margin: 12px 0;
+  
+}
+
+.menu-container a {
+  color: #80cbc4;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.menu-container a:hover {
+  color: #4db6ac;
+}
+
+#signout, #switch {
+  color: white;
+    border: none;
+    padding: 14px 20px;
+    font-size: 16px;
+    top:0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+
+  cursor: pointer;
+  padding: 10px 20px;
+    background-color: #4caf50;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s ease;
+
+}
+  
+  #signout1 {
+    background: none;
+    border: 0.5px solid white;
+    border-radius: 4px;
+    border-bottom: none;
+  }
+  
+  
+  /* Dark theme */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #f0f0f0;
+  }
+}
+  
+ #fms {
+  list-style: decimal inside;
+  padding: 0;
+  margin: 0;
+  max-width: 400px;
+  font-family: sans-serif;
+}
+
+#fms li {
+  background-color: #f0f0f0;
+  margin: 10px 0;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+#fms li:hover {
+  background-color: #dbeafe; /* light blue */
+  color: #1d4ed8; /* deeper blue text */
+}
+
+#fms li:active {
+  background-color: #93c5fd;
+}
+  
+  
+  .loading {
+  display: inline-block;
+  font-weight: bold;
+  font-family: sans-serif;
+  font-size: 1.2rem;
+  color: #1d4ed8; /* blue */
+  position: relative;
+  padding-left: 24px;
+}
+
+.loading::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #1d4ed8;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  transform: translateY(-50%);
+}
+
+@keyframes spin {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+
+</style>
+
+
+</head>
+<body>
+      
+  <header>
+    <hr>
+    <button id="signout1">MAIDUGURI CAPITAL SCHOOL</button>
+    <button id="menu">&#9776;</button>
+     <div class="menu-container">
+            <button id="close">X</button> Menu
+            <hr>
+            <ul>
+              <li></li>
+             <li id="switch">Switch <span>Account</span></li>
+              <li id="signout">Logout <span id="username"></span></li>
+              <li><a href="../../changePsw.html">Change password </a></li>
+            </ul>
+     </div>
+    <div id="sess">session/term not initialized</div>
+    <div id="date"></div>
+    <hr>
+  </header>
+  <main>
+  <h1 id="heading">HOD</h1>
+    
+    <div class="card-container">  
+    <div class="card auth">
+      Authorization code: <span id="code"></span>
+      <button id="generate">Generate new</button>
+      <button id="save" style="display:none">Save</button>
+      
+    </div>      
+      
+      <div class="card">
+      <h2>Teaching History</h2>
+      <button id="plh" style="display:none">View Periodic Lesson History</button>
+    </div>
+      
+          
+   <div class="card">
+      <h2><span class="pupil">Pupils</span> Management</h2>
+      <a href="students.html">Manage <span class="pupil">Pupils</span></a>
+    </div>
+
+    <div class="card">
+      <h2><span class="pupil">Pupils</span> List</h2>
+      <a href="studentlist.html">Update <span class="pupil">Pupils</span> List</a>
+    </div>
+      
+      <div class="card">
+      <h2><span class="pupil">Pupils</span> Summary Statistics</h2>
+      <a href="stat/pupils.html">View Realtime Class-based Summary Statistic of <span class="pupil">Pupils</span></a>
+    </div>  
+          
+      <!--div class="card">
+      <h2>Teachers</h2>
+      <a href="teachers.html">View teachers' account</a>
+    </div-->  
+      
+      <div class="card">
+      <h2>Academic Performance</h2>
+      <a href="rc.html">View Progressive Report Cards</a>
+    </div>  
+      
+       <div class="card">
+         <h2>Form Masters</h2>
+         <ol id="fms">
+           <span class="loading">Loading...</span>
+         </ol>         
+       </div>
+      <hr>
+    
+  
+</main>
+   <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, updateProfile, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+
+  
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+const schoolId= "capital";
+  const terms = ["first term", "second term", "third term"];
+  
+   var sessions = [];
+  
+
+  let sessionsRef = doc(db, schoolId, "sessions");
+    let sessionsDoc = await getDoc(sessionsRef);
+    if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sessions= sessions.sort((a, b)=>b.no - a.no);
+    sess.innerHTML = sessions[0].year + ", " +terms[sessions[0].term]
+        }
+  
+  let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
+    
+
+
+
+
+  let d = new Date();
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day = d.getDate();
+  let sec = d.getSeconds()+1;
+  let min = d.getMinutes()+1;
+  let h = d.getHours()+1;
+  //time.innerHTML = `${h} : {}{
+  date.innerHTML = `${day}/${month}/${year}`;
+
+  function randint(low, high) {
+    let num = Math.random();
+    num = num*high + 1;
+    num = Math.floor(num);
+    if(num < low)
+    num =  randint(low, high);
+    return num
+}
+  
+  function generate4N(){
+    let n1 = randint(0,9);
+    let n2 = randint(0,9);
+    let n3 = randint(0,9);
+    let n4 = randint(0,9);
+    return `${n1}${n2}${n3}${n4}`;
+  }
+    generate.onclick = e=>{
+      code.innerHTML = generate4N();
+      save.style = "display: inline";
+      save.textContent = "save";
+    }
+  save.onclick = async e=>{
+    let user = auth.currentUser;
+    if (!user) return;
+    let email = user.email;
+    let name = user.displayName;
+    if (!name) {
+     name = window.prompt("It seems there is no name on your account, update your name: ");
+     if (!name) return;
+      await updateProfile(user, {
+        displayName: name
+      })
+    }
+    let c = code.textContent;
+    let authRef = doc(db, schoolId, "auth");
+    let data = {};
+    data[email] = {
+      authorizer: name,
+      code: c
+    }
+    await setDoc(authRef, data, {merge: true});
+    save.textContent = "saved!"
+    setTimeout(e=>save.style = "display: none", 1000);
+    
+  }
+  signout.onclick = e=>{
+   // window.location.href = "../signin.html";
+    signOut(auth);
+  }
+  
+  
+  document.getElementById("close").onclick = _ => document.querySelector(".menu-container").classList.remove("show");
+  menu.onclick = _ => document.querySelector(".menu-container").classList.add("show");
+
+  document.body.onclick = e =>{
+    
+    if (e.target != menu )
+    document.querySelector(".menu-container").classList.remove("show");
+
+  }
+  
+  onAuthStateChanged(auth, async (user)=>{
+    if (!user){
+      window.location.href = "../../signin.html";
+      return;
+    }
+    signout1.onclick = e=>{
+      //signOut(auth);
+    }
+    document.getElementById("switch").onclick = e=> {
+      window.location.href = "../../teacher/index.html";
+    }
+    let name = user.displayName;
+    if (!name){
+      name = window.prompt("It seems there is no name on your account, update your name: ");
+     if (name)
+     updateProfile(user, {displayName: name})
+    }
+    username.textContent = name;
+    let authRef = doc(db, schoolId, "auth");
+    let authDoc = await getDoc(authRef);
+    
+    let authData = authDoc.exists()? authDoc.data()[user.email] : {}
+    let c = authData? authData.code : "no code";
+    code.textContent = c;
+    
+    let id = user.email.replace(/@.*/, "");
+    let teachers = teachersDoc.data();
+    let teacher = teachers[id];
+ //   alert(teacher.adminFunctions);
+    teacher.role ??={};
+    teacher.role.hod ??={};
+    let classes = teacher.role.hod.classes ?? [];
+    if (classes[0][0].toLowerCase()=="s" || classes[0][0].toLowerCase()=="j"){
+      heading.innerHTML = "Year Group Leader";
+      Array.from(document
+      .querySelectorAll(".pupil"))
+      .forEach(label=>label.textContent = "Students");
+    }
+    fms.innerHTML = "";
+    let teacherList = Object.values(teachers);
+    let fmList = teacherList.filter(teacher=>{
+      let cond = true;
+      let c = teacher.role.fm ?? [];
+      c = c[c.length - 1];
+      return classes.includes(c);
+    });
+    fmList.sort((a, b)=>a.role.fm[a.role.fm.length-1].localeCompare(b.role.fm[b.role.fm.length-1]));
+    classes.sort((a, b)=>a.localeCompare(b));
+
+    console.log(fmList);
+    classes.forEach((cls, i)=>{
+      let li = document.createElement("li");
+      let fmI = fmList.indexOf(cls);
+      let fm =  fmList[i].name;
+      li.innerHTML = cls +" - "+fmList[i].name;
+      fms.append(li);
+      li.onclick = e=>{
+        localStorage.setItem("class", cls);
+        window.location.href = "fm/index.html";
+
+      }
+    })
+    plh.style.display = "block";
+    plh.onclick = e=>{
+        localStorage.setItem("classes", JSON.stringify(classes));
+        window.location.href = "../headmaster/teachAndLog.html";
+      }
+    
+  })
+  </script>
+</body>
+</html>

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Position</title>
+  
+  <style>
+ table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  margin: auto;
+}
+ 
+ th,
+td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.vertical-header-table .thead th.subject {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  background: #004080;
+  color: white;
+  height: 150px;
+  vertical-align: center;
+  text-transform: uppercase;
+  text-align: left;
+  border: 1px solid grey;
+}
+  #gtotal, #position {
+    writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  
+  height: 150px;
+  vertical-align: center;
+    text-transform: uppercase;
+  text-align: left;
+  }
+
+ tbody tr:nth-child(even) {
+//  background-color: #f9f9f9;
+}
+
+ tbody tr:hover {
+  background-color: #eef;
+   color: black;
+}
+
+  body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+  select {
+    background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+  }
+  
+  
+      button {
+      padding: 6px 12px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td{
+      padding: 10px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+ h1, .save-container {
+ //   display: inline-block;
+text-align: center;
+    
+  }
+ 
+ 
+   .select-container, .table-container {
+    text-align: center;
+    margin: auto;
+    padding: 10px;
+    //border: 1px solid white;
+    width: 100%;
+    overflow-x: auto;
+  }
+ 
+ 
+ select {
+    background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      border: none;
+    font-size: 24px;
+    text-align: center;
+    width: 100%;
+    display: inline-block;
+  }
+    
+  hr {
+    border: 0;
+    height: 4px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(200, 200, 200, 0.75), rgba(0, 0, 0, 0));
+}
+  </style>
+</head>
+<body>
+  <h1>
+   Result and Position
+  </h1>
+   <div class="select-container">
+   <select id="sessionSelect">
+    <option> -select session- </option>
+  </select>
+  <select id="classSelect">
+    <option value=""> -select class- </option>
+    
+  </select>
+  
+  </div>
+ <div class="table-container">
+  <table id="table" class="vertical-header-table">
+  </table>
+ </div>
+ 
+ <hr>
+ 
+ <table id="summary">
+
+ </table>
+  
+   <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+           const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+
+  const schoolId = "capital";
+  class StdList extends Array {
+  constructor() {
+    super();
+  }
+  push(elm) {
+    if (this.length == 0) {
+      elm.position = 1;
+    } else {
+      this.position(elm);
+    }
+    super.unshift(elm);
+    super.sort((a, b) => {
+      return b.score - a.score;
+    });
+  }
+
+   
+  position(elm) {
+    for (let i = 0; i < this.length; i++) {
+      if (Number(this[i].score) == Number(elm.score)) {
+        elm.position = this[i].position;
+        return;
+      } else if (Number(this[i].score) < Number(elm.score)) {
+        elm.position = this[i].position;
+        for (let j = i; j < this.length; j++) {
+          this[j].position++;
+        }
+        return;
+      } else {
+        elm.position = this[this.length - 1].position + 1;
+      }
+    }
+  }
+}
+  let sectionRef = doc(db, schoolId, "section");
+  let sectionDoc = await getDoc(sectionRef);
+
+
+  let sections;
+   if (sectionDoc.exists()){
+   sections = sectionDoc.data();
+     
+   let keys = Object.keys(sections);
+   
+   keys.forEach(key=>{
+       let optG = document.createElement("optgroup");
+       optG.label = key;
+       let classes = sections[key].classes;
+       classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
+       classSelect.append(optG);
+   });
+
+ }
+  
+   var students;
+    const terms = ["first term", "second term", "third term"];
+
+  let sessionsRef = doc(db, schoolId, "sessions");
+  let sessionsDoc = await getDoc(sessionsRef);
+if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sessions= sessions.sort((a, b)=>b.no - a.no);
+    sessions.forEach((session, i)=>{
+        let year = session.year;
+      let opt = document.createElement("option");
+      opt.innerHTML = year + ", " + terms[session.term];
+      sessionSelect.appendChild(opt);
+      opt.setAttribute("data-year", year);
+      opt.setAttribute("data-term", session.term);
+        if (i==0)
+        opt.selected = true;
+    });
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+  
+  
+
+  
+  async function loadStudents() {
+   
+    let clas = key(classSelect.value);
+    let ssi = sessionSelect.selectedIndex;
+    let year = sessionSelect.options[ssi].getAttribute("data-year");
+    let session = key(sessionSelect.value);
+    if (!(clas && session)) return null;
+
+    let stdsRef = doc(db, schoolId, session, clas, "students");
+    let stdsDoc = await getDoc(stdsRef);
+    if (stdsDoc.exists()){
+      students = Object.values(stdsDoc.data());
+    
+      //return students
+      
+    } else
+    students = null;
+    
+    
+    
+      function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+    }
+  
+    
+  }
+  
+ 
+  classSelect.onchange= async e=>{
+    await loadPositions();
+   }
+  sessionSelect.onchange =async  e=>{
+    await loadPositions();
+  }
+  
+  async function loadPositions(){
+  table.innerHTML = `  <tr id="th" class="thead">
+      <th colspan="2">Student</th>
+      <th id="gtotal">Grand total</th>
+      <th id="position">Position</th>
+    </tr>
+    <tbody id="table-body"></tbody>`;
+   summary.innerHTML = `
+     <caption>SUMMARY</caption>
+  <tr>
+   <th>Student</th>
+   <th>Total score</th>
+   <th>Position</th>
+  </tr>
+  <tbody></tbody>`;
+   
+   // document.getElementById("table-body").innerHTML = "";
+      await loadStudents();
+    if (!students) return;
+    let ssi = sessionSelect.selectedIndex;
+    let termIndex = sessionSelect.options[ssi].getAttribute("data-term");
+ // alert(termIndex);
+    let stdList = new StdList();
+    let subHeads = new Set();
+   
+    students.forEach(student=>{
+       
+      student.score=0;
+      let subjects = student.subjects;
+      
+      for (const subj in subjects) {
+        
+        console.log(JSON.stringify(subjects[subj]))
+        try {
+         let t1 = Number(subjects[subj][termIndex].test1 ?? 0);
+         let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
+         let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
+
+          student.score += t1+t2+t3 + Number(subjects[subj][termIndex].exam);
+          subHeads.add(subjects[subj][termIndex].name);
+          
+        } catch(e) {
+          console.log(subj + "is  not recorded for", student.name);
+        }
+      }
+      //stdList.push(student);
+    }) 
+   
+let hElm = document.createElement("th");
+      // hElm.innerHTML = "Student";
+      //th.append(hElm); 
+     //th.innerHTML = "<th></th>"    
+    subHeads.forEach(h => {
+      let hElm = document.createElement("th");
+       hElm.innerHTML = h;
+      th.insertBefore(hElm, gtotal);
+      hElm.classList.add("subject");
+    })
+   let sumBody = summary.querySelector("tbody");
+   //sumBody.innerHTML = "";
+   assignPositions(students);
+    students.forEach(std=>{
+         sumBody.innerHTML += `
+     <tr><td>${std.name}</td><td>${std.score}</td><td>${std.position}</td></tr>
+     `;
+     
+      document.getElementById("table-body").innerHTML +=`
+      <tr>
+        <th rowspan="4">${std.name}</th>
+      </tr>
+      <tr>
+        <th>Test</th>
+        ${
+          function (){
+            let subjects = std.subjects;
+             let tests="";
+             for (let subj in subjects){
+                let t1 = Number(subjects[subj][termIndex].test1 ?? 0);
+                let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
+                let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
+                tests += "<td>"+(t1+t2 +t3)+"</td>";
+             }
+          return tests + "<td> - </td> <td> - </td>";
+             
+          }()
+        }
+      </tr>
+      <tr>
+        <th>Exam</th>
+      ${
+          function (){
+            let subjects = std.subjects;
+             let exams="";
+             for (let subj in subjects){
+                exams += "<td>"+subjects[subj][termIndex].exam+"</td>";
+             }
+          return exams + "<td> - </td> <td> - </td>";
+             
+          }()
+        }
+      </tr>
+      <tr>
+        <th>Total</th>
+      ${
+          function (){
+            let subjects = std.subjects;
+             let totals="";
+             /*let test = subjects[subj][termIndex].test
+             let exam = subjects[subj][termIndex].exam*/
+             for (let subj in subjects){
+                let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
+                let test2 = Number(subjects[subj][termIndex].test2 ?? 0);
+                let test3 = Number(subjects[subj][termIndex].test3 ?? 0);
+                let exam = subjects[subj][termIndex].exam
+                let total = test1 + test2 + test3 + Number(exam)
+                 totals += "<td>" + total + "</td>";
+             }
+          return totals + "<td>"+ std.score + "</td>" + "<td>"+ std.position + "</td>";
+             
+          }()
+        }
+      </tr>`
+     // addRow(std);
+    });
+
+  }
+  
+  function addData(row, data){
+    let cell = document.createElement("td");
+    cell.innerHTML = data;
+    row.appendChild(cell);
+  }
+  
+  function addRow(data){
+    let container = document.getElementById("table-body");
+    let sn = container.children.length;
+      const row = document.createElement('tr');
+    row.classList.add("record");
+      row.innerHTML = `
+      <!--td>
+      ${sn+1}
+      </td-->
+       <th rowspan="3">
+         ${data.name}
+      </th> 
+      <th>
+        Test
+      </th>    
+       <td>
+        ${data.position}  
+      </td>       
+      `;
+
+      container.appendChild(row);
+
+  }
+  
+  
+  
+  function assignPositions(students){
+    students.sort((a, b)=>b.score -a.score);
+  students.forEach((student, i)=>{
+    student.position = i+1
+    if (students[i+1])
+    student.next = students[i+1];
+    if (students[i-1])
+    student.prev = students[i-1];
+    if ((!!student.prev) && (student.score == student.prev.score))
+    student.position = student.prev.position;
+    console.log(student.position);
+  });
+   
+    
+  }
+  </script>
+</body>
+</html>
