@@ -255,10 +255,7 @@ footer small {
 
     if (role=="capital"){
       console.log("cap");
-      let dRef = doc(db, schoolId, "directors");
-  let dDoc = await getDoc(dRef);
-   let dirs = dDoc.exists()? dDoc.data() : {};
-      
+        
         signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           if (username=="mcs001"){
@@ -280,6 +277,10 @@ footer small {
          // onLoginSuccess(userCredential.user, role);
         })
         .catch( async (error) => {
+          let dRef = doc(db, schoolId, "directors");
+  let dDoc = await getDoc(dRef);
+   let dirs = dDoc.exists()? dDoc.data() : {};
+    
           let user = dirs[schoolGeneratedUsername];
           console.log(user.psw) 
           //return;
