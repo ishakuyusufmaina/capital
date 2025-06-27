@@ -257,7 +257,12 @@ footer small {
       console.log("cap");
         
         signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
+        .then( async (userCredential) => {
+          let dRef = doc(db, schoolId, "directors");
+  let dDoc = await getDoc(dRef);
+   let dirs = dDoc.exists()? dDoc.data() : {};
+          let username = dirs[schoolGeneratedUsername].username;
+          
           if (username=="mcs001"){
                 window.location.href = "admin/proprietress/index.html";
                  console.log("proprietress");
