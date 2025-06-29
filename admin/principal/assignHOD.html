@@ -45,12 +45,12 @@
   </style>
 </head>
 <body>
-  <h1>Year Group Leader Assignment</h1>
+  <h1>Year Group Leaders Assignment</h1>
   <table id="students-table">
     <thead>
       <tr>
-        <th>Class</th>
-        <th>Year Group Leader</th>
+        <th>Name</th>
+        <th>Classes</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -84,85 +84,92 @@
   let sectionRef = doc(db, schoolId, "section");
   let sectionDoc = await getDoc(sectionRef);
  
-  var combSectsTeachers = [];
-    let user = await new Promise(async resolve=> onAuthStateChanged(auth, user=> resolve(user)));
-  let id = user.email.replace(/@.*/, "");
-  let teachers = teachersDoc.exists()? teachersDoc.data() : {};
-  const teacher = teachers[id];
-
-
-  let hosSections = teacher.role.hos.sections; //JSON.parse(localStorage.getItem("sections"));
-  var classes = [];
+  var classOptions = [];
   if (sectionDoc.exists()){
   let sections = sectionDoc.data();
-    hosSections.forEach( hosSect=> {
-      if (!sections[hosSect]) return;
-      let section = sections[hosSect];
-      section.teachers ??=[];
-      combSectsTeachers = combSectsTeachers.concat(section.teachers);
-      classes = classes.concat(section.classes);
-    })
+    for (const key in sections){
+    let section = sections[key];
+    classOptions = classOptions.concat(section.classes);
+    }
   }
   
     //const classOptions = ['Math', 'Science', 'History', 'Art', 'PE'];
-   teachers = teachersDoc.exists()? teachersDoc.data() : {};
-   
+  let teachers = teachersDoc.exists()? teachersDoc.data() : {};
+   let modelData = Object.values(teachers).sort((a, b)=>a.name.localeCompare(b.name));
+
     function presentModel(model) {
-      
+      modelData = model;
       renderTable();
     }
 
-  presentModel();
+  presentModel(modelData);
     function renderTable() {
       const tbody = document.querySelector('#students-table tbody');
       tbody.innerHTML = '';
 
-      classes.forEach((cls, index) => {
+      modelData.forEach((teacher, index) => {
         const tr = document.createElement('tr');
+      //  console.log("processing "+teacher.name);
+        if (!teacher.role) return;
+       // console.log("role "+teacher.name);
+        if (!teacher.role.hod) return;
+        //console.log("hod "+teacher.name);
+        if (!teacher.role.hod.classes) return;
+        //console.log("hod with a class "+teacher.name);
+        if (!teacher.role.hod.classes.length) return;   
+       // console.log("hod with classes >=1 "+teacher.name);  
+        let classes = teacher.role.hod.classes;        
+        let cInit;
+        try {
+          cInit=classes[0][0].toLowerCase();     
+        } catch(e){
+          console.error(e.message);
+          return;
+        }
+        console.log("hod with classes ", classes, teacher.name);   
+        console.log(cInit);        
+        if (!(cInit=="s" || cInit=="j")) return;
+       console.log("a sec sch hod ", cInit, teacher.name);        
+
+        /* teacher.role ??={};
+        teacher.role.hod ??={};
+        teacher.role.hod.classes ??=[];*/
         
         const nameTd = document.createElement('td');
-        nameTd.textContent = cls;
+        nameTd.textContent = teacher.name;
 
         const classTd = document.createElement('td');
+        const classList = document.createElement('div');
+        const selectContainer = document.createElement('div');
+        classTd.append(classList, selectContainer);
+        
         const select = document.createElement('select');
-       select.setAttribute("data-class", cls);
-        // select.multiple = true;
-console.log(combSectsTeachers);
-        Object.keys(teachers).sort((a,b)=>teachers[a].name.localeCompare(teachers[b].name)).forEach(tId => {
-          if (!combSectsTeachers.includes(tId)) return;
-          let teacher = teachers[tId];
-          teacher.role ??={};
-          teacher.role.ygl ??={};
-          teacher.role.ygl.classes ??=[];
+        select.multiple = true;
+        selectContainer.append(select);
+ 
+        classOptions.forEach(cls => {
           const option = document.createElement('option');
-          option.value = tId;
-          option.textContent = teacher.name;
-          if (teacher.role.ygl.classes.includes(cls)) {
+          option.value = cls;
+          option.textContent = cls;
+          if (teacher.role.hod.classes.includes(cls)) {
             option.selected = true;
-            select.setAttribute("data-current-teacher", tId);
+            classList.innerHTML += " •"+ cls.toUpperCase();
           }
           select.appendChild(option);
+        });
+
+        select.addEventListener('change', (e) => {
+          classList.innerHTML = "";
+          const selected = Array.from(select.selectedOptions).map(opt => {
+            classList.innerHTML += " •"+ opt.value.toUpperCase();
+            return opt.value
+          });
+          teacher.role.hod.classes = selected;
+          
           
         });
-        
-        select.addEventListener('change', (e) => {
-          let prevTId = select.getAttribute("data-current-teacher");
-          let cls = select.getAttribute("data-class");
-          if (prevTId){
-          //  let cls = select.getAttribute("data-class");
-            let classes = teachers[prevTId].role.ygl.classs
-            let index = classes.indexOf(cls);
-            classes.splice(index, 1);
-          }
-          let tId = select.value;
-          teachers[tId].role.ygl.classes.push(cls);
-          teachers[tId].role.ygl.classes = Array.from(new Set(teachers[tId].role.ygl.classes));
-          console.log(teachers[tId].role.ygl.classes)
-        });
 
-        
-
-        classTd.appendChild(select);
+        //classTd.appendChild(select);
 
         tr.appendChild(nameTd);
         tr.appendChild(classTd);
@@ -171,8 +178,14 @@ console.log(combSectsTeachers);
     }
   
   save.onclick = async _ =>{
+    
+    if (!teachers) return;
+    if (!Object.values(teachers)) return;
+    if (!Object.values(teachers).length) return;
+    save.textContent = "Saving...";
     await setDoc(teachersRef, teachers);
     alert("saved!");
+    save.textContent = "Save";
   }
   </script>
 </body>
