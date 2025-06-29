@@ -138,11 +138,18 @@
       const tbody = document.querySelector('#students-table tbody');
       tbody.innerHTML = '';
      let classes = [];
-      Object.keys(sections).forEach(async (sectK, index) => {
+     let sects = JSON.parse(localStorage.getItem("section"));
+     Object
+     .keys(sects)
+     .forEach(key=>{
+       classes = classes.concat(sects[key].classes);
+
+     })
+   /*   Object.keys(sections).forEach(async (sectK, index) => {
         if (!sectKeys.includes(sectK)) return;
         let sectClasses = sections[sectK].classes;
         classes = classes.concat(sectClasses);
-      });
+      });*/
        // console.log(sectK);
         let sesK = key(session.year + terms[session.term]);
         let stdsRefs = classes.map(c => doc(db, schoolId, sesK, key(c), "students"));
