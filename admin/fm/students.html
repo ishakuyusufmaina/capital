@@ -207,10 +207,10 @@ let sectionDoc = await getDoc(sectionRef);
       </td>      
       `;
       container.appendChild(row);
-      let id = "std"+sn+1;
+      let id = "std"+result.sn;
       let nameIn = row.querySelector(".name");
       nameIn.oninput = e=>{
-        alert(id);
+        //alert(id);
           currentStudents[id].name = nameIn.textContent;
       }
       let genderIn = row.querySelector(".gender");
@@ -293,9 +293,10 @@ add.onclick = e=>{
     let stdsDoc = await getDoc(stdsRef);
     if (stdsDoc.exists()){
       currentStudents = stdsDoc.data();
-        Object.keys(currentStudents).sort((a,b)=>currentStudents[a].name.localeCompare(currentStudents[b].name)).forEach(id=>{
-   
+      //let lastSn = Object.keys(currentStudents).length;
+        Object.keys(currentStudents).sort((a,b)=>currentStudents[a].name.localeCompare(currentStudents[b].name)).forEach((id, i)=>{
           let student = currentStudents[id];
+          alert(id);
           addRow(student)
       });
       //students.forEach(student=>addRow(student));
