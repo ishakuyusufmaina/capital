@@ -207,7 +207,7 @@ let sectionDoc = await getDoc(sectionRef);
       </td>      
       `;
       container.appendChild(row);
-      let id = "std"+result.sn;
+      let id = "std"+sn+1;
       let nameIn = row.querySelector(".name");
       nameIn.oninput = e=>{
         alert(id);
