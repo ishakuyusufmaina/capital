@@ -210,6 +210,7 @@ let sectionDoc = await getDoc(sectionRef);
       let id = "std"+result.sn;
       let nameIn = row.querySelector(".name");
       nameIn.oninput = e=>{
+        alert(id);
           currentStudents[id].name = nameIn.textContent;
       }
       let genderIn = row.querySelector(".gender");
