@@ -296,7 +296,8 @@ add.onclick = e=>{
       //let lastSn = Object.keys(currentStudents).length;
         Object.keys(currentStudents).sort((a,b)=>currentStudents[a].name.localeCompare(currentStudents[b].name)).forEach((id, i)=>{
           let student = currentStudents[id];
-          alert(id);
+         // alert(id);
+          student.sn=i;
           addRow(student)
       });
       //students.forEach(student=>addRow(student));
