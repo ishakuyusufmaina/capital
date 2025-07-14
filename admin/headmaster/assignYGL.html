@@ -45,12 +45,12 @@
   </style>
 </head>
 <body>
-  <h1>HOD Assignment</h1>
+  <h1>HODs Assignment</h1>
   <table id="students-table">
     <thead>
       <tr>
-        <th>Class</th>
-        <th>HOD</th>
+        <th>Name</th>
+        <th>Classes</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -83,90 +83,56 @@
   let teachersDoc = await getDoc(teachersRef);
   let sectionRef = doc(db, schoolId, "section");
   let sectionDoc = await getDoc(sectionRef);
-   let user = await new Promise(async resolve=> onAuthStateChanged(auth, user=> resolve(user)));
-  let id = user.email.replace(/@.*/, "");
-  const teacher = teachersDoc.data()[id];
-
-  
-  var combSectsTeachers = [];
-  let hosSections = new Set(teacher.role.hos.sections);// JSON.parse(localStorage.getItem("sections"));
-  var classes = [];
+ 
+  var classOptions = [];
   if (sectionDoc.exists()){
   let sections = sectionDoc.data();
-    hosSections.forEach( hosSect=> {
-      if (!sections[hosSect]) return;
-      let section = sections[hosSect];
-      section.teachers ??=[];
-      combSectsTeachers = combSectsTeachers.concat(section.teachers);
-      classes = classes.concat(section.classes);
-    })
+    for (const key in sections){
+    let section = sections[key];
+    classOptions = classOptions.concat(section.classes);
+    }
   }
   
     //const classOptions = ['Math', 'Science', 'History', 'Art', 'PE'];
   let teachers = teachersDoc.exists()? teachersDoc.data() : {};
-   
+   let modelData = Object.values(teachers).sort((a, b)=>a.name.localeCompare(b.name));
+
     function presentModel(model) {
-      
+      modelData = model;
       renderTable();
     }
 
-  presentModel();
+  presentModel(modelData);
     function renderTable() {
       const tbody = document.querySelector('#students-table tbody');
       tbody.innerHTML = '';
 
-      classes.forEach((cls, index) => {
+      modelData.forEach((teacher, index) => {
         const tr = document.createElement('tr');
-        
+        teacher.role ??={};
+        teacher.role.hod ??={};
+        teacher.role.hod.classes ??=[];
         const nameTd = document.createElement('td');
-        nameTd.textContent = cls;
+        nameTd.textContent = teacher.name;
 
         const classTd = document.createElement('td');
         const select = document.createElement('select');
-       select.setAttribute("data-class", cls);
-        // select.multiple = true;
+        select.multiple = true;
 
-        Object.keys(teachers).sort((a,b)=>teachers[a].name.localeCompare(teachers[b].name)).forEach(tId => {
-          let teacher = teachers[tId];
-          /*
-           teacher.role ??={};
-          teacher.role.hod ??={};
-          teacher.role.hod.classes ??=[];
-          console.log(teacher.role.hod.classes);
-          */
-          if (!combSectsTeachers.includes(tId)) return;
-          //let teacher = teachers[tId];
-          teacher.role ??={};
-          teacher.role.hod ??={};
-          teacher.role.hod.classes ??=[];
-          console.log(teacher.role.hod.classes);
+        classOptions.forEach(cls => {
           const option = document.createElement('option');
-          option.value = tId;
-          option.textContent = teacher.name;
+          option.value = cls;
+          option.textContent = cls;
           if (teacher.role.hod.classes.includes(cls)) {
             option.selected = true;
-            select.setAttribute("data-current-teacher", tId);
           }
           select.appendChild(option);
-          
-        });
-        
-        select.addEventListener('change', (e) => {
-          let prevTId = select.getAttribute("data-current-teacher");
-          let cls = select.getAttribute("data-class");
-          if (prevTId){
-          //  let cls = select.getAttribute("data-class");
-            let classes = teachers[prevTId].role.ygl.classs
-            let index = classes.indexOf(cls);
-            classes.splice(index, 1);
-          }
-          let tId = select.value;
-          teachers[tId].role.ygl.classes.push(cls);
-          teachers[tId].role.ygl.classes = Array.from(new Set(teachers[tId].role.ygl.classes));
-          console.log(teachers[tId].role.ygl.classes)
         });
 
-        
+        select.addEventListener('change', (e) => {
+          const selected = Array.from(select.selectedOptions).map(opt => opt.value);
+          teacher.role.hod.classes = selected;
+        });
 
         classTd.appendChild(select);
 
