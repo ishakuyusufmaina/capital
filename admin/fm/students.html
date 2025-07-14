@@ -211,11 +211,11 @@ let sectionDoc = await getDoc(sectionRef);
       let nameIn = row.querySelector(".name");
       nameIn.oninput = e=>{
         //alert(id);
-          currentStudents[id].name = nameIn.textContent;
+        result.name = nameIn.textContent;
       }
       let genderIn = row.querySelector(".gender");
       genderIn.onchange = e=>{
-          currentStudents[id].gender = genderIn.value;
+          result.gender = genderIn.value;
       }
      
      if (result.gender) 
@@ -223,7 +223,7 @@ let sectionDoc = await getDoc(sectionRef);
       
       let relIn = row.querySelector(".religion");
       relIn.onchange = e=>{
-          currentStudents[id].religion = relIn.value;
+          result.religion = relIn.value;
       }
       if (result.religion) 
       row.querySelector(`select>option[value=${result.religion}]`).selected = true;
