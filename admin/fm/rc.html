@@ -207,6 +207,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       for (let i=0; i<sectSubjs.length; i++) {
         
           let subj = key(sectSubjs[i]);
+        console.log(subj);
+        if (!subjects[subj]) continue;
         
         let sN = subjects[subj][termIndex].name;
      //   console.log(sN);
