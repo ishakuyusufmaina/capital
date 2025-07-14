@@ -202,6 +202,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       //return;
       }
       let faith = stdReg == "Islam"? "Muslim" : "Christrian";
+    console.log("subjects:", sectSubjs)
+      
       for (let i=0; i<sectSubjs.length; i++) {
         
           let subj = sectSubjs[i];
