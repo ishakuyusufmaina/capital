@@ -202,9 +202,9 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       //return;
       }
       let faith = stdReg == "Islam"? "Muslim" : "Christrian";
-      for (const subj in subjects) {
+      for (let i=0; i<sectSubjs.length; i++) {
         
-          
+          let subj = sectSubjs[i];
         let sN = subjects[subj][termIndex].name;
      //   console.log(sN);
         if (srp[sN]) {
@@ -212,12 +212,12 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
        //   console.log(JSON.stringify(srp), "---", subj);
           if (!(srp[sN]==faith))
           delete subjects[subj]
-        }
+      
        // console.log(JSON.stringify(subjects[subj]))
-      if (!sectSubjs.includes(subj)) {
+     /* if (!sectSubjs.includes(subj)) {
           delete subjects[subj];
           
-        }
+        }*/
         try {
           let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
           let test2 = Number(subjects[subj][termIndex].test2 ?? 0);
