@@ -216,8 +216,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
        // console.log(JSON.stringify(subjects[subj]))
      /* if (!sectSubjs.includes(subj)) {
           delete subjects[subj];
-          
-        }*/
+          */
+        }
         try {
           let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
           let test2 = Number(subjects[subj][termIndex].test2 ?? 0);
