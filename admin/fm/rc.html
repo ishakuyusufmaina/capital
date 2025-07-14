@@ -121,7 +121,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
    let teacher = teachersDoc.data()[id];
   const sections = {};
   var srp;
-  
+  var sectSubjs=[];
   let classes = teacher.role.fm ?? [];
   let initials =  classes.map(cls => cls.toLowerCase()[0]);
    if (sectionDoc.exists()){
@@ -151,6 +151,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     if (!(clas && session)) return null;
     let sectK = classSelect.selectedOptions[0].parentElement.label;
     srp = sections[sectK].srp;
+    sectSubjs= sections[sectK].subjects;
     console.log(srp);
     let stdsRef = doc(db, schoolId, session, clas, "students");
     let stdsDoc = await getDoc(stdsRef);
@@ -203,6 +204,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       let faith = stdReg == "Islam"? "Muslim" : "Christrian";
       for (const subj in subjects) {
         
+          
         let sN = subjects[subj][termIndex].name;
      //   console.log(sN);
         if (srp[sN]) {
@@ -212,6 +214,10 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
           delete subjects[subj]
         }
        // console.log(JSON.stringify(subjects[subj]))
+      if (!sectSubjs.includes(subj)) {
+          delete subjects[subj];
+          
+        }
         try {
           let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
           let test2 = Number(subjects[subj][termIndex].test2 ?? 0);
