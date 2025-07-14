@@ -206,7 +206,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       
       for (let i=0; i<sectSubjs.length; i++) {
         
-          let subj = sectSubjs[i];
+          let subj = key(sectSubjs[i]);
+        
         let sN = subjects[subj][termIndex].name;
      //   console.log(sN);
         if (srp[sN]) {
@@ -360,7 +361,10 @@ container.append(hr, wrapper);
     alert();
     window.print();
   }*/
-  
+
+     function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+     }
   </script>
   
 <style>
