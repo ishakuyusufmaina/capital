@@ -254,6 +254,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
           <th>Remark</th>
         </tr>
       `;
+      let cls = classSelect.value.toLowerCase()[0];
       let subjects = std.subjects;
       let stdReg = std.religion;
       if (!stdReg) {
@@ -272,8 +273,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         let row =document.createElement("tr");
         row.innerHTML = `
         <td>${subjects[subj][termIndex].name}</td>
-        <td>${t1}</td>
-        <td>${t2}</td>
+        <td class="${cls}">${t1}</td>
+        <td class="${cls}">${t2}</td>
         <td>${subjects[subj][termIndex].exam}</td>
         <td>${t1 + t2 +t3 + Number(subjects[subj][termIndex].exam)}</td>
         <td>${grade(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
@@ -499,6 +500,10 @@ text-align: center;
     .logo {
       border-radius: 0%;
     }
+  }
+
+  .n, .c {
+    display: none;
   }
   </style>
 </body>
