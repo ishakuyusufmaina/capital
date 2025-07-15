@@ -228,6 +228,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     assignPositions(students);
     students.forEach(std=>{
      // console.log(std.religion);
+      let cls = classSelect.value.toLowerCase()[0];
+      
       let reportCard = document.createElement("table");
       reportCard.innerHTML = `
       <caption>
@@ -246,15 +248,15 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </caption>
          <tr>
           <th>Subject</th>
-          <th>1<sup>st</sup> CA</th>
-          <th>2<sup>nd</sup> CA</th>
+          <th class="${cls}">1<sup>st</sup> CA</th>
+          <th class="${cls}">2<sup>nd</sup> CA</th>
           <th>Exam</th>
           <th>Total</th>
           <th>Grade</th>
           <th>Remark</th>
         </tr>
       `;
-      let cls = classSelect.value.toLowerCase()[0];
+     
       let subjects = std.subjects;
       let stdReg = std.religion;
       if (!stdReg) {
