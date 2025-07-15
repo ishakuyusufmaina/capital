@@ -121,6 +121,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
    let hos = teachersDoc.data()[id];
   const sections = {};
   var srp;
+     var sectSubjs =[];
    if (sectionDoc.exists()){
    let sects = sectionDoc.data();
      
@@ -199,6 +200,9 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         
         let sN = subjects[subj][termIndex].name;
      //   console.log(sN);
+         if (!sectSubjs.includes(sN))
+         delete subjects[subj]
+        
         if (srp[sN]) {
        // console.log("sss");
        //   console.log(JSON.stringify(srp), "---", subj);
