@@ -121,6 +121,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
    let hodHolder = teachersDoc.data()[id];
   const sections = {};
   var srp;
+     var sectSubjs =[];
    if (sectionDoc.exists()){
    let sects = sectionDoc.data();
      
@@ -150,6 +151,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     if (!(clas && session)) return null;
     let sectK = classSelect.selectedOptions[0].parentElement.label;
     srp = sections[sectK].srp;
+    sectSubjs = sections[sectK].subjects;
     console.log(srp);
     let stdsRef = doc(db, schoolId, session, clas, "students");
     let stdsDoc = await getDoc(stdsRef);
@@ -203,6 +205,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       for (const subj in subjects) {
         
         let sN = subjects[subj][termIndex].name;
+        if (!sectSubjs.includes(sN))
+          delete subjects[subj]
      //   console.log(sN);
         if (srp[sN]) {
        // console.log("sss");
