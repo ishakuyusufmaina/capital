@@ -212,7 +212,7 @@ button.delete:hover {
   </style>
 </head>
 <body>
-  <a href="admin.html"><i class="fas fa-home"></i></a>
+  <a href="index.html"><i class="fas fa-home"></i></a>
 
   <h1>Teachers</h1>
   <div class="save-container" >
@@ -355,6 +355,8 @@ button.delete:hover {
       sect
       .teachers
       .forEach(tId=>{
+        if (!teachers[tId]) return;
+        //teacher not on school system
         subTeachers[tId] = teachers[tId];
       })
     })
