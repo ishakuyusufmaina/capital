@@ -152,7 +152,10 @@
   
   var students = {};
   let ses;
-  let cls = localStorage.getItem("class");;
+  let cls = localStorage.getItem("class");
+  if (cls.toLowerCase()[0] == "n")
+  window.location.href = "scoreSheetN.html"
+
   clas.textContent = cls;
   let subj = localStorage.getItem("subject");
   subject.textContent = subj;
