@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <title>Score Interpretation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    h1, h2 {
+      color: #2c3e50;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    input {
+      padding: 8px;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px 0 0;
+      background-color: #2ecc71;
+      border: none;
+      color: white;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #27ae60;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: none;
+      border-top: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    <abbr>SGGR</abbr> Mapping
+  </h1>
+  <select id="sectSelect">
+    <option  value="">- Section- </option>
+  </select>
+ 
+  <table id="table">
+    <tr id="head">      
+      <th>Score&lt;</th>
+      <th>Grade</th>
+      <th>Remark</th>      
+    </tr>
+    <tbody id="tbody"></tbody>
+  
+  </table>
+  <div>
+    <button id="add">New Maping</button>
+    <button id="save">Save</button>
+    <!--button id="save">Reset</button-->
+  </div>
+  <hr>
+  
+  <h2>Test</h2>
+  <table id="table2">
+    <tr>
+      <th>Score</th>
+      <th>Grade</th>
+      <th>Remark</th>
+    </tr>
+    <tr>
+      <td>
+        <input type="number" id="scoreIn">
+      </td>
+      <td id="gradeOut"></td>
+      <td id="remarkOut"></td>
+    </tr>
+  </table>
+  <button id="test">Map</button>
+  
+      <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, runTransaction, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+ const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  
+  const schoolId = "capital";
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+  
+  
+ 
+  
+  
+
+    let teachersRef = doc(db, schoolId, "teachers");
+  let teachersDoc = await getDoc(teachersRef);
+  let sectionRef = doc(db, schoolId, "section");
+  let sectionDoc = await getDoc(sectionRef);
+ let sections = sectionDoc.exists()? sectionDoc.data() : {};
+  var classOptions = [];
+  var interpretations = [];
+     
+  let user = await new Promise(async resolve=> onAuthStateChanged(auth, user=> resolve(user)));
+  let id = user.email.replace(/@.*/, "");
+  let teachers = teachersDoc.exists()? teachersDoc.data() : {};
+  const teacher = teachers[id];
+  let sectKeys = teacher.role.hos.sections; //JSON.parse(localStorage.getItem("sections"));
+
+  sectKeys.forEach(k=>{
+    let opt = document.createElement("option");
+    opt.textContent = k;
+    opt.value = k;
+    sectSelect.appendChild(opt);
+  });
+
+  sectSelect.onchange = e=>{
+    if (!e.target.value) return;
+    update();
+  }
+  
+  function update(){
+    let sect = sectSelect.value;
+    sections[sect].scoreInterpretations ??= [];
+    interpretations = sections[sect].scoreInterpretations;
+    clearInterpTable();
+    interpretations.forEach(interp=>addInterp(interp));    
+  }
+  
+  head.ondblclick = e=>{
+    let sect = sectSelect.value;
+    if (!sect) return;
+    sections[sect].scoreInterpretations = [];
+    update();
+
+  }
+  
+  function clearInterpTable(){
+    tbody.innerHTML = "";
+  }
+  function addInterp(interp){
+    let row = tbody.insertRow();
+    ["range", "grade", "remark"].forEach(k=>{
+      let cell = row.insertCell();
+      cell.textContent = interp[k] || '';
+      cell.setAttribute("contenteditable", "plaintext-only");
+      cell.oninput = _ =>{
+        interp[k] = cell.textContent;
+      }
+    })    
+  }
+  
+  function addNew(model){
+    model.push({});
+    addInterp(model[model.length-1]);
+  }
+  
+  
+  add.onclick = _=> addNew(interpretations);
+  
+  function interpret(score, interpsModel){
+    for (const interp of interpsModel){
+      if (Number(score) < Number(interp.range))
+        return {grade:interp.grade, remark:interp.remark}
+    }
+    
+    let lastInterp = interpsModel[interpsModel.length-1];
+    return {grade:lastInterp?.grade || '', remark:lastInterp?.remark || ''};
+  }
+  
+  test.onclick = _=>{
+    let score = Number(scoreIn.value);
+    let interp = interpret(score, interpretations);
+    gradeOut.textContent = interp.grade;
+    remarkOut.textContent = interp.remark;
+  }
+  save.onclick = _=>{
+    //await setDoc(sectionRef, sections, {merge: true});
+    runTransaction(db, async transaction=>{
+      let sectsDoc = await transaction.get(sectionRef);
+      let sects = sectsDoc.exists()? sectsDoc.data() : {};
+      let sectKey = sectSelect.value;
+      if(sectKey){
+        sects[sectKey].scoreInterpretations = interpretations;
+        transaction.set(sectionRef, sects);
+      }
+    })
+    .then(_ => alert("saved!"))
+    .catch(e=> alert("Failed! "+e.message));
+  }
+  </script>
+</body>
+</html>
