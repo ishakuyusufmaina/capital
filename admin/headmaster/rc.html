@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <script src="rc/rc.js"></script>
   <title>Position</title>
 </head>
 <body>
@@ -121,6 +121,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
    let hos = teachersDoc.data()[id];
   const sections = {};
   var srp;
+  var scoreInterpretations;
      var sectSubjs =[];
    if (sectionDoc.exists()){
    let sects = sectionDoc.data();
@@ -146,6 +147,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     if (!(clas && session)) return null;
     let sectK = classSelect.selectedOptions[0].parentElement.label;
     srp = sections[sectK].srp;
+    scoreInterpretations = sections[sectK].scoreInterpretations;
+    console.log(scoreInterpretations);
     sectSubjs = sections[sectK].subjects;
     console.log(srp);
     let stdsRef = doc(db, schoolId, session, clas, "students");
@@ -270,7 +273,9 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       let t1= Number(subjects[subj][termIndex].test1 ?? 0);
       let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
         let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
-
+        let score = t1 + t2 +t3 + Number(subjects[subj][termIndex].exam);
+        let interp = interpret(score, scoreInterpretations);
+       // console.log(interp);
  //     subjects.forEach(subj=>{
         let row =document.createElement("tr");
         row.innerHTML = `
@@ -278,9 +283,9 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         <td class="${cls}">${t1}</td>
         <td class="${cls}">${t2}</td>
         <td>${subjects[subj][termIndex].exam}</td>
-        <td>${t1 + t2 +t3 + Number(subjects[subj][termIndex].exam)}</td>
-        <td>${grade(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
-        <td>${remark(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
+        <td>${score /*t1 + t2 +t3 + Number(subjects[subj][termIndex].exam)*/}</td>
+        <td>${interp.grade? interp.grade : grade(0, score) /*grade(t1+t2+t3, Number(subjects[subj][termIndex].exam))*/}</td>
+        <td>${interp.remark? interp.remark : remark(0,score) /*remark(t1+t2+t3, Number(subjects[subj][termIndex].exam))*/}</td>
         
         `;
         reportCard.appendChild(row);
