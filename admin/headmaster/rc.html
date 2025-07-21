@@ -9,7 +9,8 @@
 </head>
 <body>
   <h1 class="no-print">
-    Report Cards
+    Report Cards <br>
+    <a href="#print">Down &darr;</a>
   </h1>
      <div class="select-container no-print">
    <select id="sessionSelect">
@@ -236,8 +237,31 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       let reportCard = document.createElement("table");
       reportCard.innerHTML = `
       <caption>
+      <header>
       <h2>${schoolName}</h2>
+      <address>
+      PMB 1017, GOMBOLE ROAD, G.R.A, MAIDUGURI, BORNO STATE
+      <br>
+      <i>maiduguricapitalschool@yahoo.com</i>
+      </address>
+      </header>
+      <div id="logo-container">
+      <!--small id="p">
+    
+      H/Master: 445557778
+     <br>
+      Principal: 466633e
+     <br>
+      Burser: 55566666
+      
+      </small-->
+
+      <div id="top-hl">
+      </div>
+      <div id="bottom-hl">     
+      </div>
       <img class="logo" src="../../logo.jpg">
+      </div>
       <h3>Terminal Report</h3>
       Name of Student: ${std.name.toUpperCase()} <br>
       Sex: ${std.gender}<br>
@@ -261,6 +285,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       `;
      
       let subjects = std.subjects;
+      let subjKeys = Object.keys(subjects).sort();
       let stdReg = std.religion;
       if (!stdReg) {
      // alert("STUDENT " + std.name + "NRS"); 
@@ -268,7 +293,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       }
       let faith = stdReg == "Islam"? "Muslim" : "Christrian";
  
-      for (const subj in subjects) {
+      //for (const subj in subjects) 
+      subjKeys.forEach(subj=>{
         
       let t1= Number(subjects[subj][termIndex].test1 ?? 0);
       let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
@@ -279,7 +305,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
  //     subjects.forEach(subj=>{
         let row =document.createElement("tr");
         row.innerHTML = `
-        <td>${subjects[subj][termIndex].name}</td>
+        <td>${subjects[subj][termIndex].name.toUpperCase()}</td>
         <td class="${cls}">${t1}</td>
         <td class="${cls}">${t2}</td>
         <td>${subjects[subj][termIndex].exam}</td>
@@ -289,10 +315,11 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         
         `;
         reportCard.appendChild(row);
-      }//);
+      });
       let wrapper = document.createElement("div");
       let hr = document.createElement("hr");
       wrapper.className = "table-container";
+      //wrapper.innerHTML = '<img class="stamp" src="../../stamp.jpg">'
 wrapper.appendChild(reportCard);
       let p = document.createElement("p");
       p.innerHTML = `
@@ -368,6 +395,7 @@ container.append(hr, wrapper);
   width: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+   
 }
 
  th,
@@ -375,6 +403,11 @@ td {
   border: 1px solid #ddd;
   padding: 10px;
   text-align: center;
+}
+
+  table td:first-child,
+table th:first-child {
+ 
 }
 
 .vertical-header-table .thead th.subject {
@@ -408,14 +441,14 @@ td {
 }
 
   body {
-      background-color: #121212;
-      color: #ffffff;
+    //  background-color: #121212;
+  //    color: #ffffff;
       font-family: Arial, sans-serif;
       padding: 20px;
     }
   select {
-    background-color: #121212;
-      color: #ffffff;
+ //   background-color: #121212;
+   //   color: #ffffff;
       font-family: Arial, sans-serif;
   }
   
@@ -441,7 +474,7 @@ td {
 
     th, td{
       padding: 4px;
-      border: 1px solid #333;
+      border: 1px solid #007dbb;
       text-align: center;
     }
  h1, .save-container {
@@ -458,14 +491,15 @@ text-align: center;
     //border: 1px solid white;
     width: 100%;
     overflow-x: auto;
+     position: relative;
   }
  
  
  select {
-    background-color: #121212;
-      color: #ffffff;
+  //  background-color: #121212;
+ //     color: #ffffff;
       font-family: Arial, sans-serif;
-      border: none;
+   //   border: none;
     font-size: 24px;
     text-align: center;
     width: 100%;
@@ -479,19 +513,71 @@ text-align: center;
 }
   
   .logo {
-    border-radius: 50%;
+   // border-radius: 50%;
     height: 100px;
     width:100px;
+  position: relative;
+   
+    z-index: 100;
+    
+    
   }
+  
+    .stamp {
+    border-radius: 50%;
+    height: 50px;
+    width: 50px;
+  position: absolute;
+   top: 0;
+      right:0;
+    z-index: 100;
+    
+    
+  }
+  #logo-container {
+   // height: 120px;
+ //   width: 100%;
+   // border-bottom: 1px solid black;
+    position: relative;
+  }
+  
+  #top-hl, #bottom-hl {
+    border: 8px solid #007dbb;
+    position: absolute;
+    width: calc(100% - 22px);
+    left: 0;
+    bottom: 40px;
+    z-index: 1;
+    height: 0;
+  }
+  #p{
+    position: absolute;
+    bottom: 60px;
+    right: 30px;
+    text-align: left;
+    font-size: 10px;
+    
+  }
+  
+  #bottom-hl {
+ 
+    position: absolute;
+    width: calc(100% - 22px);
+    left: 0;
+    bottom: 20px;
+  }
+  
   tr:nth-child(1) {
-    padding: 0.7rem;
-      background-color: #3f51b5;
+   // padding: 0.7rem;
+      background-color: #007dbb;
       color: #fff;
       border: none;
       border-radius: 5px;
       font-size: 1rem;
   }
-
+.table-container {
+  border: 2px solid #007dbb;
+}
   @media print {
     hr {
       page-break-after: always;
@@ -502,11 +588,44 @@ text-align: center;
     .table-container, .table-container > *{
       margin: auto;
     }
-    .table-container > * {}
+    .table-container > * {
+    //  color: black;
+      //text-transform: uppercase;
+    }
 
     .logo {
       border-radius: 0%;
     }
+     
+    .stamp {
+    
+  
+      
+    
+    
+  }
+
+    
+    
+    table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table th, table td {
+  padding: 8px;
+  text-align: left;
+//border: 1px solid #ccc;
+}
+
+table tr:nth-child(even) {
+  //background-color: #f2f2f2;
+}
+
+table tr:nth-child(odd) {
+ // background-color: #ffffff;
+}
+
   }
 
   .n, .c {
