@@ -238,7 +238,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       reportCard.innerHTML = `
       <caption>
       <header>
-      <h2>${schoolName}</h2>
+      <h2>${schoolName.toUpperCase()}</h2>
       <address>
       PMB 1017, GOMBOLE ROAD, G.R.A, MAIDUGURI, BORNO STATE
       <br>
@@ -262,25 +262,25 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </div>
       <img class="logo" src="../../logo.jpg">
       </div>
-      <h3>Terminal Report</h3>
-      Name of Student: ${std.name.toUpperCase()} <br>
-      Sex: ${std.gender}<br>
-      Class: ${classSelect.value} <br>
-      Session: ${sessionSelect.value} <br>
+      <h3>TERMINAL REPORT</h3>
+      NAME OF PUPIL: ${std.name.toUpperCase()} <br>
+      GENDER: ${std.gender.toUpperCase()}<br>
+      CLASS: ${classSelect.value} <br>
+      SESSION: ${sessionSelect.value.toUpperCase()} <br>
       <!--Term: ${"?"}<br-->
-      Number in Class: ${students.length} <br>
-      Position: ${std.position}
+      NUMBER IN CLASS: ${students.length} <br>
+      POSITION: ${std.position}
      
       
       </caption>
          <tr>
-          <th>Subject</th>
+          <th>SUBJECT</th>
           <th class="${cls}">1<sup>st</sup> CA</th>
           <th class="${cls}">2<sup>nd</sup> CA</th>
-          <th>Exam</th>
-          <th>Total</th>
-          <th>Grade</th>
-          <th>Remark</th>
+          <th>EXAM</th>
+          <th>TOTAL</th>
+          <th>GRADE</th>
+          <th>REMARK</th>
         </tr>
       `;
      
@@ -323,13 +323,13 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
 wrapper.appendChild(reportCard);
       let p = document.createElement("p");
       p.innerHTML = `
-      Total Score: ${std.score}<br>
-      Average: ${std.score/std.sc}
+      TOTAL SCORE: ${std.score}<br>
+      AVERAGE SCORE: ${std.score/std.sc}
       `;
       wrapper.append(p);
       p = document.createElement("p");
       p.innerHTML = `
-      powered by mainafly.com
+      Powered by <strong>mainafly.com</strong>
       `;
       wrapper.append(p);
       p.classList.add("powered");
