@@ -327,11 +327,11 @@ wrapper.appendChild(reportCard);
       AVERAGE SCORE: ${std.score/std.sc}
       <br>
       <br>
-      H/MASTER COMMENT: ____________<br>
-      SIGN: ____________
-      <hr>
+      <strong>H/MASTER COMMENT:</strong> ____________ <strong>SIGN:</strong>____________
+    
       `;
       wrapper.append(p);
+      p.classList.add("rfooter");
       p = document.createElement("p");
       p.innerHTML = `
       Powered by <strong>mainafly.com</strong>
@@ -401,7 +401,9 @@ container.append(hr, wrapper);
   </script>
   
 <style>
-  
+  .rfooter {
+     border-bottom: 1px solid silver;
+  }
   .powered {
     postion: absolute;
     bottom: 0px;
