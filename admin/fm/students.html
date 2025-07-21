@@ -218,7 +218,7 @@ let sectionDoc = await getDoc(sectionRef);
           result.gender = genderIn.value;
       }
      
-     if (result.gender) 
+     if (result.gender && !(result.gender=="-select gender-")) 
       row.querySelector(`select>option[value=${result.gender}]`).selected = true;
       
       let relIn = row.querySelector(".religion");
