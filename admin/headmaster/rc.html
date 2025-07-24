@@ -219,7 +219,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
           let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
           let test2 = Number(subjects[subj][termIndex].test2 ?? 0);
           let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
-          student.score += /*test1 + test2 +t3 +*/ Number(subjects[subj][termIndex].exam);
+          student.score += test1 + test2 +t3 + Number(subjects[subj][termIndex].exam);
           subHeads.add(subjects[subj][termIndex].name);
           student.sc++;
         } catch(e) {
@@ -299,7 +299,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       let t1= Number(subjects[subj][termIndex].test1 ?? 0);
       let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
         let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
-        let score = /*t1 + t2 +t3 +*/ Number(subjects[subj][termIndex].exam);
+        let score = t1 + t2 +t3 + Number(subjects[subj][termIndex].exam);
         let interp = interpret(score, scoreInterpretations);
        // console.log(interp);
  //     subjects.forEach(subj=>{
