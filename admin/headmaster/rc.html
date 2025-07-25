@@ -331,6 +331,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         `;
         reportCard.appendChild(row);
       });
+            let interp = interpret(std.score/std.sc, scoreInterpretations);
+      
       let wrapper = document.createElement("div");
       let hr = document.createElement("hr");
       wrapper.className = "table-container";
@@ -339,10 +341,10 @@ wrapper.appendChild(reportCard);
       let p = document.createElement("p");
       p.innerHTML = `
       TOTAL SCORE: ${std.score}<br>
-      AVERAGE SCORE: ${std.score/std.sc}
+      AVERAGE SCORE: ${tosf(std.score/std.sc, 4)}
       <br>
       <br>
-      <strong>H/MASTER COMMENT:</strong> _______________________ <strong>SIGN:</strong>____________
+      HEAD MASTER COMMENT: <strong>${interp.remark}</strong>
     
       `;
       wrapper.append(p);
@@ -412,7 +414,10 @@ container.append(hr, wrapper);
     alert();
     window.print();
   }*/
-  
+  function tosf(num, sf) {
+  if (num === 0) return 0;
+  return Number(num.toPrecision(sf));
+     }
   </script>
   
 <style>
