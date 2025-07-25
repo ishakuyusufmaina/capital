@@ -4,6 +4,8 @@
 <head>
   <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Include this in the <head> of your HTML -->
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
   <script src="rc/rc.js"></script>
   <title>Position</title>
 </head>
@@ -344,7 +346,7 @@ wrapper.appendChild(reportCard);
       AVERAGE SCORE: ${tosf(std.score/std.sc, 4)}
       <br>
       <br>
-      HEAD MASTER COMMENT: <strong>${interp.remark}</strong>
+      HEAD MASTER COMMENT: <strong class="comment">${interp.remark}</strong>
     
       `;
       wrapper.append(p);
@@ -421,6 +423,12 @@ container.append(hr, wrapper);
   </script>
   
 <style>
+  /* Apply handwriting font to a class or the body */
+.comment {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.2rem; /* adjust as needed */
+  line-height: 1.6;
+}
      .student-info-table * {
      border: none;
      }
