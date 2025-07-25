@@ -263,15 +263,30 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       <img class="logo" src="../../logo.jpg">
       </div>
       <h3>TERMINAL REPORT</h3>
-      NAME OF PUPIL: ${std.name.toUpperCase()} <br>
-      GENDER: ${std.gender.toUpperCase()}<br>
-      CLASS: ${classSelect.value} <br>
-      SESSION: ${sessionSelect.value.toUpperCase()} <br>
-      <!--Term: ${"?"}<br-->
-      NUMBER IN CLASS: ${students.length} <br>
-      POSITION: ${std.position}
-     
-      
+      <table class="student-info-table">
+  <tr class="std-name">
+    
+    <td colspan="2">NAME OF PUPIL: ${std.name.toUpperCase()}</td>
+  </tr>
+  <tr>
+   
+    <td>GENDER: ${std.gender}</td>
+  
+    <td>CLASS: ${classSelect.value}</td>
+  </tr>
+  <tr>
+    
+    <td>SESSION: ${sessionSelect.value}</td>
+    
+    <td>RESUMPTION DATE: XYZ</td>
+  </tr>
+  <tr>
+    
+    <td>NUMBER IN CLASS: ${students.length}</td>
+    
+    <td>POSITION: ${std.position}</td>
+  </tr>
+</table>   
       </caption>
          <tr>
           <th>SUBJECT</th>
@@ -401,6 +416,50 @@ container.append(hr, wrapper);
   </script>
   
 <style>
+     .student-info-table * {
+     border: none;
+     }
+  .student-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  
+}
+
+  
+.student-info-table th {
+//  background-color: #f9f9f9;
+  width: 20%;
+}
+
+.student-info-table td {
+  width: 30%;
+  text-align: left;
+}
+
+     .student-info-table.std-name {
+    
+      border-top: 1px solid black;
+       border-top-radius: 25px;
+   }
+.std-name,  .std-name > th{
+    background: white;
+    color: black;
+    
+  }
+
+  .std-name>td {
+    border-bottom: 1px solid black;
+    background-color: white;
+    color:black;
+    font-weight: bolder;
+    text-align: center;
+        
+  }
+    
+
+
+
+  
   .rfooter {
      border-bottom: 1px solid silver;
   }
