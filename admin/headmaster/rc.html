@@ -345,7 +345,7 @@ wrapper.appendChild(reportCard);
       TOTAL SCORE: ${std.score}<br>
       AVERAGE SCORE: ${tosf(std.score/std.sc, 4)}
       <br>
-      <br>
+      
       HEAD MASTER COMMENT: <strong class="comment">${interp.remark}</strong>
     
       `;
@@ -426,8 +426,8 @@ container.append(hr, wrapper);
   /* Apply handwriting font to a class or the body */
 .comment {
   font-family: 'Patrick Hand', cursive;
-  font-size: 1.2rem; /* adjust as needed */
-  line-height: 1.6;
+  font-size: 1.5rem; /* adjust as needed */
+  line-height: 1.5;
 }
      .student-info-table * {
      border: none;
@@ -474,7 +474,7 @@ container.append(hr, wrapper);
 
   
   .rfooter {
-     border-bottom: 1px solid silver;
+     border-bottom: 1px solid black;
   }
   .powered {
     postion: absolute;
@@ -489,14 +489,14 @@ container.append(hr, wrapper);
   border-collapse: collapse;
   width: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  //box-shadow: 0 4px 20px rgba(0,0,0,0.1);
    
 }
 
  th,
 td {
   border: 1px solid #ddd;
-  padding: 10px;
+  padding: 6px;
   text-align: center;
 }
 
@@ -539,7 +539,7 @@ table th:first-child {
     //  background-color: #121212;
   //    color: #ffffff;
       font-family: Arial, sans-serif;
-      padding: 20px;
+      padding: 12px;
     }
   select {
  //   background-color: #121212;
@@ -582,7 +582,7 @@ text-align: center;
    .select-container, .table-container {
     text-align: center;
     margin: auto;
-    padding: 10px;
+    padding: 6px;
     //border: 1px solid white;
     width: 100%;
     overflow-x: auto;
@@ -664,8 +664,8 @@ text-align: center;
   
   tr:nth-child(1) {
    // padding: 0.7rem;
-      background-color: #007dbb;
-      color: #fff;
+     // background-color: #007dbb;
+    //  color: #fff;
       border: none;
       border-radius: 5px;
       font-size: 1rem;
