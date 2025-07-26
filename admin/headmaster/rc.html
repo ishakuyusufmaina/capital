@@ -280,7 +280,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     
     <td>SESSION: ${sessionSelect.value}</td>
     
-    <td>RESUMPTION DATE: XYZ</td>
+    <td>RESUMPTION DATE: <strong><time>18<sup>th</sup> SEPTEMBER, 2025</time></strong></td>
   </tr>
   <tr>
     
@@ -347,13 +347,14 @@ wrapper.appendChild(reportCard);
       <br>
       
       HEAD MASTER COMMENT: <strong class="comment">${interp.remark}</strong>
-    
+    <img id="stamp" src="stamp.png">
       `;
       wrapper.append(p);
       p.classList.add("rfooter");
       p = document.createElement("p");
       p.innerHTML = `
       Powered by <strong>mainafly.com</strong>
+      
       `;
       wrapper.append(p);
       p.classList.add("powered");
@@ -618,13 +619,13 @@ text-align: center;
     
   }
   
-    .stamp {
+    #stamp {
     border-radius: 50%;
-    height: 50px;
-    width: 50px;
+    height: 100px;
+    width: 100px;
   position: absolute;
-   top: 0;
-      right:0;
+   bottom: 10px;
+   right:100px;
     z-index: 100;
     
     
