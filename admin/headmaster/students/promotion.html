@@ -253,7 +253,7 @@
             console.log(cls1);*/
             classes.forEach((cls, i)=>{
                 if (promotion[i].status) return;
-                
+                promotion[i].classFrom = cls;
                 //promotion[i].status = 0;
             })
             PromotionTable(promotion, classes, ref, ses1, ses2);
