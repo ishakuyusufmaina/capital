@@ -230,17 +230,12 @@
     transition: background 0.3s ease;
 
 }
-  #sess {
-    text-transform: capitalize;
-  }
+  
   #signout1 {
     background: none;
     border: 0.5px solid white;
     border-radius: 4px;
     border-bottom: none;
-    text-align: center;
-    color: white;
-    text-transform: uppercase;
   }
   
   
@@ -253,18 +248,13 @@
 }
 </style>
 
-<!-- Light theme -->
-<meta name="theme-color" content="#3f51b5" media="(prefers-color-scheme: light)">
-
-<!-- Dark theme -->
-<meta name="theme-color" content="#3f51b5" media="(prefers-color-scheme: dark)">
 
 </head>
 <body>
       
   <header>
-    
-    <a href="#" id="signout1">Maiduguri Capital School</a>
+    <hr>
+    <button id="signout1">Logout</button>
     <button id="menu">&#9776;</button>
      <div class="menu-container">
             <button id="close">X</button> Menu
@@ -281,7 +271,7 @@
     <hr>
   </header>
   <main>
-  <h1>HEAD MASTER</h1>
+  <h1>Head Master</h1>
     
     
     
@@ -332,10 +322,13 @@
       
    <div class="card">
       <h2>Pupils Management</h2>
-      <a href="students/index.html">Manage pupils</a>
+      <a href="students.html">Manage pupils</a>
     </div>
 
-
+    <div class="card">
+      <h2>Pupils List</h2>
+      <a href="studentlist.html">Update pupils list</a>
+    </div>
       
       <div class="card">
       <h2>Pupils Summary Statistics</h2>
@@ -476,7 +469,7 @@ const schoolId= "capital";
       return;
     }
     signout1.onclick = e=>{
-     // signOut(auth);
+      signOut(auth);
     }
     document.getElementById("switch").onclick = e=> {
       window.location.href = "../../teacher/index.html";
