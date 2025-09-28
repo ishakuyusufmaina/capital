@@ -122,15 +122,17 @@
     </div>
 
     <!-- Promote Button -->
+    <button id="saveBtn">Save</button>
+    <br>
     <button id="promBtn">Promote</button>
 </div>
     
 
     <script src="common.js"></script>
-    <script type="module">
+    <script type="module" defer>
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, writeBatch, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  //import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, documentId, where, getDocs, query, collection, runTransaction, writeBatch, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
       const firebaseConfig = {
@@ -146,45 +148,20 @@
     
     const schoolId = "capital";
       const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
+     // const analytics = getAnalytics(app);
       const auth = getAuth(app);
     const db = getFirestore(app);
-    var batch = writeBatch(db);
+    const batch = writeBatch(db);
     
     let user = await new Promise(resolve=>onAuthStateChanged(auth, (user)=>resolve(user)));
     let id = user.email.replace(/@.*/, "");
-    user = (await getDoc(doc(db, schoolId, "db", "teachers", id))).data();
+    user = (await getDoc(doc(db, schoolId, "db", "staff", id))).data();
     //relevant roles => rroles
     const rroles = user.roles.filter(role=> role.code=="hosec");
     
     
   
-    /*
-    getSections()
-    getSessions()
-    getSelectedSession()
-    getSelectedSection()
-    getClasses(sectionId)
-    getStudents(sessionId, classId)
-    setStudents(sessionId, classId)
-    
-    row.child(1) -> class from
-    row.child(2) -> class to
-    row.child(3) -> status
-    row.child(4) -> performedBy
-    
-    promotionModel
-    section
-        session
-            [{classFrom, 
-             classTo, status,
-             performedBy},
-             ..., classN]
-        .
-        .
-        
-    */
-    
+
    
    let sessions = await getSessions();
     sessions.forEach(s=>{
@@ -242,7 +219,10 @@
        }
     
     
-    function PromotionTable(promotion, classes, ref, ses1, ses2){
+  async  function PromotionTable(promotion, classes, ref, ses1, ses2){
+      
+        // classes = classes.map(cls=>cls.trim());   
+      
         tbody.innerHTML = "";
         let selectedClasses1 =[];
         let selectedClasses2 =[];
@@ -252,6 +232,7 @@
             .replace(/\d+/g, (match)=> Number(match)+1 )
             console.log(cls1);*/
             classes.forEach((cls, i)=>{
+                promotion[i] ??= {};
                 if (promotion[i].status) return;
                 promotion[i].classFrom = cls;
                 //promotion[i].status = 0;
@@ -317,7 +298,7 @@
                 if (class1.firstChild.value === class2.firstChild.value) class2.firstChild.value = transition.classTo;
                 else transition.classTo = class2.firstChild.value;
                if (transition.classTo){
-                   transition.performedBy = user.displayName;
+                   transition.performedBy = user.name;
                    transition.status = 1;
                    PromotionTable(promotion, classes, ref, ses1, ses2);
 
@@ -333,30 +314,7 @@
             }
             status.textContent = transition.status? statusCode[transition.status] : "not yet initiated";
             status.textContent +=transition.size??"";
-            /*if (transition.status === 2) {
-                let promotingClass = transition.classFrom;
-                let destinedClass = transition.classTo;
-                let studentsRef = doc(db, schoolId, key(ses1), key(promotingClass), "students");
-                let newStudentsRef = doc(db, schoolId, key(ses2), key(destinedClass), "students");
-                console.log(promotingClass, ses1);             
-                getDoc(studentsRef)
-                .then(async studentsDoc=>{
-                    if (studentsDoc.exists()){
-                        let students = studentsDoc.data();
-                        let list = Object.values(students);
-                        list.forEach(std => delete std.subjects);
-                        console.log(JSON.stringify(students));
-                        transition.status = 3;
-                        await setDoc(newStudentsRef, students);   
-                        transition.status = 4;                        
-                        PromotionTable(promotion, classes, ref, ses1, ses2);
-                    } else {
-                        alert("No students to be promoted in "+promotingClass);
-                        transition.status = 0;
-                        PromotionTable(promotion, classes, ref, ses1, ses2);
-                    }
-                })
-            } */
+            
             let performedBy = row.insertCell();
             performedBy.textContent = transition.performedBy;
             
@@ -364,31 +322,48 @@
         promBtn.onclick = async e=>{
             let ses1Id = key(ses1);
             let ses2Id = key(ses2);
-            console.log(ses1Id);            
-            console.log(ses2Id);
-
+            console.log(ses1);            
+            console.log(ses2);
+            let year = ses2.split(",")[0].trim().replaceAll(" ", '');
+            console.log(year);
+            promotion = promotion.filter(t=>!!t.classFrom && !!t.classTo);
+          // return;
             for (const t of promotion){
-                if (!(t.status===1)) continue;
-                console.log(t.status, t.classFrom, t.classTo);
-                let oldStdRef = doc(db, schoolId, key(ses1), key(t.classFrom), "students");
-                let newStdRef = doc(db, schoolId, key(ses2), key(t.classTo), "students");
-                t.status = 2;
-                PromotionTable(promotion, classes, ref, ses1, ses2);
-                let studentsDoc = await getDoc(oldStdRef);
-                t.status = 3;
-                PromotionTable(promotion, classes, ref, ses1, ses2);
-                let students = studentsDoc.exists() ? studentsDoc.data() : {};
-                Object.values(students)
-                .forEach(std=> delete std.subjects)
-                await setDoc(newStdRef, students);
-                t.status = 4;
-                PromotionTable(promotion, classes, ref, ses1, ses2);
+                console.log(t.classFrom, t.classTo);
+                let stdsDoc = await getDoc(doc(db, schoolId, key(session1.value), key(t.classFrom), "students"));
+                let stds = stdsDoc.data();
+                let stdWithIds = Object.values(stds).filter(std=>!!std.id)
+                let stdIds = stdWithIds.map(std => std.id);
+                //let q = query(collection(db, schoolId, "db", "students"), where(documentId(), "in", stdIds));
+              //  let stdsSnap = await getDocs(q);
+                stdIds.forEach(id=>{
+                    let std = stds[id]; //stdDoc.data();
+                    std.class = t.classTo.toLowerCase();
+                    std.yearOfLastPromotion = year;
+                    delete std.subjects;
+                    batch.set(doc(db, schoolId, "db", "students", id.replaceAll("/", "_")), std);
+                });
+                t.status = "promoted with yolp: "+year;
                 
             }
-            await setDoc(ref, {transitions:promotion}, {merge: true});   
-            alert("Done!");            
-            console.log(JSON.stringify(promotion));
+            await batch.commit();
+            saveBtn.click();
+            alert("Done!");
+            window.location.reload();
+           // await setDoc(ref, {transitions:promotion}, {merge: true});   
+         //   alert("Done!"); 
+            
           }
+      
+       saveBtn.onclick = async e=>{
+           promotion = promotion.filter(t=>{
+               t.performedBy = user.name;
+               return !!t.classFrom && !!t.classTo
+           });
+           console.log(JSON.stringify(promotion));
+           await setDoc(ref, {transitions:promotion}, {merge: true}); 
+           alert("Saved!");
+       }
         
     }
     
