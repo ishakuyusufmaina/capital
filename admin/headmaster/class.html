@@ -304,11 +304,19 @@ let sectionDoc = await getDoc(sectionRef);
             <option value="female">Female</option>
            <option value="male">Male</option>
         </select>
+    
     </td>    
+    <td>
+    <select class="religion" value="Islam">
+         <option value=""> -select religion- </option>
+         <option value="Islam">Muslim</option>
+         <option value="Christian">Christian</option>
+    </select>
+    </td>
       `;
      row.querySelector(".id").ondblclick = async e=>{
        if (!result.id) return;
-       if (window.confirm("Are you sure you want to delete this student?")); {
+       if (window.confirm("Are you sure you want to delete this student?")){
          let docId = result.id.replaceAll("/", "_");
          await deleteDoc(doc(db, schoolId, "db", "students", docId));
          alert("Done!");
@@ -350,7 +358,7 @@ let sectionDoc = await getDoc(sectionRef);
           imgIn.click();
       }
      // row.scrollIntoView();
-      let id = "std"+result.sn;
+     // let id = "std"+result.sn;
       let nameIn = row.querySelector(".name");
       nameIn.oninput = e=>{
           result.name = nameIn.textContent.toLowerCase().trim();
@@ -358,11 +366,15 @@ let sectionDoc = await getDoc(sectionRef);
       }
       let genderIn = row.querySelector(".gender");
       genderIn.onchange = e=>{
-          result.gender = genderIn.value.toLowerCase();
+          result.gender = genderIn.value; //.toLowerCase();
       }
-    // if (result.gender.toLowerCase()[0]=="m" || result.gender.toLowerCase()[0] == "f") 
-      console.log(result.gender);
-      row.lastElementChild.querySelector(`.gender`).value = !result.gender? "" : result.gender.toLowerCase();
+    let relIn = row.querySelector(".religion");
+      relIn.onchange = e=>{
+          result.religion = relIn.value; //.toLowerCase();
+      }
+    relIn.value = result.religion;
+     if (result.gender.toLowerCase()[0]=="m" || result.gender.toLowerCase()[0] == "f") 
+      genderIn.value = !result.gender? "" : result.gender.toLowerCase();
   
 
   }
