@@ -128,7 +128,7 @@
           option.value = key;
           option.textContent = teacher.name;
           
-          if (sections[sectK].teachers.includes(key)) {
+          if (sections[sectK].teachers.map(t=>t.id).includes(key)) {
             option.selected = true;
             if (lastAddedTeacher){
               lastAddedTeacher.insertAdjacentElement("afterend", option);
