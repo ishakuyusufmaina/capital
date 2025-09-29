@@ -331,7 +331,8 @@
             for (const t of promotion){
                 console.log(t.classFrom, t.classTo);
                 let stdsDoc = await getDoc(doc(db, schoolId, key(session1.value), key(t.classFrom), "students"));
-                let stds = stdsDoc.data();
+                let stds = stdsDoc.data()? stdsDoc.data() : {};
+                console.log(t.classFrom);
                 let stdWithIds = Object.values(stds).filter(std=>!!std.id)
                 let stdIds = stdWithIds.map(std => std.id);
                 //let q = query(collection(db, schoolId, "db", "students"), where(documentId(), "in", stdIds));
