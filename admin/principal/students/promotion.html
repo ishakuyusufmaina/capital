@@ -157,7 +157,7 @@
     let id = user.email.replace(/@.*/, "");
     user = (await getDoc(doc(db, schoolId, "db", "staff", id))).data();
     //relevant roles => rroles
-    const rroles = user.roles.filter(role=> role.code=="hosec");
+    const rroles = user.roles.filter(role=> role.code=="hosec" || role.code=="hosec2");
     
     
   
