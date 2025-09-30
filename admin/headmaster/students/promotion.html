@@ -332,20 +332,23 @@
                 console.log(t.classFrom, t.classTo);
                 let stdsDoc = await getDoc(doc(db, schoolId, key(session1.value), key(t.classFrom), "students"));
                 let stds = stdsDoc.data()? stdsDoc.data() : {};
-                console.log(t.classFrom);
+              //  console.log(t.classFrom);
                 let stdWithIds = Object.values(stds).filter(std=>!!std.id)
                 let stdIds = stdWithIds.map(std => std.id);
                 //let q = query(collection(db, schoolId, "db", "students"), where(documentId(), "in", stdIds));
               //  let stdsSnap = await getDocs(q);
-                stdIds.forEach(id=>{
-                    let std = stds[id]; //stdDoc.data();
+                stdWithIds.forEach((std, i)=>{
+                 //   console.log(std.id);
+                    //let std = stds[id]; //stdDoc.data();
                     std.class = t.classTo.toLowerCase();
                     std.yearOfLastPromotion = year;
                     delete std.subjects;
-                    batch.set(doc(db, schoolId, "db", "students", id.replaceAll("/", "_")), std);
+                    console.log(std.religion);
+                    batch.set(doc(db, schoolId, "db", "students", std.id.replaceAll("/", "_")), std);
                 });
                 t.status = "promoted with yolp: "+year;
-                
+                let idSet = new Set(stdWithIds.map(std=>std.id));
+                if (idSet.size !== stdWithIds.length) throw "identical ids found";
             }
             await batch.commit();
             saveBtn.click();
