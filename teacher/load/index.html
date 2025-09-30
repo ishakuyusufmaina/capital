@@ -72,7 +72,7 @@
     <a class="fw" href="teachAndSign.html">Teach and Sign</a>
   </div>
   <div>
-    <a class="fw" id="scoreSheet" href="scoreSheet.html">Score Sheet</a>
+    <a class="fw" id="scoreSheet" href="scoreSheetv2.html">Score Sheet</a>
   </div>
   </main>
   
@@ -83,17 +83,17 @@
   import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
       const firebaseConfig = {
-  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
-  authDomain: "school-in-the-box.firebaseapp.com",
-  projectId: "school-in-the-box",
-  storageBucket: "school-in-the-box.firebasestorage.app",
-  messagingSenderId: "596350496353",
-  appId: "1:596350496353:web:84c66c351700ddf0824420",
-  measurementId: "G-3MGCDH4FRF"
-};
+        apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+        authDomain: "school-in-the-box.firebaseapp.com",
+        projectId: "school-in-the-box",
+        storageBucket: "school-in-the-box.firebasestorage.app",
+        messagingSenderId: "596350496353",
+        appId: "1:596350496353:web:84c66c351700ddf0824420",
+        measurementId: "G-3MGCDH4FRF"
+      };
   
   
-  const schoolId = "salim";
+  const schoolId = "capital";
       const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
       const auth = getAuth(app);

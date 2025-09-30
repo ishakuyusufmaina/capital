@@ -38,6 +38,7 @@
       padding: 8px;
       border: 1px solid #333;
       border-radius: 5px;
+          width: 65px;
      // background-color: inherit; //#1e1e1e;
     //color: white;
     }
@@ -83,7 +84,9 @@
     overflow-x: auto;
   }
   
-  
+  header, th {
+    text-transform: uppercase;
+  }
   </style>
 </head>
 <body>
@@ -102,17 +105,18 @@
     <tr>
       <th>SN</th>
       <th>Name</th>
-      <th>1st CA (15)</th>
-      <th>2nd CA (15)</th>
-      <!--th>3rd CA</th-->
-      <th>Exam (70)</th>
-      <th>Total (100)</th>
+      <th>1st CA</th>
+      <th>2nd CA</th>
+      <th>3rd CA</th>
+      <th>Exam</th>
+      <th>Total</th>
     </tr>
     <tbody id="table-body"></tbody>
   </table>
   </div>
   <button id="saveBtn">Save</button>
-  
+  <script src="../../config.js"></script>
+
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
@@ -148,15 +152,9 @@
   date.innerHTML = `${day}/${month}/${year}`;
 
    
-  
-  
   var students = {};
   let ses;
-  let cls = localStorage.getItem("class");
-  console.log(cls);
-  if (cls.toLowerCase()[0] == "n")
-  window.location.href = "scoreSheetN.html"
-
+  let cls = localStorage.getItem("class");;
   clas.textContent = cls;
   let subj = localStorage.getItem("subject");
   subject.textContent = subj;
@@ -167,13 +165,145 @@
     ses= sessions.sort((a, b)=>b.no - a.no)[0];
       session.textContent = ses.year + ", " + terms[ses.term];
   }
-  
-  loadStudents();
-  loadScores();
+
+await  render();
   
 
+ async function render(){
+   let sections = (await getDoc(doc(db, schoolId, "section"))).data();
+   let rsects = Object
+   .values(sections)
+   .filter(section=>{
+     let classes = section.classes.map(c=>c);
+     return  classes.includes(cls)
+   });
+   let section = rsects[0];
+   if (!section){     
+     alert(cls + " does not belong to any section");
+     return
+   }
+   let scoreSheetConfig = section.scoreSheetConfig;
+   scoreSheetConfig??= {
+     total: 100,
+     assessments: [
+     {name: "1st CA", subtotal: 10},
+     {name: "2nd CA", subtotal: 10},
+     {name: "3rd CA", subtotal: 10},
+     {name: "exam", subtotal: 70}
+     ]
+   }
+    let clas = key(cls);   
+   let  subjK = key(subj);
+   let termIndex = ses.term;
+    let session = key(ses.year+terms[ses.term]);
+   console.log(session);
+    if (!(clas && session)) return null;
+    let stdsRef = doc(db, schoolId, session, clas, "students");
+    let stdsDoc = await getDoc(stdsRef);
+   console.log(clas);
+    if (stdsDoc.exists()){
+      table.innerHTML = "";
+      const {exam, assessments} = scoreSheetConfig;
+      table.innerHTML = "<tr><th>ID Num</th><th>Name</th></tr>";
+      let r = table.querySelector("tr");
+      assessments.forEach(asm=>{
+        //table.innerHTML +=`<th>${asm.name}(${asm.subtotal})</th>`;
+        let th = document.createElement("th");
+        th.innerHTML = asm.name + " ("+asm.subtotal+")";
+        r.append(th);
+      });
+    r.innerHTML +=`<th>Exam (${exam})</th><th>Total</th>`;
  
- async function loadScores(){
+  
+      students = stdsDoc.data();
+      let studentsArr = Object.values(students).sort((a, b)=>a.name.localeCompare(b.name));
+      studentsArr.forEach(student=>present(student, table.insertRow()));  
+      saveBtn.onclick = async e=>{
+        await setDoc(stdsRef, students, {merge:true});
+        alert("saved!");
+      }      
+      function present(student, row){
+        row.innerHTML = "";
+        let id = row.insertCell();
+        id.innerHTML = student.id;
+        let name = row.insertCell(); 
+        name.innerHTML = student.name;
+        student.subjects??={};
+        student.subjects[subjK]??=[{}, {}, {}];
+        student.subjects[subjK][termIndex]??={}
+        let scores = student.subjects[subjK][termIndex];
+        let sum = 0;
+        scores.exam??="-";
+        scores.subject = subj;
+        sum +=Number(scores.exam.replace("-", 0))??0;
+        assessments.forEach((asm, i)=>{
+          let k = asm.name.toLowerCase().trim().replaceAll();
+          scores[k]??="-";
+          let subjScore = scores[k];
+          sum +=Number(subjScore.replace("-", 0))??0;
+          let score = row.insertCell();
+          score.innerHTML = `
+           <input
+            min="0" max="40"
+            type="text" 
+            pattern="^(-|[0-9]|[1-9][0-9]|${asm.subtotal})$" 
+            title="Enter a number between 0 and ${asm.subtotal}, or just '- to indicate absence'"
+            value="${subjScore}"
+            inputmode="numeric"
+            required
+            />`;
+          
+         // console.log(asm.subtotal);
+          let inp = score.querySelector("input");
+          inp.onchange = e=>{
+            let val = e.target.value;
+            let oldScore = scores[k];
+            if (!e.target.checkValidity() || asm.subtotal < Number(e.target.value)){
+              e.target.value = oldScore;
+              alert("Wrong input means no input!");
+              return;
+            }
+            scores[k] = val;
+            present(student, row);
+          }
+        });
+        let examCell = row.insertCell();
+        examCell.innerHTML = `
+        <input
+            min="0" max="40"
+            type="text" 
+            pattern="^(-|[0-9]|[1-9][0-9]|${exam})$" 
+            title="Enter a number between 0 and ${exam}, or just '- to indicate absence'"
+            value="${scores.exam}"
+            inputmode="numeric"
+            required
+            />`;
+          
+         // console.log(asm.subtotal);
+          let inp = examCell.querySelector("input");
+          inp.onchange = e=>{
+            let val = e.target.value;
+            let oldScore = scores.exam;
+            if (!e.target.checkValidity() || exam < Number(e.target.value)){
+              e.target.value = oldScore;
+              alert("Wrong input means no input!");
+              return;
+            }
+            scores.exam = val;
+            present(student, row);
+          }
+        
+        //total.innerHTML = sum 
+        let total = row.insertCell();
+        total.innerHTML = sum;        
+      }
+      
+    }
+ }
+  
+  
+  
+/* async function loadScores(){
    
    let  subjK = key(subj);
    await loadStudents();
@@ -218,9 +348,9 @@
     <td>
         <input id="test2-${i}" type="number" min="0" max="40" value="${test2? test2 : 0}">
     </td>   
-    <!--td>
+    <td>
         <input id="test3-${i}" type="number" min="0" max="40" value="${test3? test3 : 0}">
-    </td-->        
+    </td>        
        <td >
         <input id="exam${i}" type="number" min="0" max="100" value="${exam? exam : 0}">
     </td>  
@@ -228,9 +358,9 @@
         ${function (){
           test1 = test1? test1 : 0;
           test2 = test2? test2 : 0;
-          //test3 = test3? test3 : 0;
+          test3 = test3? test3 : 0;
           exam = exam? exam : 0;
-          return Number(test1) + Number(test2) + Number(exam);
+          return Number(test1) + Number(test2) + Number(test3) + Number(exam);
          }()}
     </td>            
       `;
@@ -238,20 +368,20 @@
       container.appendChild(row);
        let testInp1 = document.getElementById("test1-"+ i);
        let testInp2 = document.getElementById("test2-"+ i);
-      // let testInp3 = document.getElementById("test3-"+ i);
+       let testInp3 = document.getElementById("test3-"+ i);
        let examInp = document.getElementById("exam"+ i);
        let totalElm = document.getElementById("total"+ i);
-       [testInp1, testInp2, /*testInp3,*/ examInp].forEach(inp=> {
+       [testInp1, testInp2, testInp3, examInp].forEach(inp=> {
          inp.oninput = e=>{
          let test1 = Number(testInp1.value);
          let test2 = Number(testInp2.value);
-      //   let test3 = Number(testInp3.value);
+         let test3 = Number(testInp3.value);
          let exam = Number(examInp.value);
-         let total = test1 + test2 /*+ test3*/ + exam;
+         let total = test1 + test2 + test3 + exam;
          totalElm.innerHTML = total;
            student.subjects[subjK][termIndex].test1 = test1;
            student.subjects[subjK][termIndex].test2 = test2;
-           //student.subjects[subjK][termIndex].test3 = test3;
+           student.subjects[subjK][termIndex].test3 = test3;
            student.subjects[subjK][termIndex].exam = exam;
            student.subjects[subjK][termIndex].name = subj;
           
@@ -323,7 +453,7 @@ async function  saveScores(){
   let clas = key(cls);
     let session = key(ses.year + terms[ses.term]);
     if (!(clas && session)) return null;
-   if (!Object.values(students).length) return;
+   if (!students) return;
  
   
  let stdsRef = doc(db, schoolId, session, clas, "students");
@@ -333,22 +463,20 @@ async function  saveScores(){
   }
   
   saveBtn.onclick= async e=>{
-    if (!students) return;
-    if (Object.values(students).length){
     e.target.textContent = "Saving..";
     await saveScores();
     e.target.textContent = "Saved!";
     setTimeout(_=>e.target.textContent = "Save", 1500);
-    }
 
 
-  }
+  }*/
   
-  function key(token){
+  
+  
+function key(token){
       return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "").trim();
     }
   
-
   
   
   </script>
