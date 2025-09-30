@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promotion Page</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f5f7fa;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+    }
+    .container {
+        max-width: 1000px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #444;
+    }
+    .select-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    select {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        background: #fff;
+        transition: border 0.3s ease;
+    }
+    select:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+    /* Table wrapper for responsiveness */
+    .table-wrapper {
+        overflow-x: auto;
+    }
+    table {
+        width: 100%;
+        min-width: 600px; /* Prevent columns from squishing too much */
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    table thead {
+        background: #007bff;
+        color: #fff;
+    }
+    table th, table td {
+        padding: 12px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+    table tbody tr:nth-child(even) {
+        background: #f9f9f9;
+    }
+    button {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        background: #28a745;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    button:hover {
+        background: #218838;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Promotion Panel</h2>
+
+    <!-- Top Selects -->
+    <div class="select-group">
+        <select id="session1">
+        
+            <option value="">Select session from</option>
+         </select>
+        <select id="session2">
+            <option value="">Select session to</option>
+        </select>
+        <select id="section">
+            <option value="">Select Section</option>
+            
+        </select>
+    </div>
+
+    <!-- Table Wrapper -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th id="fromHead">Previous Class</th>
+                    <th id="toHead">Current Class</th>
+                    <th>Status</th>
+                    <th>Performed by</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+                
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Promote Button -->
+    <button id="saveBtn">Save</button>
+    <br>
+    <button id="promBtn">Promote</button>
+</div>
+    
+
+    <script src="common.js"></script>
+    <script type="module" defer>
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  //import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, documentId, where, getDocs, query, collection, runTransaction, writeBatch, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+    
+    
+    const schoolId = "capital";
+      const app = initializeApp(firebaseConfig);
+     // const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+    const batch = writeBatch(db);
+    
+    let user = await new Promise(resolve=>onAuthStateChanged(auth, (user)=>resolve(user)));
+    let id = user.email.replace(/@.*/, "");
+    user = (await getDoc(doc(db, schoolId, "db", "staff", id))).data();
+    //relevant roles => rroles
+    const rroles = user.roles.filter(role=> role.code=="hosec");
+    
+    
+  
+
+   
+   let sessions = await getSessions();
+    sessions.forEach(s=>{
+        let year = s.year;
+        let term = terms[s.term];
+        let val = year+", "+term;
+        let opt = new Option(val);
+        opt.value = val;
+        session1.append(opt);
+        opt = new Option(val);
+        opt.value = val;
+        session2.append(opt);
+    })
+   let s1 = sessions[0];
+   let s2 = sessions[1];
+   session1.value = s2.year+", "+terms[s2.term];
+  session2.value = s1.year+", "+terms[s1.term];
+    session1.disabled = true;
+    session2.disabled = true;
+    
+    var sections = await getSections();
+    let sectionsHeading = rroles.map(role=> role.resource.section);
+    for (const sectId in sections){
+        if (!sectionsHeading.includes(sectId)) continue;
+        let opt = new Option(sectId.toUpperCase());
+        section.append(opt);
+    }
+    
+    session1.onchange = e=>{
+        let ses1 = session1.value;
+        let ses2 = session2.value;
+        let sect = section.value;
+        if (!(ses1 && ses2 && sect)) return
+       
+    }
+    session2.onchange = e=>{
+        //....
+    }
+    
+    section.onchange = async e=>{
+        let ses1 = session1.value;
+        let ses2 = session2.value;
+        let sect = section.value;
+        if (!(ses1 && ses2 && sect)) return;
+        let sectionId = sect.toLowerCase().replaceAll(".", "");
+        let sessionId = key(ses2);
+        let promotionRef = doc(db, schoolId, sectionId, sessionId, "promotion");
+        let promDoc = await getDoc(promotionRef);
+        let classes = sections[sectionId].classes;
+        let promotion;
+        if (promDoc.exists()) promotion = promDoc.data().transitions;
+        else promotion = classes.map(cls => new Object());
+        PromotionTable(promotion, classes, promotionRef, ses1, ses2);
+
+       }
+    
+    
+  async  function PromotionTable(promotion, classes, ref, ses1, ses2){
+      
+        // classes = classes.map(cls=>cls.trim());   
+      
+        tbody.innerHTML = "";
+        let selectedClasses1 =[];
+        let selectedClasses2 =[];
+        fromHead.ondblclick = e=>{
+         /* let cls = selectedClasses1[0];
+            let cls1 = cls
+            .replace(/\d+/g, (match)=> Number(match)+1 )
+            console.log(cls1);*/
+            classes.forEach((cls, i)=>{
+                promotion[i] ??= {};
+                if (promotion[i].status) return;
+                promotion[i].classFrom = cls;
+                //promotion[i].status = 0;
+            })
+            PromotionTable(promotion, classes, ref, ses1, ses2);
+            
+        }
+        toHead.ondblclick = e=>{
+         /* let cls = selectedClasses1[0];
+            let cls1 = cls
+            .replace(/\d+/g, (match)=> Number(match)+1 )
+            console.log(cls1);*/
+            promotion.forEach((transition, i)=>{
+               // transition.classTo = key(transition.classTo);
+               // transition.classFrom = key(transition.classFrom);
+                console.log(transition.classFrom);
+                if (!transition.classFrom) return;
+               // if (transition.status) return;
+                transition.classTo = transition
+                .classFrom
+                .replace(/\d+/g, (match) => Number(match)+1); 
+                transition.performedBy = user.displayName;
+                if (!classes.includes(transition.classTo)) transition.classTo = null; 
+                console.log(transition.classFrom);
+                console.log("Class To", transition.classTo);
+                if (transition.classTo)  transition.status = 1;
+                else transition.status = 0;
+                
+            })
+            PromotionTable(promotion, classes, ref, ses1, ses2);
+            
+        }
+        promotion.forEach(transition=>{
+            let row = tbody.insertRow();
+            let class1 = row.insertCell();
+            class1.innerHTML = "<select><option value=''>From</option></select>";
+            classes.forEach(cls=>{
+                let opt = new Option(cls);
+                opt.value = cls;
+                class1.firstChild.append(opt);
+            })
+            if (transition.classFrom) {
+                class1.firstChild.value = transition.classFrom;
+                selectedClasses1.push(transition.classFrom);
+            }
+           
+            let class2 = row.insertCell();
+             class2.innerHTML = "<select><option value=''>To</option></select>";
+            classes.forEach(cls=>{
+                let opt = new Option(cls);
+                opt.value = cls;
+                class2.firstChild.append(opt);
+            })
+            if (transition.classTo) class2.firstChild.value = transition.classTo;
+            class1.firstChild.onchange = e=>{
+                if (class1.firstChild.value === class2.firstChild.value || selectedClasses1.includes(class1.firstChild.value)) class1.firstChild.value = transition.classFrom;
+                else {
+                    transition.classFrom = class1.firstChild.value;
+                    selectedClasses1.push(class1.firstChild.value);
+                }
+            }
+           class2.firstChild.onchange = e=>{
+                if (class1.firstChild.value === class2.firstChild.value) class2.firstChild.value = transition.classTo;
+                else transition.classTo = class2.firstChild.value;
+               if (transition.classTo){
+                   transition.performedBy = user.name;
+                   transition.status = 1;
+                   PromotionTable(promotion, classes, ref, ses1, ses2);
+
+               }
+            }
+            
+            let status = row.insertCell();
+            const statusCode= {
+                1: "not yet promoted",
+                2: "pending",
+                3: "scheduled",
+                4: "promoted"
+            }
+            status.textContent = transition.status? statusCode[transition.status] : "not yet initiated";
+            status.textContent +=transition.size??"";
+            
+            let performedBy = row.insertCell();
+            performedBy.textContent = transition.performedBy;
+            
+        });
+        promBtn.onclick = async e=>{
+            let ses1Id = key(ses1);
+            let ses2Id = key(ses2);
+            console.log(ses1);            
+            console.log(ses2);
+            let year = ses2.split(",")[0].trim().replaceAll(" ", '');
+            console.log(year);
+            promotion = promotion.filter(t=>!!t.classFrom && !!t.classTo);
+          // return;
+            for (const t of promotion){
+                console.log(t.classFrom, t.classTo);
+                let stdsDoc = await getDoc(doc(db, schoolId, key(session1.value), key(t.classFrom), "students"));
+                let stds = stdsDoc.data()? stdsDoc.data() : {};
+              //  console.log(t.classFrom);
+                let stdWithIds = Object.values(stds).filter(std=>!!std.id)
+                let stdIds = stdWithIds.map(std => std.id);
+                //let q = query(collection(db, schoolId, "db", "students"), where(documentId(), "in", stdIds));
+              //  let stdsSnap = await getDocs(q);
+                stdWithIds.forEach((std, i)=>{
+                 //   console.log(std.id);
+                    //let std = stds[id]; //stdDoc.data();
+                    std.class = t.classTo.toLowerCase();
+                    std.yearOfLastPromotion = year;
+                    delete std.subjects;
+                    console.log(std.religion);
+                    batch.set(doc(db, schoolId, "db", "students", std.id.replaceAll("/", "_")), std);
+                });
+                t.status = "promoted with yolp: "+year;
+                let idSet = new Set(stdWithIds.map(std=>std.id));
+                if (idSet.size !== stdWithIds.length) throw "identical ids found";
+            }
+            await batch.commit();
+            saveBtn.click();
+            alert("Done!");
+            window.location.reload();
+           // await setDoc(ref, {transitions:promotion}, {merge: true});   
+         //   alert("Done!"); 
+            
+          }
+      
+       saveBtn.onclick = async e=>{
+           promotion = promotion.filter(t=>{
+               t.performedBy = user.name;
+               return !!t.classFrom && !!t.classTo
+           });
+           console.log(JSON.stringify(promotion));
+           await setDoc(ref, {transitions:promotion}, {merge: true}); 
+           alert("Saved!");
+       }
+        
+    }
+    
+  async function getSessions(){
+    let sessionsRef = doc(db, schoolId, "sessions");
+    let sessionsDoc = await getDoc(sessionsRef);
+    if (sessionsDoc.exists())
+    return sessionsDoc.data()
+    .sessions
+    .sort((a, b)=>b.no - a.no);
+    return [];
+}
+    
+async function getSections(){
+     let sectRef = doc(db, schoolId, "section");
+     let sectDoc = await getDoc(sectRef);
+     if (sectDoc.exists()) return sectDoc.data()
+     return {};
+ }
+
+   
+    
+    function key(token){
+    return token.trim().replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+  }
+    </script>
+</body>
+</html>
