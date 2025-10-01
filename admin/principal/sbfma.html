@@ -242,7 +242,7 @@ details ol li::before {
               let tchList = document.createElement("ul");
               Object.keys(teachers).sort((a,b)=>teachers[a].name.localeCompare(teachers[b].name)).forEach(tId => {
                 let teacher = teachers[tId];
-                if (!combSectsTeachers.includes(tId)) return;
+                if (!combSectsTeachers.map(t=>t.id).includes(tId)) return;
                // let teacher = teachers[username];
                 let list = document.createElement("li");
                 list.innerHTML = teacher.name + "<hr>";
@@ -259,7 +259,7 @@ details ol li::before {
                    let username = fm.getAttribute("data-username");
                    fm.setAttribute("data-username", teacher.username);
                    if (!teacher.role.fm.includes(clas)) 
-                   teacher.role.fm.push(clas);
+                   teacher.role.fm =[clas];
                    return username;
                }
                 if (teacher.role.fm.includes(clas)){
