@@ -288,7 +288,7 @@ let sectionDoc = await getDoc(sectionRef);
     if (!clas) return;
     row.classList.add("record");
     console.log(result.picURL);
-    let picURL = result.picURL;
+    let picURL = optimizeCloudinaryUrl(result.picURL??'');
       row.innerHTML = `
       <td class="passport">
       <img src="${picURL}">
@@ -373,6 +373,7 @@ let sectionDoc = await getDoc(sectionRef);
           result.religion = relIn.value; //.toLowerCase();
       }
     relIn.value = result.religion;
+    console.log(result.id, result.religion);
      if (result.gender.toLowerCase()[0]=="m" || result.gender.toLowerCase()[0] == "f") 
       genderIn.value = !result.gender? "" : result.gender.toLowerCase();
   
@@ -462,7 +463,7 @@ add.onclick = e=>{
       console.log(cbsIds);
       console.log(Object.keys(stds));
       console.log(year === activeYear);
-    if (count !== cbCount && year === activeYear) {
+    if (count  !== cbCount && year === activeYear) {
       //alert(); return;
         let gStdsDoc = await getDocs(q);
         let stdIds =[];
@@ -477,8 +478,8 @@ add.onclick = e=>{
             stdIds.push(id);
             if (!stds[id]) {
               std.picURL ??="";
-               let {name, gender, id, picURL} = std;
-               stds[id] = {name, gender, id, picURL};
+               let {name, gender, id, picURL, religion} = std;
+               stds[id] = {name, gender, id, picURL, religion};
               console.log(std.gender, std.name, std.picURL);
            }           
         });
@@ -592,6 +593,10 @@ function isEqual(a, b) {
   return keysA.every(key => keysB.includes(key) && isEqual(a[key], b[key]));
 }
 
+  
+  function optimizeCloudinaryUrl(url, params = "f_auto,q_auto") {
+  return url.replace("/upload/", `/upload/${params}/`);
+}
   </script>
 </body>
 </html>
