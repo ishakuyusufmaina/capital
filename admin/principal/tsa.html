@@ -127,8 +127,9 @@
           let option = document.createElement('option');
           option.value = key;
           option.textContent = teacher.name;
-          
-          if (sections[sectK].teachers.includes(key)) {
+         // console.log(JSON.stringify(sections[sectK].teachers));
+          //console.log(teacher.name,  key);
+          if (sections[sectK].teachers.map(t=>t.id).includes(key)) {
             option.selected = true;
             if (lastAddedTeacher){
               lastAddedTeacher.insertAdjacentElement("afterend", option);
@@ -140,7 +141,8 @@
         });
 
         select.addEventListener('change', (e) => {
-         let selectedTeachers = Array.from(select.selectedOptions).map(opt =>opt.value );
+         let selectedTeachers = Array.from(select.selectedOptions).map(opt =>({id: opt.value, name: teachers[opt.value].name}));
+         // selectedTeachers.forEach(t=>console.log(JSON.stringify(t)));
          sections[sectK].teachers = Array.from(new Set(selectedTeachers));
         });
 
