@@ -236,6 +236,7 @@ await  render();
         let scores = student.subjects[subjK][termIndex];
         let sum = 0;
         scores.exam??="-";
+        scores.exam = String(scores.exam);
         scores.subject = subj;
         sum +=Number(scores.exam.replace("-", 0))??0;
         assessments.forEach((asm, i)=>{
