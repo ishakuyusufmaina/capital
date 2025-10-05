@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STUDENT</title>
+  <style>
+    :root {
+      --primary: #4f8cff;
+      --primary-hover: #3b6fd9;
+      --bg: #121212;
+      --card: #1e1e1e;
+      --text: #ffffff;
+      --muted: #aaaaaa;
+      --border: #2a2a2a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* Form controls */
+    select, input[type="text"] {
+      padding: 0.6rem 0.8rem;
+      margin: 0.5rem 0.4rem 1rem 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--primary);
+    }
+
+    /* Buttons */
+    button {
+      display: inline-block;
+      margin: 1rem 0.4rem 0;
+      padding: 0.7rem 1.5rem;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+    }
+    button:active {
+      transform: scale(0.97);
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background: var(--card);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    th {
+      background: #1a1a1a;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Passport image */
+    .passport img {
+      width: 90px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: #222;
+      padding: 2px;
+      transition: transform 0.2s;
+    }
+
+    .passport img:hover {
+      transform: scale(1.05);
+    }
+
+    /* Responsive table */
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead {
+        display: none;
+      }
+      tr {
+        margin-bottom: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--card);
+      }
+      td {
+        text-align: left;
+        border: none;
+        padding: 0.8rem;
+        position: relative;
+      }
+      td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 0.3rem;
+        font-size: 0.8rem;
+      }
+    }
+    
+    input[type='file']{
+        display: inline: block;
+        height:0;
+        width: 0;
+    }
+  .name {
+    border: 1px solid white;
+  }
+  </style>
+</head>
+<body>
+  <h1>Students</h1>
+  <div>
+    <select id="sessionSelect">
+      <option> -select session- </option>
+    </select>
+    <select id="classSelect">
+      <option value=""> -select class- </option>
+    </select>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Passport</th>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Gender</th>
+      </tr>
+    </thead>
+    <tbody id="table"></tbody>
+  </table>
+
+  <button id="add">Add</button>
+  <button id="saveBtn">Save</button>
+
+  
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, deleteDoc, getDocs, getCountFromServer, collection, query, where, updateDoc, arrayUnion, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+}; 
+  
+  
+  const schoolId = "capital";
+     // Replace with your Cloudinary details
+          const cloudName = "daktkkz2k"; // Replace with your Cloudinary cloud name
+      const uploadPreset = "passport"; // Replace with your unsigned preset
+
+    
+   // const schoolId = "alhidayah";
+      const app = initializeApp(firebaseConfig);
+    //  const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    let currentStudents = null;
+    
+    const terms = ["first term", "second term", "third term"];
+
+  let sessionsRef = doc(db, schoolId, "sessions");
+  //let studentsRef = doc(db, schoolId, "classes");
+  const sessionsDoc = await getDoc(sessionsRef);
+  var sessionIndex;
+    
+  if (sessionsDoc.exists()){
+      
+     let sessions = sessionsDoc.data().sessions      
+     sessions =  sessions.sort((a, b)=>b.no - a.no);
+    sessions.forEach((session, i)=>{
+      let year = session.year;
+      let opt = document.createElement("option");
+      opt.innerHTML = year + ", " + terms[session.term];
+      sessionSelect.appendChild(opt);
+        opt.dataset.index = i;
+        if (i==0){
+            opt.selected = true;           
+        }
+       
+    });
+      sessionIndex = 0;
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+  
+  
+  let sectionRef = doc(db, schoolId, "section");
+let sectionDoc = await getDoc(sectionRef);
+/* if (sectionDoc.exists()){
+   let sections = sectionDoc.data();
+     
+   let keys = Object.keys(sections);
+   
+   keys.forEach(key=>{
+       let optG = document.createElement("optgroup");
+       optG.label = key;
+       let classes = sections[key].classes;
+       classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
+       classSelect.append(optG);
+   });
+
+ }*/
+  
+  
+ onAuthStateChanged(auth, async user=>{ 
+       if (!user) return;
+       let id = user.email.replace(/@.*/, "");
+      let teachers = (await getDoc(doc(db, schoolId, "teachers"))).data()
+       let teacher = teachers[id];
+       if (sectionDoc.exists()){
+           let sections = sectionDoc.data();
+           let hosSects = teacher.role.hos.sections;
+           let keys = Object.keys(sections);
+           hosSects.forEach(key=>{
+               let optG = document.createElement("optgroup");
+               optG.label = key;
+               let classes = sections[key].classes;
+               classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
+               classSelect.append(optG);
+           });
+       }
+       
+   })
+  
+
+  function addRow(result){
+    //console.log(result.gender=="Male");
+    //result.name = nameIn.textContent.toLowerCase().trim();
+    result.names = result.name.toLowerCase().split(" ");
+    const container = document.getElementById('table');
+    const row = document.createElement('tr');
+    let clas = key(classSelect.value);
+    if (!clas) return;
+    row.classList.add("record");
+    console.log(result.picURL);
+    let picURL = optimizeCloudinaryUrl(result.picURL);
+      row.innerHTML = `
+      <td class="passport">
+      <img src="${picURL}">
+      <input type="file" accept="image/*" capture="environment" id="cameraInput">
+      </td>
+      <td class="id">${result.id??"Not Yet Generated"}</td>
+       <td class="name" contenteditable>
+        ${result.name.toUpperCase()}
+      </td> 
+      <td>
+         <select class="gender">
+            <option value=""> -select gender- </option>
+            <option value="female">Female</option>
+           <option value="male">Male</option>
+        </select>
+    
+    </td>    
+    <td>
+    <select class="religion" value="Islam">
+         <option value=""> -select religion- </option>
+         <option value="Islam">Muslim</option>
+         <option value="Christian">Christian</option>
+    </select>
+    </td>
+      `;
+     row.querySelector(".id").ondblclick = async e=>{
+       if (!result.id) return;
+       if (window.confirm("Are you sure you want to delete this student?")){
+         let docId = result.id.replaceAll("/", "_");
+         await deleteDoc(doc(db, schoolId, "db", "students", docId));
+         alert("Done!");
+       }
+     }
+      container.appendChild(row);
+      let psp = row.querySelector(".passport");
+      let imgIn = psp.querySelector("input");
+      let preview = psp.querySelector("img");
+      imgIn.onchange = async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+    
+      // Show temporary preview
+      
+      // Prepare upload
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", uploadPreset);
+
+      try {
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+          { method: "POST", body: formData }
+        );
+        const data = await res.json();
+        preview.src = data.secure_url; // Final Cloudinary URL
+        console.log("Uploaded to Cloudinary:", data);
+        result.picURL = data.secure_url;
+       /* if (result.id){
+          await setDoc(doc(db, schoolId, "db", "students", id.replaceAll("/", "_")), {picURL: data.secure_url}, {merge:true});
+        }*/
+        alert("done!");
+      } catch (err) {
+        alert("Upload failed: " + err.message);
+      }
+    };
+      psp.ondblclick = e=>{
+          imgIn.click();
+      }
+     // row.scrollIntoView();
+     // let id = "std"+result.sn;
+      let nameIn = row.querySelector(".name");
+      nameIn.oninput = e=>{
+          result.name = nameIn.textContent.toLowerCase().trim();
+        result.names = result.name.split(" ");
+      }
+      let genderIn = row.querySelector(".gender");
+      genderIn.onchange = e=>{
+          result.gender = genderIn.value; //.toLowerCase();
+      }
+    let relIn = row.querySelector(".religion");
+      relIn.onchange = e=>{
+          result.religion = relIn.value; //.toLowerCase();
+      }
+    relIn.value = result.religion;
+    console.log(result.id, result.religion);
+     if (result.gender.toLowerCase()[0]=="m" || result.gender.toLowerCase()[0] == "f") 
+      genderIn.value = !result.gender? "" : result.gender.toLowerCase();
+  
+
+  }
+add.onclick = e=>{
+  let result ={
+    sn: table.children.length,
+    name: "",
+    gender: ""
+  }
+  addRow(result);
+  currentStudents["std"+result.sn] = result;
+}
+  
+   /* printBtn.onclick = e=>{
+        window.print();
+    }*/
+  saveBtn.onclick = async e=>{
+    let clas = key(classSelect.value);
+    let session = key(sessionSelect.value);
+    if (!(clas && session)) return;
+    let stdsRef = doc(db, schoolId, session, clas, "students");   
+    if (!currentStudents) return;
+    if (!Object.values(currentStudents).length) return;
+    
+    await runTransaction(db, async transaction=>{
+      let stdsDoc = await transaction.get(stdsRef);
+      let stds = stdsDoc.exists()? stdsDoc.data() : {};
+      for (const stdId in currentStudents){
+        const localStd = currentStudents[stdId];
+        if (stds[stdId] && !isEqual(localStd, stds[stdId]) && stds[stdId].id){
+          //alert();
+         // return;
+         await transaction.update(doc(db, schoolId, "db", "students", stds[stdId].id.replaceAll("/", "_")), localStd);
+        }
+      }
+      await transaction.set(stdsRef, currentStudents);
+   });
+      await loadStudents();
+    alert("saved!");
+    //console.log(JSON.stringify(students));
+     
+  }
+  
+  classSelect.onchange = async e=>{
+    loadStudents();
+  }
+    sessionSelect.onchange = async e=>{
+        if (!e.target.value) return;
+      //console.log(e.target.value); return;
+        loadStudents();
+        let opt = sessionSelect.selectedOptions[0];
+        sessionIndex = opt.dataset.index;
+        console.log(sessionIndex);
+        
+  }
+    
+    
+ 
+    async function loadStudents(){
+        table.innerHTML = "";
+        let clas = key(classSelect.value);
+    let session = key(sessionSelect.value);
+    if (!(clas && session)) return;
+    let cls = classSelect.value.toLowerCase();
+    let year = sessionSelect.value.split(",")[0].trim().replaceAll(" ", "");
+    console.log(year);
+    let yearsNum = sessionsDoc.data().sessions.length;
+    let activeYear = sessionsDoc.data().sessions[yearsNum-1].year.trim().replaceAll(" ", "");
+    console.log(activeYear);
+    console.log(classSelect.value);
+    let q = query(collection(db, schoolId, "db", "students"), where("class", "==", cls));
+    let countSnap = await getCountFromServer(q);
+    let stdCountQ = query(collection(db, schoolId, "db", "students"));
+    let StdCountSnap = await getCountFromServer(stdCountQ);
+    let stdCount = StdCountSnap.data().count;
+    console.log("total student: ", stdCount);
+
+    let count = countSnap.data().count;
+    console.log(count);
+            
+    let stdsRef = doc(db, schoolId, session, clas, "students");
+      console.log(clas, session);
+      
+    let stdsDoc = await getDoc(stdsRef);
+    let stds = stdsDoc.exists()? stdsDoc.data() : {};
+    //class based std id  
+    let cbsIds = Object.values(stds).map(std => std.id).filter(id=> !!id);
+    let cbCount = cbsIds.length;
+     console.log(cbCount);
+      console.log(cbsIds);
+      console.log(Object.keys(stds));
+      console.log(year === activeYear);
+    if (count  !== cbCount && year === activeYear) {
+      //alert(); return;
+        let gStdsDoc = await getDocs(q);
+        let stdIds =[];
+     // return;
+   
+      let gStudents = {};
+        gStdsDoc.forEach(doc=>{
+          
+            let std = doc.data();
+            let id = std.id;
+            console.log(id);
+            stdIds.push(id);
+            if (!stds[id]) {
+              std.picURL ??="";
+               let {name, gender, id, picURL, religion} = std;
+               stds[id] = {name, gender, id, picURL, religion};
+              console.log(std.gender, std.name, std.picURL);
+           }           
+        });
+        let supersetIds = Array.from(new Set(cbsIds.concat(stdIds)));
+        Object.keys(stds)
+      .forEach(id=>{
+            if (!stdIds.includes(id))
+             delete stds[id]
+          console.log(id);
+        });
+      
+        await setDoc(stdsRef, stds);  
+        currentStudents = stds;  
+    }
+    let size = Object.values(stds).length;
+    if (stdsDoc.exists() || size){
+      currentStudents = size? stds : stdsDoc.data();
+      
+
+        
+        let upgradeRef = doc(db, schoolId,"upgrade");
+        
+      // await setDoc(upgradeRef, {upscaledClasses: [clas]});
+     //  alert("Done");
+      
+     //  console.log(upgrade.upscaledClasses);
+      for (const id in currentStudents){
+          
+          let student = currentStudents[id];
+          if (!student.id/*!upgrade.upscaledClasses.includes(clas)*/){
+         if (student.id) throw "Alread ided!";
+              let session = sessionsDoc.data().sessions.sort((a, b)=>b.no - a.no)[sessionIndex];
+               let [y1, y2] = session.year.replaceAll(" ", "").split("/");
+              let t = Number(session.term)+1;              
+            await runTransaction(db, async transaction=>{
+                //if (Number(sessionIndex)) return;
+                let upgradeDoc = await transaction.get(upgradeRef);
+        let upgrade = upgradeDoc.exists()? upgradeDoc.data() : {upscaledClasses: []};
+
+                 let sesDoc = await transaction.get(doc(db, schoolId, key(session.year+terms[session.term])));
+                let stds = (await transaction.get(stdsRef)).data();
+                let lastId = sesDoc.exists()? sesDoc.data().lastStudentId?? 0 : 0;
+                lastId++;
+                console.log(lastId);
+               
+                const lastStdId = `${y1.slice(-2)}/${y2.slice(-2)}/${t}/${lastId}`;
+              /*  let newDoc = await transaction.get(doc(db, schoolId, "db", "students", lastStdId.replaceAll("/","_")));
+                if (newDoc.exists()){
+                    console.log('Conflict!');
+                    return
+                }*/
+                let upStd = {};
+                student.id = lastStdId;
+                upStd.class = classSelect.value.toLowerCase();
+                upStd.id = student.id;
+                console.log(student.name);
+                upStd.names = student.name.trim().split(" ").map(n=>n.toLowerCase());
+                upStd.name = student.name.toLowerCase();
+                upStd.gender = student.gender.toLowerCase();
+                upStd.religion = student.religion?.toLowerCase()?? "";
+                delete stds[id] 
+                stds[lastStdId] = student;
+                await transaction.set(doc(db, schoolId, "db", "students", upStd.id.replaceAll("/", "_")), upStd);
+                await transaction.set(stdsRef, stds);
+                await transaction.set(doc(db, schoolId, key(session.year+terms[session.term])), {lastStudentId: lastId}, {merge:true});
+                console.log(lastStdId);
+             }) 
+          }
+          addRow(student)
+      } 
+      let table = document.getElementById("table");
+      let sortedRows = Array.from(table.children).sort((a, b)=>{
+        let nameA = a.querySelector(".name").textContent.trim();
+        let nameB = b.querySelector(".name").textContent.trim();
+        return nameA.localeCompare(nameB)      
+       });
+      table.append(...sortedRows);
+      //  await updateDoc(upgradeRef, {upscaledClasses: arrayUnion(clas)});
+        console.log("Done");
+        let opt = classSelect.selectedOptions[0];
+      
+    } else 
+        currentStudents = {};
+    }
+  
+  function key(token){
+    return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+    //.toLowerCase();
+  }
+ 
+   
+function isEqual(a, b) {
+  if (a === b) return true;
+
+  if (typeof a !== "object" || a === null ||
+      typeof b !== "object" || b === null) {
+    return false;
+  }
+
+  // Handle arrays separately
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    return a.every((val, i) => isEqual(val, b[i]));
+  }
+
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+
+  if (keysA.length !== keysB.length) return false;
+
+  return keysA.every(key => keysB.includes(key) && isEqual(a[key], b[key]));
+}
+
+  
+  function optimizeCloudinaryUrl(url, params = "f_auto,q_auto") {
+    if (!url || !url.length) return "../../std-pic.jpg";
+    return url.replace("/upload/", `/upload/${params}/`);
+}
+  </script>
+</body>
+</html>
