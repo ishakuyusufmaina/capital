@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <title>Teachers - Name, Username, Password</title>
+  <style>
+  *{
+    box-sizing: border-box;
+  }
+    body {
+      background-color: #f4f7fa;
+        font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+  select {
+       font-family: Arial, sans-serif;
+  }
+
+    form {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    input {
+      padding: 8px;
+      border: 1px solid #333;
+      border-radius: 5px;
+  
+    }
+
+    
+
+    .p-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td{
+      padding: 10px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+ h1, .save-container {
+    display: inline-block;
+ }
+  .save-container {
+    float: right;
+  }
+
+    .center {
+      text-align: center;
+      margin-top: 15px;
+    }
+  
+  
+    .p-table {
+  min-width: 600px; /* ensures large enough width for scrolling */
+}
+
+.table-container {
+  overflow-x: auto;
+  margin: 30px auto;
+}
+  
+  .subject > select {
+    width: 100%;
+    border: none;
+    text-align: right;
+    margin-bottom: 0;
+    margin-top: 20px;
+    border: 0.5px solid;
+    border-top: none;
+    border-radius: 18px;
+   
+   
+  }
+#subjHead {
+  text-align: center;
+}
+  
+  .cell-table * {
+      
+      border-collapse: collapse;
+      margin-top: 20px;
+    border: none;
+    }
+button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.7rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #5c6bc0;
+    }
+  
+  button.delete {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.delete:hover {
+  background-color: #c82333;
+}
+  
+  
+  
+  
+/* Modal background overlay */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* semi-transparent background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  display: none;
+}
+
+/* Modal content styling */
+.modal-content {
+  border: none;
+  border-radius: 10px;
+  padding: 2rem;
+  background: #fff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  min-width: 300px;
+  max-width: 90%;
+}
+
+/* Header */
+.modal-content h3 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Inputs */
+.modal-content input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+/* Buttons */
+.modal-content button {
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1rem;
+  width: fit-content;
+}
+
+/* Close Button styling (optional) */
+#closeBtn {
+  width: fit-content;
+  background-color: #f44336;
+  float: right;
+  margin-bottom: 1rem;
+}
+
+/* Add hover effect */
+.modal-content button:hover {
+  opacity: 0.9;
+}
+  
+  #message {
+    display: none;
+    color: green;
+  }
+  .show#message {
+    display: block;
+  }
+  .error#message {
+    color: red;
+
+      }
+  
+  a {
+    font-size: 1.2rem;
+    color: #4a90e2;
+  }
+
+  </style>
+</head>
+<body>
+  <a href="admin.html"><i class="fas fa-home"></i></a>
+
+  <h1>Teachers</h1>
+  <div class="save-container" >
+      <button id="save">Save</button>
+    </div>
+  <div id="teacherForm" >
+    <div class="table-container">
+    <table class="p-table">
+      <thead>
+        <tr>
+          <th>SN</th>
+          <th>Name</th>
+          <!--th id="subjHead"> 
+            <table>
+              <tr>
+                <th>Subject</th>
+                <th>Class</th>
+              </tr>
+            </table>
+          </th-->
+          <th>Username</th>
+          
+          <!--th>Password</th-->
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="fieldContainer">
+        
+      </tbody>
+    </table>
+  </div>
+    <div>
+      <button type="button" id="add" onclick="addField()">Add Teacher</button>
+    </div>
+       
+  </form>
+  
+  
+  
+      <!-- Modal -->
+  <div id="modal" class="modal">
+  <dialog open class="modal-content">
+   <h3>Create Teacher Account</h3>
+    <p id="message">message</p>
+    <input id="nameIn" placeholder="Name">
+    <br>
+    <input id="usernameIn" placeholder="Username">
+    <br>
+    <button id="createBtn">Create</button>
+    <button id="closeBtn">Close</button>
+
+  </dialog>
+</div>
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+ const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  
+  const schoolId = "capital";
+  const test = true;
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+  
+  
+ add.textContent = "Loading.."; 
+ const user = await new Promise(resolve=> onAuthStateChanged(auth, user=>resolve(user)));
+ let headId = user.email.replace(/@.*/, "");
+  
+    //let sessionsRef = doc(db, schoolId, "sessions");
+    let sectionRef = doc(db, schoolId, "section");
+  let sectionDoc = await getDoc(sectionRef);
+  var subjectDict = new Map();
+  let teachersRef = doc(db, schoolId, "teachers");
+  let teachersDoc = await getDoc(teachersRef);
+
+  const teachers = teachersDoc.data();
+  const head = teachers[headId];
+  let rsects = head.role.hos.sections;
+  let sectTeachers = [];
+ // console.log(JSON.stringify(head));
+  
+  let subjs = [];
+  
+  if (sectionDoc.exists()){
+  let sections = sectionDoc.data();
+    rsects.forEach(key=>{
+    let section = sections[key];
+    let subjects = section.subjects.sort();
+      sectTeachers = sectTeachers.concat(section.teachers.map(t=>t.id));
+  });
+  
+  }
+
+  
+  function presentTeachers(teachers){
+    let container = document.getElementById('fieldContainer');
+    container.innerHTML = "";
+    let vals = Object.values(teachers); //.sort((a, b) => a.name.localeCompare(b.name) );
+   vals = vals.filter(t=> sectTeachers.includes(t.username))
+    vals.sort((a, b) => a.name.localeCompare(b.name) );
+    
+      vals.forEach(val=>{
+      let teacher = val
+      teacher.load ??= {};      
+      addField(teacher);
+      
+    }); 
+  }
+  
+  
+ presentTeachers(teachers)
+  
+  add.textContent = "New Teacher";
+  save.onclick = async e=>{
+    if (!Object.values(teachers)) return;
+    if (!Object.values(teachers).length) return;
+    
+    save.innerHTML = "Saving..";
+    await setDoc(teachersRef, teachers);
+    save.innerHTML = "Saved!";
+    setTimeout(_=>save.innerHTML = "Save", 1500);
+  }
+  
+  usernameIn.oninput = e=>{
+    let val = usernameIn.value;
+    val = val.replaceAll(" ", "").toLowerCase();
+    usernameIn.value=val;
+  }
+  
+  add.onclick =  e=>{
+    openModal();
+    createBtn.onclick = e=>{
+      let name = nameIn.value;
+        let username = usernameIn.value;
+        if (!username) return;
+        if (!name) return;
+      
+        if (teachers[username]){
+          message.innerHTML = username + " alreay exists!";
+          message.classList.add("show", "error");
+          setTimeout(e=>message.classList.remove("show", "error"), 2000);
+          return;
+        }
+        let teacher = {
+          name: name,
+          psw: "123456",
+          username: username,
+          load: {}
+       }
+        addField(teacher);
+      teachers[username] = teacher;
+        nameIn.value="";
+       usernameIn.value = "";
+        message.innerHTML = `${name}'s account has been created!`;
+       message.classList.add("show");
+       setTimeout(e=>message.classList.remove("show"), 2000);
+
+    }
+    
+    closeBtn.onclick = closeModal;
+   
+  }
+ 
+    function addField(teacher) {
+      const container = document.getElementById('fieldContainer');
+      const row = document.createElement('tr');
+      row.classList.add("entry");
+      
+      let name = teacher.name;
+      let psw = teacher.psw;
+      let username = teacher.username;
+     
+      row.innerHTML = `
+       <td class="sn"></td>
+          <td><input type="text" disabled class="name" value="${name}" name="name" placeholder="Name"></td>   
+          <td class="username"><input disabled value="${username}" class="username" name="username" placeholder="Username"></td>
+          <td><button class="assign">assign</button><button class="delete" type="button" onclick="deleteField(this)">remove</button></td>
+          `;
+
+      container.appendChild(row);
+       row.querySelector(".sn").textContent = container.children.length;
+      row.querySelector(".assign").onclick = e=> window.location.href = `teacher.html?username=${username}`;
+
+      row.querySelector(".delete").onclick = e=>deleteField(e.target);
+      
+       }
+
+    function deleteField(btn) {
+      const row = btn.closest('tr');
+      let username = row.querySelector(".username > input").value;
+      delete teachers[username];
+      presentTeachers(teachers);
+     // row.remove();
+    }
+  
+    function openModal() {
+    modal.style = "display: block";
+  }
+
+    function closeModal() {
+      document.getElementById("modal").style = "display: none";
+    }
+    
+  
+ 
+  </script>
+</body>
+</html>
