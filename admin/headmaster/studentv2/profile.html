@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Profile</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --background: #f3f4f6;
+      --text: #1f2937;
+      --border: #d1d5db;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      max-width: 700px;
+      width: 100%;
+      overflow: hidden;
+      padding: 2rem;
+    }
+
+    .top {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .top img {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+    //  border: 4px solid var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-weight: bold;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0.4rem;
+      font-size: 1rem;
+    }
+
+    .form-group input[readonly] {
+      background-color: #f9fafb;
+      color: #6b7280;
+    }
+
+    .links {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .links a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .submit-btn {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    .submit-btn button {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 1.5rem;
+      }
+    }
+  
+  
+  
+  .loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(6px);
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.ripple {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.ripple::before,
+.ripple::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 4px solid #007bff;
+  border-radius: 50%;
+  animation: rippleAnim 1.5s infinite;
+}
+
+.ripple::after {
+  animation-delay: 0.75s;
+}
+
+@keyframes rippleAnim {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <div class="ripple"></div>
+  </div>
+  <div class="card">
+    <div class="top">
+      <img src="" id="pic" alt="Profile Picture">
+      <h2>Student Profile</h2>
+    </div>
+
+    <form id="profileForm">
+      <!-- Editable (starred) fields -->
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" value="" required>
+      </div>
+
+      <div class="form-group">
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender" required>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob" name="dob" value="" required>
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" name="status" required>
+          <option value="Active">Active</option>
+          <option value="Graduated">Graduated</option>
+          <option value="Transferred">Transferred</option>
+          <option value="Defaulter">Defaulter</option>
+          <option value="Suspended">Suspended</option>
+          <option value="Dismissed">Dismissed</option>
+        </select>
+      </div>
+
+      <!-- Read-only fields -->
+      <div class="form-group">
+        <label for="id">ID Number</label>
+        <input type="text" id="id" name="id" value="" readonly>
+      </div>
+
+      <div class="form-group">
+        <label for="classSelect">Class</label>
+        <select type="text" id="classSelect" name="class" value="" multiple>
+        </select>
+      </div>
+
+      <div class="submit-btn">
+        <button type="submit">Update Profile</button>
+      </div>
+    </form>
+
+    <!--div class="links">
+      <a href="#">View ID Card</a>
+      <a href="#">Parent</a>
+    </div-->
+  </div>
+
+  <!-- JavaScript -->
+<script type="module">
+  /*
+  precondition: session must be already created;
+  */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  
+  const schoolId="capital";
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+
+  let student = JSON.parse(localStorage.getItem("student"));
+  //let id = student.id
+  console.log(student.id);
+  const stdRef = doc(db, schoolId, "db", "students", student.id.trim().replaceAll("/", ""));
+  let stdDoc = await getDoc(stdRef);
+  document.querySelector(".loader").style.display = "none";
+ 
+  student = stdDoc.data();
+    document.getElementById("name").value = student.name.toUpperCase().trim();
+    document.getElementById("gender").value = student.gender;
+    document.getElementById("dob").value = student.dob;
+     document.getElementById("status").value = student.status ?? "active";;
+  document.getElementById("id").value = student.id;
+  document.getElementById("pic").src = student.picURL;  
+  console.log(student.gender, student.status)
+  const sections = (await getDoc(doc(db, schoolId, "section"))).data();
+/*  let user = await new Promise(resolve=>onAuthStateChanged(auth, user=>resolve(user)));
+  let id = user.email.replace(/@.* /, "");
+  user = (await getDoc(doc(db, schoolId, "db", "staff", id))).data();
+  const rroles = user.roles.filter(role=>role.code=="hosec");
+  const mySections = rroles.map(role=>role.resource.section);*/
+  for (const sectId in sections){
+ //   if (!mySections.includes(sectId)) continue;
+    let section = sections[sectId];
+    section.classes.forEach(cls=>{
+      let opt = new Option(cls.toUpperCase());
+      opt.value = cls; //.toLowerCase();
+      classSelect.append(opt);
+      if (student.classes.includes(cls)) opt.selected = true;
+    })
+  }
+  
+  classSelect.onchange = e=>{
+    student.classes = Array.from(classSelect.selectedOptions).map(opt=>opt.value);
+    console.log(student.classes);
+  }
+  
+  //document.getElementById("classSelect").value = student.class //.toLowerCase();
+
+
+    document.getElementById("profileForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const gender = document.getElementById("gender").value;
+      const dob = document.getElementById("dob").value;
+      const status = document.getElementById("status").value;
+      student.name = name.trim().toLowerCase();
+      student.names = student.name.split();
+      student.gender = gender; //.toLowerCase();
+      student.dob = dob;
+      student.status = status;//.toLowerCase();
+      
+      await setDoc(stdRef, student, {merge:true});
+      alert("Updated!");
+     // this.reset();
+     /* alert(
+        "Updated Info:\n\n" +
+        "Name: " + name + "\n" +
+        "Gender: " + gender + "\n" +
+        "Date of Birth: " + dob + "\n" +
+        "Status: " + status
+      );*/
+    });
+      
+      function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "").trim();
+    }
+  </script>
+
+</body>
+</html>

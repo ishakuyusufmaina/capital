@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Diary</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 1rem;
+      background-color: #f7f9fc;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .entry {
+      background: #fff;
+      border-left: 5px solid #4a90e2;
+      padding: 1rem;
+      margin: 1rem auto;
+      max-width: 700px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+
+    .meta {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 0.5rem;
+    }
+
+    .status {
+      font-weight: bold;
+      text-transform: capitalize;
+    }
+
+    .status.delivered {
+      color: green;
+    }
+
+    .status.pending {
+      color: orange;
+    }
+
+    .status.failed {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Student Diary</h1>
+  <div id="diaryContainer"></div>
+
+  <script>
+    const diary = {
+      message1: {
+        content: "Homework should be submitted by Friday.",
+        timestamp: "2025-07-26T10:30:00Z",
+        deliveryStatus: "delivered",
+        teacher: "Mr. Ahmed"
+      },
+      message2: {
+        content: "Reminder: Test on Monday.",
+        timestamp: "2025-07-25T14:20:00Z",
+        deliveryStatus: "pending",
+        teacher: "Mrs. Bello"
+      },
+      message3: {
+        content: "Project presentation moved to next week.",
+        timestamp: "2025-07-20T08:00:00Z",
+        deliveryStatus: "failed",
+        teacher: "Mr. John"
+      }
+    };
+
+    const container = document.getElementById('diaryContainer');
+
+    Object.values(diary).forEach(msg => {
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+
+      const content = `<p>${msg.content}</p>`;
+      const meta = `
+        <div class="meta">
+          <span><strong>Teacher:</strong> ${msg.teacher}</span><br>
+          <span><strong>Time:</strong> ${new Date(msg.timestamp).toLocaleString()}</span><br>
+          <span class="status ${msg.deliveryStatus}"><strong>Status:</strong> ${msg.deliveryStatus}</span>
+        </div>
+      `;
+
+      entry.innerHTML = content + meta;
+      container.appendChild(entry);
+    });
+  </script>
+</body>
+</html>

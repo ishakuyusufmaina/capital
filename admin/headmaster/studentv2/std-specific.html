@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Profile</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f7fa;
+      color: #333;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: auto;
+      padding: 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+      gap: 1rem;
+    }
+
+    .header img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .info {
+      flex: 1;
+    }
+
+    .info h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .info p {
+      margin: 0.2rem 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .badge.active { background: #e0f7e9; color: #1e7f3a; }
+    .badge.graduated { background: #e8f0ff; color: #1e40af; }
+    .badge.transfered, .badge.dismissed, .badge.suspended, .badge.defaulter {
+      background: #ffe5e5; color: #a80000;
+    }
+
+    .section {
+      padding: 1rem;
+    }
+
+    .section h3 {
+      margin-bottom: 0.5rem;
+    }
+
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+
+    .link-card {
+      background: #f0f4f8;
+      padding: 0.75rem;
+      border-radius: 8px;
+      text-align: center;
+      transition: background 0.3s;
+    }
+
+    .link-card:hover {
+      background: #dfe9f2;
+    }
+
+    .link-card a {
+      text-decoration: none;
+      color: #2c3e50;
+      font-weight: 500;
+    }
+
+    .fee-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+
+    .fee-status .status {
+      font-weight: bold;
+    }
+
+    .fee-status .status.paid { color: #2e7d32; }
+    .fee-status .status.unpaid { color: #c62828; }
+    .fee-status .status.incomplete { color: #f57c00; }
+
+    @media (max-width: 600px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .header img {
+        margin-bottom: 0.5rem;
+      }
+
+      .fee-status {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+      }
+    }
+  .fee-status {
+    box-sizing: border-box;
+    padding-left: 12px;
+    border-left: 4px solid #007bff;;
+  }
+  .button-primary {
+  background-color: indianred; //coral; //#007bff;
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button-primary:hover {
+  background-color: #0056b3;
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <img id="student-photo" src="" alt="Student Photo">
+        <div class="info">
+          <h2 id="student-name"></h2>
+          <p>ID Number: <span id="student-id"></span></p>
+          <p>Class: <span id="student-class"></span></p>
+          <p>House: <span id="student-house"></span></p>
+
+          <span id="student-status" class="badge active">Active</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <!--h3>Quick Links</h3-->
+        <div class="links-grid">
+          <div class="link-card"><a id="profile-link" href="profile.html">Profile</a></div>
+          <div class="link-card"><a id="performance-link" href="#">Performance</a></div>
+          <div class="link-card"><a id="diary-link" href="#">Diary</a></div>
+          <div class="link-card"><a id="remarks-link" href="#">Comments</a></div>
+          <!--div class="link-card"><a id="idcard-link" href="#">ID Card</a></div -->
+        </div>
+      </div>
+
+
+      <div class="section school-fee">
+              <hr>
+          <button class="button-primary">Delete</button>
+     </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Example data
+  /*  const student = {
+      name: "Yusuf Maina",
+      photoURL: "std.png",
+      id: "STU202503",
+      class: "SSS 3A",
+      profileURL: "profile.html",
+      idCardURL: "id-card.html",
+      performanceURL: "performance/index.html",
+      remarksURL: "comments.html",
+      diaryURL: "diary.html",
+      status: "active", // could be: transfered, dismissed, etc.
+      SchoolFees: {
+        status: "paid", // paid, unpaid, incomplete
+        paymentHistoryURL: "school-fees-hx.html"
+      }
+    };*/
+
+  let student = JSON.parse(localStorage.getItem("student"));
+    // Populate the HTML with actual data
+    document.getElementById("student-name").textContent = student.name.toUpperCase();
+    document.getElementById("student-id").textContent = student.id;
+    document.getElementById("student-house").textContent = student.house.toUpperCase();
+    document.getElementById("student-class").textContent = student.classes.toString().toUpperCase();
+    document.getElementById("student-photo").src = student.picURL;
+    document.getElementById("student-status").textContent = student.status.charAt(0).toUpperCase() + student.status.slice(1);
+    document.getElementById("student-status").className = "badge " + student.status?.toLowerCase();
+
+    document.getElementById("profile-link").href = "profile.html";
+    document.getElementById("performance-link").href = "#"//"performance/index.html"; //student.performanceURL;
+    document.getElementById("diary-link").href = "#"//"diary.html"; //student.diaryURL;
+    document.getElementById("remarks-link").href ="#"// "comments.html"; //student.remarksURL;
+    //document.getElementById("idcard-link").href = "#"// "id-card.html"; //student.idCardURL;
+
+    document.getElementById("student-status").textContent = student.status; //.charAt(0).toUpperCase() + student.SchoolFeeStatus.slice(1);
+    //document.getElementById("fee-status").className = "status " + student.SchoolFeeStatus;
+  //  document.getElementById("payment-history-link").href = "#"; student.SchoolFees.paymentHistoryURL;
+  </script>
+</body>
+</html>

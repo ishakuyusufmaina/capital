@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Direct Camera Upload to Cloudinary</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    input { margin: 15px 0; }
+    img { max-width: 100%; margin-top: 15px; border: 2px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h2>Take Photo & Upload to Cloudinary</h2>
+
+  <!-- Camera Input (opens camera directly on mobile) -->
+  <input type="file" accept="image/*" capture="environment" id="cameraInput">
+
+  <!-- Preview after upload -->
+  <img id="preview" alt="Uploaded image will appear here"/>
+
+  <script>
+    const cameraInput = document.getElementById("cameraInput");
+    const preview = document.getElementById("preview");
+
+    // Replace with your Cloudinary details
+          const cloudName = "daktkkz2k"; // Replace with your Cloudinary cloud name
+      const uploadPreset = "passport"; // Replace with your unsigned preset
+
+    cameraInput.onchange = async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      let size = getFileSizeMB(file);
+      alert(size + "MB");
+      // Show temporary preview
+      return;
+      // Prepare upload
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", uploadPreset);
+
+      try {
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+          { method: "POST", body: formData }
+        );
+        const data = await res.json();
+        preview.src = data.secure_url; // Final Cloudinary URL
+        console.log("Uploaded to Cloudinary:", data);
+        alert("done!");
+      } catch (err) {
+        alert("Upload failed: " + err.message);
+      }
+    };
+  
+  
+  function getImageSize(fileOrUrl) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+
+    // Handle File object (from input or camera)
+    if (fileOrUrl instanceof File) {
+      img.src = URL.createObjectURL(fileOrUrl);
+    } else {
+      img.src = fileOrUrl; // URL string
+    }
+
+    img.onload = () => {
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+
+    img.onerror = (err) => reject(err);
+  });
+}
+  
+  function getFileSizeMB(file) {
+  if (!(file instanceof File)) {
+    throw new Error("Input must be a File object");
+  }
+  return (file.size / (1024 * 1024)).toFixed(2); // size in MB, 2 decimals
+}
+  </script>
+</body>
+</html>

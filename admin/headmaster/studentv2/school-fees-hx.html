@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>History of School Fees</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #007BFF;
+      color: white;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        margin-bottom: 20px;
+        background: #f9f9f9;
+        padding: 10px;
+        border-radius: 10px;
+      }
+
+      td {
+        padding: 10px;
+        text-align: right;
+        position: relative;
+      }
+
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        text-align: left;
+        font-weight: bold;
+        color: #555;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>History of School Fees</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Session</th>
+          <th>Amount Paid</th>
+          <th>Balance</th>
+          <th>Time, Place & Person Stamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-label="Session">2022/2023</td>
+          <td data-label="Amount Paid">₦45,000</td>
+          <td data-label="Balance">₦5,000</td>
+          <td>2023-03-14, Admin Block, Mr. Johnson</td>
+        </tr>
+        <tr>
+          <td data-label="Session">2021/2022</td>
+          <td data-label="Amount Paid">₦50,000</td>
+          <td data-label="Balance">₦0</td>
+          <td>2022-02-10, Bursary, Mrs. Okafor</td>
+        </tr>
+        <tr>
+          <td data-label="Session">2020/2021</td>
+          <td data-label="Amount Paid">₦48,000</td>
+          <td data-label="Balance">₦2,000</td>
+          <td>2021-03-01, Online, Mr. James</td>
+        </tr>
+        <!-- Add more rows as needed -->
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

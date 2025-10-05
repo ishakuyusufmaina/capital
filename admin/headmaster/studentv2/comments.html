@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teacher Comments</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f6f8;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .comment {
+      border-bottom: 1px solid #e0e0e0;
+      padding: 15px 0;
+    }
+
+    .comment:last-child {
+      border-bottom: none;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    .teacher {
+      font-weight: 600;
+      color: #007BFF;
+    }
+
+    .time {
+      font-style: italic;
+      color: #888;
+    }
+
+    .content {
+      margin-top: 8px;
+      font-size: 1rem;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      .meta {
+        flex-direction: column;
+      }
+
+      .time {
+        margin-top: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Teacher Comments</h2>
+
+    <div class="comment">
+      <div class="meta">
+        <span class="teacher">Mr. Adewale</span>
+        <span class="time">2025-06-15 10:45 AM</span>
+      </div>
+      <div class="content">
+        The student has shown significant improvement in mathematics. Keep encouraging practice at home.
+      </div>
+    </div>
+
+    <div class="comment">
+      <div class="meta">
+        <span class="teacher">Mrs. Okoro</span>
+        <span class="time">2025-05-22 03:20 PM</span>
+      </div>
+      <div class="content">
+        Needs to pay more attention during English lessons. Reading skills are developing but slowly.
+      </div>
+    </div>
+
+    <div class="comment">
+      <div class="meta">
+        <span class="teacher">Mr. Bello</span>
+        <span class="time">2025-04-30 09:10 AM</span>
+      </div>
+      <div class="content">
+        Excellent participation in science projects. Very curious and shows leadership in group tasks.
+      </div>
+    </div>
+
+    <!-- Add more comments here -->
+  </div>
+</body>
+</html>
