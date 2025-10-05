@@ -270,6 +270,8 @@ let sectionDoc = await getDoc(sectionRef);
 
   function addRow(result){
       //console.log(result.gender=="Male");
+    result.names = result.name.toLowerCase().split(" ");
+
     const container = document.getElementById('table');
     const row = document.createElement('tr');
     let clas = key(classSelect.value);
