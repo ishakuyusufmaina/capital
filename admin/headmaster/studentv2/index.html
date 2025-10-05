@@ -397,7 +397,7 @@
     resultElm.className = "resultElm";
 
     resultElm.innerHTML = `
-      <img src="${student.picURL}" alt="Picture of ${student.name}" class="studentPic">
+      <img src="${optimizeCloudinaryUrl(student.picURL??'')}" alt="Picture of ${student.name}" class="studentPic">
       <div class="studentInfo">
         <div class="studentId">${student.id.toUpperCase()}</div>
         <div class="studentName">${student.name.toUpperCase()}</div>
@@ -412,6 +412,11 @@
     }
     container.appendChild(resultElm);
   });
+}
+  
+  
+  function optimizeCloudinaryUrl(url, params = "f_auto,q_auto") {
+  return url.replace("/upload/", `/upload/${params}/`);
 }
   </script>
 </body>
