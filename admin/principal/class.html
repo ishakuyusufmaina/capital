@@ -281,14 +281,16 @@ let sectionDoc = await getDoc(sectionRef);
   
 
   function addRow(result){
-      //console.log(result.gender=="Male");
+    //console.log(result.gender=="Male");
+    result.name = nameIn.textContent.toLowerCase().trim();
+    result.names = result.name.split(" ");
     const container = document.getElementById('table');
     const row = document.createElement('tr');
     let clas = key(classSelect.value);
     if (!clas) return;
     row.classList.add("record");
     console.log(result.picURL);
-    let picURL = result.picURL;
+    let picURL = optimizeCloudinaryUrl(result.picURL??'');
       row.innerHTML = `
       <td class="passport">
       <img src="${picURL}">
@@ -593,6 +595,10 @@ function isEqual(a, b) {
   return keysA.every(key => keysB.includes(key) && isEqual(a[key], b[key]));
 }
 
+  
+  function optimizeCloudinaryUrl(url, params = "f_auto,q_auto") {
+  return url.replace("/upload/", `/upload/${params}/`);
+}
   </script>
 </body>
 </html>
