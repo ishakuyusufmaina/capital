@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloud Storage Dashboard</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .dashboard {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+      padding: 35px 40px;
+      width: 400px;
+      max-width: 90%;
+      text-align: left;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #0f172a;
+      font-size: 20px;
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 1.05rem;
+    }
+
+    .label {
+      color: #475569;
+      font-weight: 500;
+    }
+
+    .value {
+      font-weight: 600;
+      color: #0284c7;
+    }
+
+    .negative {
+      color: #dc2626;
+    }
+
+    .input-group, .bill-icon{
+      margin-top: 25px;
+    }
+  
+
+    .input-group input, .bill-icon * {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      outline: none;
+      font-size: 0.95rem;
+    }
+  
+  .bill-icon {
+    text-align: right;
+    font-size: 500px;
+    width: 100%;
+  }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+    }
+
+    button {
+      flex: 1;
+      margin: 0 5px;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #settleBtn {
+      background: #dc2626;
+      color: white;
+    }
+
+    #settleBtn:hover {
+      background: #b91c1c;
+    }
+
+    #fundBtn {
+      background: #16a34a;
+      color: white;
+    }
+
+    #fundBtn:hover {
+      background: #15803d;
+    }
+  .credit, .input-group {
+    display: none;
+  }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard">
+    <h2>Cloud Storage and Billing💳</h2>
+    <hr>
+    <div class="stat">
+      <span class="label">Upscaling Rate</span>
+      <span id="coun" class="value">₦200/Student</span>
+    </div>
+    <div class="stat">
+      <span class="label">Students upscaled</span>
+      <span id="count" class="value">0</span>
+    </div>
+
+    <div class="stat credit">
+      <span class="label credit">Credit (₦)</span>
+      <span id="credit" class="value">0</span>
+    </div>
+
+    <div class="stat">
+      <span class="label">Balance (₦)</span>
+      <span id="balance" class="value">0</span>
+    </div>
+    
+  
+    <div class="input-group">
+      <input type="number" id="countInput" placeholder="Enter students upscaled" />
+      <input type="number" id="creditInput" placeholder="Enter credit amount (₦)" />
+    </div>
+
+    <div class="buttons">
+      <button id="settleBtn">Settle</button>
+      <button id="fundBtn">Fund</button>
+    </div>
+  </div>
+
+   <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, query, collection, getCountFromServer, onSnapshot, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, updateProfile, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+
+  
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  const schoolId= "capital";
+  let q = query(collection(db, schoolId, "db", "students"));
+  let countSnap = await getCountFromServer(q);
+  let count = countSnap.data().count;
+
+  //  let count = 200;
+  const actRef = doc(db, schoolId, "account");
+  const actSnap = await getDoc(actRef);
+  const acct = actSnap.exists()? actSnap.data() : {balance: 0};
+    let credit = acct.balance-300;
+  console.log(credit);
+    const rate = 200;
+    const countDisplay = document.getElementById("count");
+    const creditDisplay = document.getElementById("credit");
+    const balanceDisplay = document.getElementById("balance");
+
+    const countInput = document.getElementById("countInput");
+    const creditInput = document.getElementById("creditInput");
+
+    function updateDisplay() {
+      const balance = credit - count * rate;
+      countDisplay.textContent = count;
+      creditDisplay.textContent = credit.toLocaleString();
+      balanceDisplay.textContent = balance.toLocaleString();
+      balanceDisplay.classList.toggle("negative", balance < 0);
+    }
+
+    document.getElementById("settleBtn").addEventListener("click", () => {
+      const balance = credit - count * rate;
+      if (balance < 0) {
+       /* alert(`Settled ₦${(-balance).toLocaleString()}`);
+        credit += -balance;
+        updateDisplay();*/
+        console.log(-balance);
+        initilize(-balance);
+      } else {
+        alert("No negative balance to settle!");
+      }
+    });
+
+    document.getElementById("fundBtn").addEventListener("click", () => {
+      const addCredit = parseInt(prompt("Enter student capacity", "0"));
+      if (!isNaN(addCredit) && addCredit > 0) {
+        //credit += addCredit;
+        let amount = addCredit*200;
+        console.log(amount);
+        initilize(amount);
+        updateDisplay();
+      }
+    });
+
+    countInput.addEventListener("input", () => {
+      count = parseInt(countInput.value) || 0;
+      updateDisplay();
+    });
+
+    creditInput.addEventListener("input", () => {
+      credit = parseInt(creditInput.value) || 0;
+      updateDisplay();
+    });
+
+    updateDisplay();
+  
+async  function initilize(amount){
+  const email="maiduguricapitalschool@yahoo.com";
+   const res = await fetch("https://cfx-mainafly.netlify.app/.netlify/functions/initialize", {
+     method: "POST",
+     headers: { "Content-Type": "application/json" },
+     body: JSON.stringify({ email, amount, schoolId }),
+     
+   });
+   const data = await res.json();
+  
+  console.log(data.data.authorization_url);
+   window.location.href = data.data.authorization_url; 
+ }
+  
+ // initilize(100);
+  </script>
+</body>
+</html>
