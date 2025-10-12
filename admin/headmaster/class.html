@@ -22,6 +22,7 @@
       margin: 0;
       padding: 20px;
       line-height: 1.6;
+      position: relative;
     }
 
     h1 {
@@ -155,6 +156,18 @@
   .name {
     border: 1px solid white;
   }
+  
+  iframe {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    display: none;
+    left: 0;
+    top: 0;
+  }
+  iframe.show {
+    display: block;
+  }
   </style>
 </head>
 <body>
@@ -175,6 +188,8 @@
         <th>ID</th>
         <th>Name</th>
         <th>Gender</th>
+        <th>Religion</th>
+        <th>Parent</th>
       </tr>
     </thead>
     <tbody id="table"></tbody>
@@ -183,11 +198,11 @@
   <button id="add">Add</button>
   <button id="saveBtn">Save</button>
 
-  
+  <iframe id="iframe"></iframe>
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, deleteDoc, getDocs, getCountFromServer, collection, query, where, updateDoc, arrayUnion, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, writeBatch, deleteDoc, getDocs, getCountFromServer, collection, query, where, updateDoc, arrayUnion, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
       const firebaseConfig = {
   apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
@@ -202,17 +217,15 @@
   
   const schoolId = "capital";
      // Replace with your Cloudinary details
-          const cloudName = "daktkkz2k"; // Replace with your Cloudinary cloud name
-      const uploadPreset = "passport"; // Replace with your unsigned preset
-
-    
-   // const schoolId = "alhidayah";
-      const app = initializeApp(firebaseConfig);
-    //  const analytics = getAnalytics(app);
-      const auth = getAuth(app);
-    const db = getFirestore(app);
-    
-    let currentStudents = null;
+  const cloudName = "daktkkz2k"; // Replace with your Cloudinary cloud name
+  const uploadPreset = "passport"; // Replace with your unsigned preset
+  // const schoolId = "alhidayah";
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const batch = writeBatch(db);
+  let currentStudents = null;
     
     const terms = ["first term", "second term", "third term"];
 
@@ -284,13 +297,14 @@ let sectionDoc = await getDoc(sectionRef);
     //console.log(result.gender=="Male");
     //result.name = nameIn.textContent.toLowerCase().trim();
     result.names = result.name.toLowerCase().split(" ");
+    const parent = result.parent;
     const container = document.getElementById('table');
     const row = document.createElement('tr');
     let clas = key(classSelect.value);
     if (!clas) return;
     row.classList.add("record");
     console.log(result.picURL);
-    let picURL = optimizeCloudinaryUrl(result.picURL??'');
+    let picURL = optimizeCloudinaryUrl(result.picURL);
       row.innerHTML = `
       <td class="passport">
       <img src="${picURL}">
@@ -315,7 +329,55 @@ let sectionDoc = await getDoc(sectionRef);
          <option value="Christian">Christian</option>
     </select>
     </td>
+    <td class="parent">
+    ${parent? `<a href="parent/profile.html?pin=${parent.pin}">PIN:`+parent.pin+'<br>'+parent.name.toUpperCase()+"</a>"
+    : 
+    '<span >Link parent by</span><button class="pin-link">PIN</button> | <button class="match-link">matching</button>'}
+    </td> 
       `;
+    if (!parent && result.id){
+      row.querySelector(".parent > .pin-link").onclick = e=>{
+        let pin = window.prompt("Enter PIN: ");
+        if (!pin) return;
+        pin = pin.replace(/^0+/, '');
+        let pRef = doc(db, schoolId, "db", "parents", "pin"+pin);      
+        getDoc(pRef)
+        .then(async doc=>{
+          if (!!doc.exists()){
+            let p = doc.data();
+            let stdName = result.name.toUpperCase();
+            let stdId = result.id;
+            let c = classSelect.value;
+            let pName = p.fullname.toUpperCase().trim();
+            if (window.confirm(`Are you sure you want to award ${stdName} (${stdId}) to ${pName} (${p.paddedId})?`)) {
+              result.parent = {pin: p.paddedId, name: p.fullname};
+               batch.update(pRef, {
+                wards: arrayUnion({id: result.id, name: stdName.toLowerCase(), "class": c}),
+                wardIds: arrayUnion(result.id)
+              });
+              e.target.parentElement.innerHTML =  "PIN: "+p.paddedId + "<br>"+p.fullname.toUpperCase() + " (unsaved)";       
+            }//end of if confirm
+          } else {// parent does not exist
+            alert("Parent/guardian with PIN "+ pin+" is not found");
+          }
+        })
+        console.log(pin);
+      }
+      row.querySelector(".parent > .match-link").onclick = async e=>{
+        const p = (await searchAndMatch(result.id, result.name, classSelect.value)).parent;
+        if (!p) return;
+        let c = classSelect.value
+        result.parent = {pin: p.paddedId, name: p.fullname};
+        result.pin = p.paddedId;
+        let pin = result.pin.replace(/^0+/, '');
+        let pRef = doc(db, schoolId, "db", "parents", "pin"+pin);      
+        batch.update(pRef, {
+             wards: arrayUnion({id: result.id, name: result.name.toLowerCase(), "class": c}),
+             wardIds: arrayUnion(result.id)
+        });
+        e.target.parentElement.innerHTML =  "PIN: "+p.paddedId + "<br>"+p.fullname.toUpperCase() + " (unsaved)";       
+      }
+    }
      row.querySelector(".id").ondblclick = async e=>{
        if (!result.id) return;
        if (window.confirm("Are you sure you want to delete this student?")){
@@ -401,7 +463,7 @@ add.onclick = e=>{
     let stdsRef = doc(db, schoolId, session, clas, "students");   
     if (!currentStudents) return;
     if (!Object.values(currentStudents).length) return;
-    
+    await batch.commit();
     await runTransaction(db, async transaction=>{
       let stdsDoc = await transaction.get(stdsRef);
       let stds = stdsDoc.exists()? stdsDoc.data() : {};
@@ -450,6 +512,11 @@ add.onclick = e=>{
     console.log(classSelect.value);
     let q = query(collection(db, schoolId, "db", "students"), where("class", "==", cls));
     let countSnap = await getCountFromServer(q);
+    let stdCountQ = query(collection(db, schoolId, "db", "students"));
+    let StdCountSnap = await getCountFromServer(stdCountQ);
+    let stdCount = StdCountSnap.data().count;
+    console.log("total student: ", stdCount);
+
     let count = countSnap.data().count;
     console.log(count);
             
@@ -480,6 +547,7 @@ add.onclick = e=>{
             stdIds.push(id);
             if (!stds[id]) {
               std.picURL ??="";
+              std.religion ??="";
                let {name, gender, id, picURL, religion} = std;
                stds[id] = {name, gender, id, picURL, religion};
               console.log(std.gender, std.name, std.picURL);
@@ -541,7 +609,8 @@ add.onclick = e=>{
                 upStd.names = student.name.trim().split(" ").map(n=>n.toLowerCase());
                 upStd.name = student.name.toLowerCase();
                 upStd.gender = student.gender.toLowerCase();
-                upStd.religion = student.religion?.toLowerCase()?? "";
+                student.religion??="";
+                upStd.religion = student.religion.toLowerCase();
                 delete stds[id] 
                 stds[lastStdId] = student;
                 await transaction.set(doc(db, schoolId, "db", "students", upStd.id.replaceAll("/", "_")), upStd);
@@ -597,8 +666,28 @@ function isEqual(a, b) {
 
   
   function optimizeCloudinaryUrl(url, params = "f_auto,q_auto") {
-  return url.replace("/upload/", `/upload/${params}/`);
+    if (!url || !url.length) return "../../std-pic.jpg";
+    return url.replace("/upload/", `/upload/${params}/`);
 }
+  
+ async function searchAndMatch(stdId, stdName, stdCls){
+    iframe.src = `parent/match.html?wardId=${stdId}&wardName=${stdName}&wardClass=${stdCls}`;
+   iframe.classList.add("show");
+    return await new Promise(resolve=>{
+      window.addEventListener("message", e=>{
+        if (e.data.fromParentMatching){
+          console.log("Message", JSON.stringify(e.data));
+          resolve(e.data);
+          iframe.classList.remove("show");
+        }
+      })
+    });
+  }
+
+// Usage:
+//const data = await searchAndMatch("child.html");
+//console.log("Got:", data);
+  
   </script>
 </body>
 </html>
