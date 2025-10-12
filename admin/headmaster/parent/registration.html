@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parent & Emergency Contact Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7f8;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 30px auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin-bottom: 15px;
+      color: #444;
+      font-size: 1.4em;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 5px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    input:not(input[type="checkbox"]), select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.95em;
+      box-sizing: border-box;
+      transition: border 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #0077cc;
+      outline: none;
+    }
+
+    button {
+      background: #0077cc;
+      color: #fff;
+      border: none;
+      padding: 12px 18px;
+      font-size: 1em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #005fa3;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 15px;
+        padding: 20px;
+      }
+    }
+  
+  #status {
+    font-weight: bold;
+    color: green;
+  }
+  </style>
+</head>
+<body>
+  
+  <div class="container">
+    <form id="infoForm">
+      <div id="status" ></div>
+      <h2>PARENT/GUARDIAN DATA</h2>
+
+      <div class="form-group">
+        <label for="fullname">Full name *</label>
+        <input type="text" id="fullname" name="fullname" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="father_fullname">Father's Full name* </label>
+        <label><input id="fNameCtr" type="checkbox" name="fSameAsG"> Same as above</label>
+        <input type="text" id="father_fullname" name="fatherFullname" required>
+      </div>
+
+      <div class="form-group">
+        <label for="gender">Gender *</label>
+        <select id="gender" name="gender" required>
+          <option value="">--Select Gender--</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Residential Address *</label>
+        <textarea id="address" name="address" rows="2" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="occupation">Occupation *</label>
+        <input type="text" id="occupation" name="occupation" required>
+      </div>
+
+      <div class="form-group">
+        <label for="work">Place of work *</label>
+        <input type="text" id="work" name="work" required>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone number *</label>
+        <input type="tel" id="phone" name="phone" required pattern="[0-9+ ]+">
+      </div>
+
+      <div class="form-group">
+        <label for="whatsapp">WhatsApp number</label>
+        <input type="tel" id="whatsapp" name="whatsapp" pattern="[0-9+ ]+">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email">
+      </div>
+      
+      
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, serverTimestamp, getCountFromServer, collection, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, updateProfile, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  const schoolId = "capital";
+const ffName= document.getElementById("father_fullname");
+ const fname= document.getElementById("fullname");
+  fNameCtr.oninput = e=>{
+    if (fNameCtr.checked){
+      ffName.value = fname.value;
+      ffName.style.visibility = "hidden";
+    } else {
+      ffName.style.visibility = "visible";
+    }
+  }
+  
+  fname.oninput = e=>{
+    if (fNameCtr.checked){
+      ffName.value = fname.value;
+      //ffName.disabled = true;
+    }
+  }
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+//const schoolId= "alhidayah";
+  const terms = ["first term", "second term", "third term"];
+
+ // let p = (await getDoc(doc(db, schoolId, "db", "parents", "pin10"))).data();
+//  console.log(JSON.stringify(p));
+//  await setDoc(doc(db, schoolId, "db", "parents", "pin1"), p)
+//  alert("Done");
+    document.getElementById("infoForm").addEventListener("submit", async function(e) {
+      e.preventDefault(); // prevent reload
+
+      const formData = new FormData(this);
+      const data = {};
+      formData.forEach((value, key) => {
+        data[key] = value
+        console.log(key);
+      }); //return;
+      await runTransaction(db, async (transaction)=>{
+        let colRef = collection(db, schoolId, "db", "parents");
+        let snapshot = await getCountFromServer(colRef);
+        let count = snapshot.data().count;
+        data.id = Number(count)+1;
+        data.fatherNames = data.fatherFullname.trim().toLowerCase().split(" ");
+        data.guardianNames = data.fullname.trim().toLowerCase().split(" ");
+        const padded = String(data.id).padStart(5, '0'); // "00027"
+        data.paddedId = padded;
+        let newPRef = doc(db, schoolId, "db", "parents", "pin"+data.id);       
+        let newPDoc = await transaction.get(newPRef);
+        if (newPDoc.exists()){
+          alert("Parent: possible inconsistent parent ID!");
+          throw "Parent created before created"          
+        }
+        data.timestamp = serverTimestamp();
+        await transaction.set(newPRef, data);
+        //alert("PIN: "+ data.id); 
+        let status = document.getElementById("status");
+        status.innerHTML = `
+        ✓ <small>Parent has been successfully registered.</small><br>
+        PIN:  ${data.paddedId}
+        `;     
+        setTimeout(_=>status.innerHTML = "", 5000);        
+        status.scrollIntoView();        
+       this.reset();        
+      })
+      console.log("Collected Data:", JSON.stringify(data));
+      //alert("Form submitted! Check console for data.");
+    });
+  </script>
+</body>
+</html>

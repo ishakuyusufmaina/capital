@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parent Information</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f3f5f7;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      background: #fff;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      max-width: 400px;
+      width: 90%;
+      overflow: hidden;
+      animation: fadeIn 0.6s ease;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: white;
+      text-align: center;
+      padding: 30px 20px;
+    }
+
+    .header h2 {
+      margin: 0;
+      font-size: 1.6rem;
+    }
+
+    .content {
+      padding: 25px 20px;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .label {
+      font-weight: 600;
+      color: #555;
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+
+    .value {
+      background: #f8f9fa;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 1rem;
+      color: #333;
+      border: 1px solid #e0e0e0;
+    }
+
+    .whatsapp-link {
+      display: inline-block;
+      background: #25D366;
+      color: white;
+      text-decoration: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      margin-top: 10px;
+      transition: background 0.3s ease;
+      font-weight: 600;
+    }
+
+    .whatsapp-link:hover {
+      background: #1da851;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card" style="display:none">
+    <div class="header">
+      <h2>Parent Information</h2>
+    </div>
+    <div class="content">
+      <div class="field">
+        <span class="label">Full Name</span>
+        <div class="value" id="fullname">Dr. Jane Doe</div>
+      </div>
+      <div class="field">
+        <span class="label">Gender</span>
+        <div class="value" id="gender">Female</div>
+      </div>
+      <div class="field">
+        <span class="label">Residential Address</span>
+        <div class="value" id="address">15 Unity Crescent, Garki, Abuja</div>
+      </div>
+      <div class="field">
+        <span class="label">Occupation</span>
+        <div class="value" id="occupation">Medical Doctor</div>
+      </div>
+      <div class="field">
+        <span class="label">Place of Work</span>
+        <div class="value" id="work">University of Abuja Teaching Hospital</div>
+      </div>
+      <div class="field">
+        <span class="label">Phone Number</span>
+        <div class="value" id="phone">08012345678</div>
+      </div>
+      <div class="field">
+        <span class="label">WhatsApp</span>
+        <div class="value">
+          <a href="https://wa.me/2348012345678" target="_blank" class="whatsapp-link">Chat on WhatsApp</a>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">Email</span>
+        <div class="value" id="email">janedoe@gmail.com</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, serverTimestamp, getCountFromServer, collection, getDocs, query, or, where, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, updateProfile, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+ 
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+      authDomain: "school-in-the-box.firebaseapp.com",
+      projectId: "school-in-the-box",
+      storageBucket: "school-in-the-box.firebasestorage.app",
+      messagingSenderId: "596350496353",
+      appId: "1:596350496353:web:84c66c351700ddf0824420",
+      measurementId: "G-3MGCDH4FRF"
+    };
+  
+  
+  const schoolId = "capital";
+  const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Example data (you can later fetch this dynamically)
+  const params = new URLSearchParams(window.location.search);
+  const pin = params.get("pin").replace(/^0+/, '');;
+  let pRef = doc(db, schoolId, "db", "parents", "pin"+pin);
+  let pDoc = await getDoc(pRef);
+  const parent = pDoc.data();
+ /* const parent = {
+      fullname: "Dr. Jane Doe",
+      gender: "Female",
+      address: "15 Unity Crescent, Garki, Abuja",
+      occupation: "Medical Doctor",
+      work: "University of Abuja Teaching Hospital",
+      phone: "08012345678",
+      whatsapp: "2348012345678",
+      email: "janedoe@gmail.com"
+    };*/
+
+    // Inject data into the page
+    document.getElementById("fullname").textContent = parent.fullname;
+    document.getElementById("gender").textContent = parent.gender;
+    document.getElementById("address").textContent = parent.address;
+    document.getElementById("occupation").textContent = parent.occupation;
+    document.getElementById("work").textContent = parent.work;
+    document.getElementById("phone").textContent = parent.phone;
+    document.getElementById("email").textContent = parent.email;
+    document.querySelector(".whatsapp-link").href = `https://wa.me/${parent.whatsapp}?text=Hello%20${encodeURIComponent(parent.fullname)}`;
+    document.querySelector(".card").style.display = "block";
+  
+  </script>
+
+</body>
+</html>

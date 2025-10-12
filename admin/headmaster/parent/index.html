@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Parents Records</title>
+     <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, limit, startAfter, orderBy, serverTimestamp, getCountFromServer, collection, getDocs, query, where, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, updateProfile, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+ 
+    // Your Firebase config
+    const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  
+  const schoolId = "capital";
+  const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // --- Pagination State ---
+    let lastVisible = null;
+    let firstVisible = null;
+    let historyStack = []; // track pages for "Previous"
+    const pageSize = 20;
+  //  const schoolId = "YOUR_SCHOOL_ID"; // 🔑 Replace with real schoolId
+
+    async function loadPage(direction="next") {
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "<p>Loading...</p>";
+
+      try {
+        let q;
+        const ref = collection(db, schoolId, "db", "parents");
+
+        if (direction === "next" && lastVisible) {
+          q = query(ref, orderBy("fullname"), startAfter(lastVisible), limit(pageSize));
+        } else if (direction === "prev" && historyStack.length > 1) {
+          // Pop last cursor, go back to previous one
+          historyStack.pop();
+          const prevCursor = historyStack[historyStack.length - 1];
+          q = query(ref, orderBy("fullname"), startAfter(prevCursor), limit(pageSize));
+        } else {
+          // first page
+          q = query(ref, orderBy("fullname"), limit(pageSize));
+          historyStack = [];
+        }
+
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          resultsDiv.innerHTML = "<p>No more records.</p>";
+          return;
+        }
+
+        // Save cursors
+        firstVisible = snap.docs[0];
+        lastVisible = snap.docs[snap.docs.length - 1];
+        historyStack.push(firstVisible);
+
+        // Render
+        resultsDiv.innerHTML = snap.docs.map(d => formatDoc(d.data())).join("");
+
+      } catch (err) {
+        resultsDiv.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+      }
+    }
+
+    function formatDoc(d) {
+      return `
+        <div class="card">
+          <h2>${d.fullname}</h2>
+          <p><strong>PIN:</strong> ${d.paddedId}</p>
+          <p><strong>Phone:</strong> ${d.phone}</p>
+          <p><strong>Gender:</strong> ${d.gender}</p>
+          <p><strong>Occupation:</strong> ${d.occupation}</p>
+          <p><strong>Address:</strong> ${d.address}</p>
+    
+        </div>
+      `;
+    }
+
+    window.loadPage = loadPage;
+  
+  search.onclick = e=>{
+    //window.location.href = "index.html";
+  }
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f9fc;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #222;
+    }
+    #results {
+      display: grid;
+      gap: 15px;
+      max-width: 700px;
+      margin: auto;
+    }
+    .card {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .card h2 {
+      margin: 0 0 10px;
+      color: #007bff;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      background: #007bff;
+      color: white;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  
+  .body-header {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  justify-content: space-between;
+ // background: #0078D7;
+//  color: #fff;
+  padding: 15px 20px;
+  border-radius: 10px;
+  //margin-bottom: 30px;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  min-height: 80px;
+  line-height: 24px;
+    border: 1px solid;
+}
+
+
+  
+  .add {        
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  border-radius: 50%;
+  background: #0056b3; /* frosted overlay */
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+}
+
+.add:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+}
+  
+  .controls {
+    grid-row: 1/2;
+    padding: 4px;
+    text-align: right;
+    grid-column: 2/3;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0;
+    box-sizing: border-box;
+   // border: 1px solid black;
+}
+  #search {
+    background: inherit;
+  }
+  </style>
+</head>
+<body onload="loadPage()">
+  <header class="body-header">
+    <div class="controls">
+      <a id="search" href="search.html" class="add">🔎</a>
+      <a id="add" href="registration.html" class="add">+</a>
+    </div>      
+    <h1>Parents</h1>
+  </header>
+  <div id="results"></div>
+
+  <div class="pagination">
+    <button onclick="loadPage('prev')">Previous</button>
+    <button onclick="loadPage('next')">Next</button>
+  </div>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Parent Retrieval System</title>
+  
+    
+   <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, serverTimestamp, getCountFromServer, collection, getDocs, query, or, where, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, updateProfile, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+ 
+    // Your Firebase config
+  const firebaseConfig = {
+      apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+      authDomain: "school-in-the-box.firebaseapp.com",
+      projectId: "school-in-the-box",
+      storageBucket: "school-in-the-box.firebasestorage.app",
+      messagingSenderId: "596350496353",
+      appId: "1:596350496353:web:84c66c351700ddf0824420",
+    measurementId: "G-3MGCDH4FRF"
+  };
+  
+  
+  const schoolId = "capital";
+  const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  
+  const params = new URLSearchParams(window.location.search);
+
+const name = params.get("wardName");
+const id = params.get("wardId");  
+const cls = params.get("wardClass");
+window.onload= e=>{
+  document.getElementById("wardInfo")
+  .innerHTML= `${name} - ${id} - ${cls}`;
+  let names = name.trim().split(" ").filter((e, i)=> !!i);
+  console.log(names);
+  document.getElementById("searchValue").value = names.toString().replaceAll(",", " "); 
+  searchRecord();
+   document.getElementById("close")
+    .onclick= e=>{
+        if (window.parent) {
+            window.parent.postMessage({fromParentMatching:true}, "*"); // use specific origin in production
+            // window.close(); // optional
+        }
+    }
+}
+    async function searchRecord() {
+      const searchType = document.getElementById("searchType").value;
+      const searchValue = document.getElementById("searchValue").value.trim();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "<p>Searching...</p>";
+
+      let docs = [];
+
+      try {
+        if (searchType === "id") {
+          // Direct doc lookup
+          const trimmed = searchValue.replace(/^0+/, '');
+          const ref = doc(db, schoolId, "db", "parents", "pin"+trimmed);
+          const snap = await getDoc(ref);
+          if (snap.exists()) docs.push(snap.data());
+        } else if (searchType === "names"){
+           const q = query(
+            collection(db, schoolId, "db", "parents"),
+            or(
+            where("fatherNames", "array-contains-any", searchValue.trim().toLowerCase().split(" ")),
+            where("guardianNames", "array-contains-any", searchValue.trim().toLowerCase().split(" "))
+             )
+          );
+          const snaps = await getDocs(q);
+          snaps.forEach(d => docs.push(d.data()));
+        } else if (searchType === "ward") {
+          const q = query(
+            collection(db, schoolId, "db", "parents"),
+            where(searchType, "array-contains", searchValue.trim())
+          );
+          const snaps = await getDocs(q);
+          snaps.forEach(d => docs.push(d.data()));
+
+        } else {
+          // Query by field
+          const q = query(
+            collection(db, schoolId, "db", "parents"),
+            where(searchType, "==", searchValue)
+          );
+          const snaps = await getDocs(q);
+          snaps.forEach(d => docs.push(d.data()));
+        }
+
+        // Show results
+        resultsDiv.innerHTML = docs.length
+          ? docs.map(d => formatDoc(d)).join("")
+          : "<p>No records found.</p>";
+        
+        Array
+        .from(resultsDiv.children)
+        .forEach((pElm, i) => {
+          pElm.ondblclick = e=>{
+            console.log(name, id, cls);
+            console.log(docs[i].fullname);
+            if (window.parent) {
+              window.parent.postMessage({fromParentMatching: true, parent: docs[i]}, "*"); // use specific origin in production
+             // window.close(); // optional
+            }
+          }
+        })
+
+      } catch (err) {
+        resultsDiv.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+      }
+    }
+
+    function formatDoc(d) {
+      return `
+        <div class="card">
+          <h2>${d.fullname}</h2>
+          <p><strong>PIN:</strong> ${d.paddedId}</p>
+          <p><strong>Gender:</strong> ${d.gender}</p>
+          <p><strong>Phone:</strong> ${d.phone}</p>
+          <p><strong>Email:</strong> ${d.email || "N/A"}</p>
+          <p><strong>WhatsApp:</strong> ${d.whatsapp || "N/A"}</p>
+          <p><strong>Address:</strong> ${d.address}</p>
+          <p><strong>Occupation:</strong> ${d.occupation}</p>
+          <p><strong>Wards:</strong> ${d.wards? d.wards.map(w=>`${w.name} (${w.class})`.toUpperCase()).toString().replaceAll(",", ", ") : "None"}</p>          
+       </div>
+      `;
+    }
+
+    window.searchRecord = searchRecord;
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .search-box {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    select, input, button {
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #results {
+      display: grid;
+      gap: 15px;
+      max-width: 600px;
+      margin: auto;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .card h2 {
+      margin: 0 0 10px;
+      color: #007bff;
+    }
+    .card p {
+      margin: 5px 0;
+      color: #444;
+    }
+    #close {
+        background: rgba(100, 0,0, 0.5);
+        position: absolute;
+        top: 4px;
+        left: 2px;
+        border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <button id="close">X</button>
+  
+  <h2>Awarding <span id="wardInfo"></span> to a Parent/Guardian</h2>
+  <div class="search-box">
+    <select id="searchType">
+      <!--option value="id">PIN</option-->
+      <!--option value="ward">Ward ID</option-->
+      <option selected value="names">Name</option>
+      <!--option value="phone">Phone</option-->
+     
+    </select>
+    <input type="text" id="searchValue" placeholder="Enter search value"/>
+    <button onclick="searchRecord()">Search</button>
+  </div>
+
+  <div id="results"></div>
+ 
+</body>
+</html>
