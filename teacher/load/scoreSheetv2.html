@@ -214,11 +214,12 @@ await  render();
         th.innerHTML = asm.name + " ("+asm.subtotal+")";
         r.append(th);
       });
-    r.innerHTML +=`<th>Total</th>`;
+      
+       r.innerHTML +=`<th>Exam</th><th>Total</th>`;
  
   
       students = stdsDoc.data();
-      let studentsArr = Object.values(students).sort((a, b)=>a.name.localeCompare(b.name));
+      let studentsArr = Object.values(students).sort((a, b)=>a.name.trim().localeCompare(b.name.trim()));
       studentsArr.forEach(student=>present(student, table.insertRow()));  
       saveBtn.onclick = async e=>{
         await setDoc(stdsRef, students, {merge:true});
@@ -229,7 +230,7 @@ await  render();
         let id = row.insertCell();
         id.innerHTML = student.id;
         let name = row.insertCell(); 
-        name.innerHTML = student.name;
+        name.innerHTML = student.name.toUpperCase();
         student.subjects??={};
         student.subjects[subjK]??=[{}, {}, {}];
         student.subjects[subjK][termIndex]??={}
@@ -270,7 +271,7 @@ await  render();
             present(student, row);
           }
         });
-        /*let examCell = row.insertCell();
+        let examCell = row.insertCell();
         examCell.innerHTML = `
         <input
             min="0" max="40"
@@ -294,7 +295,7 @@ await  render();
             }
             scores.exam = val;
             present(student, row);
-          }*/
+          }
         
         //total.innerHTML = sum 
         let total = row.insertCell();
@@ -305,174 +306,7 @@ await  render();
  }
   
   
-  
-/* async function loadScores(){
-   
-   let  subjK = key(subj);
-   await loadStudents();
-   if (!students) return; 
-   
- // let ssi = sessionSelect.selectedIndex;
-  let termIndex = ses.term;
-  
-        const container = document.getElementById('table-body');
-   container.innerHTML = "";
-   if (subjK) {
-      
-     Object.values(students).sort((a, b)=>a.name.localeCompare(b.name)).forEach((student, i)=>{
-       //let student = students[key];
-       student.subjects ??={};
-       student.subjects[subjK] ??= [{}, {}, {}];
-       student.subjects[subjK][termIndex].name ??= subj;
-       student.subjects[subjK][termIndex].test ??= 0;
-       student.subjects[subjK][termIndex].exam ??= 0;
-       
-          const row = document.createElement('tr');
-       let name = student.name;
-       let [test1, test2, test3, exam]=[0,0,0,0];
-         
-       test1 = student.subjects[subjK][termIndex].test1 ?? 0;
-       test2 = student.subjects[subjK][termIndex].test2 ?? 0;
-       test3 = student.subjects[subjK][termIndex].test3 ?? 0;
-       exam = student.subjects[subjK][termIndex].exam ?? 0;
-       
-    row.classList.add("record");
-    let sn= container.children.length;
-      row.innerHTML = `
-      <td>
-      ${i+1}
-      </td>
-       <td>
-         ${student.name}
-      </td> 
-      <td>
-        <input id="test1-${i}" type="number" min="0" max="40" value="${test1? test1 : 0}">
-    </td> 
-    <td>
-        <input id="test2-${i}" type="number" min="0" max="40" value="${test2? test2 : 0}">
-    </td>   
-    <td>
-        <input id="test3-${i}" type="number" min="0" max="40" value="${test3? test3 : 0}">
-    </td>        
-       <td >
-        <input id="exam${i}" type="number" min="0" max="100" value="${exam? exam : 0}">
-    </td>  
-    <td id="total${i}">
-        ${function (){
-          test1 = test1? test1 : 0;
-          test2 = test2? test2 : 0;
-          test3 = test3? test3 : 0;
-          exam = exam? exam : 0;
-          return Number(test1) + Number(test2) + Number(test3) + Number(exam);
-         }()}
-    </td>            
-      `;
-
-      container.appendChild(row);
-       let testInp1 = document.getElementById("test1-"+ i);
-       let testInp2 = document.getElementById("test2-"+ i);
-       let testInp3 = document.getElementById("test3-"+ i);
-       let examInp = document.getElementById("exam"+ i);
-       let totalElm = document.getElementById("total"+ i);
-       [testInp1, testInp2, testInp3, examInp].forEach(inp=> {
-         inp.oninput = e=>{
-         let test1 = Number(testInp1.value);
-         let test2 = Number(testInp2.value);
-         let test3 = Number(testInp3.value);
-         let exam = Number(examInp.value);
-         let total = test1 + test2 + test3 + exam;
-         totalElm.innerHTML = total;
-           student.subjects[subjK][termIndex].test1 = test1;
-           student.subjects[subjK][termIndex].test2 = test2;
-           student.subjects[subjK][termIndex].test3 = test3;
-           student.subjects[subjK][termIndex].exam = exam;
-           student.subjects[subjK][termIndex].name = subj;
-          
-           
-       }
-       });
-         
-       
-       
-
-     });
-   } else {
-      Object.keys(students).forEach((key, i)=>{
-    // const container = document.getElementById('table-body');
-        let student = students[key];
-      const row = document.createElement('tr');
-    
-    row.classList.add("record");
-      row.innerHTML = `
-      <td>
-      ${i+1}
-      </td>
-       <td>
-         ${student.name}
-      </td> 
-      <td>
-        no subject seleted    
-      </td>    
-       <td>
-        no subject seleted    
-      </td>  
-    <td>
-        none
-    </td>            
-      `;
-
-      container.appendChild(row);
-
-     });
-   }
-   
-   
-   
- }
-  
-  async function loadStudents() {
-    let clas = key(cls);
-    
-    let session = key(ses.year+terms[ses.term]);
-  //  alert(session)
-    if (!(clas && session)) return null;
-    let stdsRef = doc(db, schoolId, session, clas, "students");
-    let stdsDoc = await getDoc(stdsRef);
-    if (stdsDoc.exists()){
-      students = stdsDoc.data();
-      
-      //return students
-      
-    } else
-    students = null;
-    
-  }
-  
-  
-async function  saveScores(){
-  let subjK = key(subj);
-  if (!subjK) return;
-
-  let clas = key(cls);
-    let session = key(ses.year + terms[ses.term]);
-    if (!(clas && session)) return null;
-   if (!students) return;
  
-  
- let stdsRef = doc(db, schoolId, session, clas, "students");
- 
-  await setDoc(stdsRef, students);
- // alert("save!");
-  }
-  
-  saveBtn.onclick= async e=>{
-    e.target.textContent = "Saving..";
-    await saveScores();
-    e.target.textContent = "Saved!";
-    setTimeout(_=>e.target.textContent = "Save", 1500);
-
-
-  }*/
   
     function key(token){
       return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "").trim();
