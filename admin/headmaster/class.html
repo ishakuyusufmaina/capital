@@ -440,17 +440,21 @@ let sectionDoc = await getDoc(sectionRef);
     console.log(result.id, result.religion);
      if (result.gender.toLowerCase()[0]=="m" || result.gender.toLowerCase()[0] == "f") 
       genderIn.value = !result.gender? "" : result.gender.toLowerCase();
-  
-
   }
 add.onclick = e=>{
   let result ={
     sn: table.children.length,
     name: "",
-    gender: ""
+    gender: "",
+    religion: ""
+    
   }
   addRow(result);
-  currentStudents["std"+result.sn] = result;
+    let lastN = Number(result.sn);
+    while (currentStudents["std"+lastN]){
+        lastN++;
+    }
+  currentStudents["std"+lastN] = result;
 }
   
    /* printBtn.onclick = e=>{
