@@ -130,7 +130,7 @@
         const select = document.createElement('select');
         select.innerHTML = "<option value=''>None</option>";
         Object.keys(teachers).sort((a,b)=>teachers[a].name.localeCompare(teachers[b].name)).forEach(tId => {
-          if (!section.teachers.map(t=>t.id).includes(id)) return;
+         // if (!section.teachers.map(t=>t.id).includes(id)) return;
           let teacher = teachers[tId];
           teacher.load ??={};
           teacher.load[subj] ??=[];
