@@ -194,12 +194,46 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     
   }
   
+  
+  
+  async function loadStudentsV0() {
+   
+    let clas = key(classSelect.value);
+    let session = key(sessionSelect.value);
+    if (!(clas && session)) return null;
+    let sectK = classSelect.selectedOptions[0].parentElement.label;
+    srp = sections[sectK].srp;
+    averageInterps = sections[sectK].averageInterpretations;
+    sectSubjs = sections[sectK].subjects;
+    console.log(srp);
+    let stdsRef = doc(db, schoolId, session, clas, "students");
+    let stdsDoc = await getDoc(stdsRef);
+    if (stdsDoc.exists()){
+      students = Object.values(stdsDoc.data());
+     // console.log(JSON.stringify(students));
+      
+      //return students
+      
+    } else
+    students = null;
+    
+    
+    
+    function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+    }
+    
+  }
+  
  
   classSelect.onchange= async e=>{
-    await loadPositions();
+    sessionSelect.onchange();
    }
   sessionSelect.onchange =async  e=>{
-    await loadPositions();
+    let v = sessionSelect.value;
+    if (!v) return;
+    if (v.split("/")[0].trim()=="2024") await loadPositionsV0()
+    else await loadPositions();
   }
   
   async function loadPositions(){
@@ -348,7 +382,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
           let k = a.name.toLowerCase();
           total += Number(termScores[k].replace("-", "0"))
         })
-        console.log(total);
+        total += Number(termScores.exam.replace("-", "0"));
+        console.log(total, termScores.exam);
         let t1= Number(subjects[subj][termIndex].test1 ?? 0);
         let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
         let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
@@ -396,7 +431,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       `;
       wrapper.append(p);
       p.classList.add("powered");
-container.append(hr, wrapper);
+      container.append(hr, wrapper);
     });
     
     function remark(test, exam){
@@ -446,6 +481,201 @@ container.append(hr, wrapper);
   });
    
     
+  }
+  
+  
+  
+  
+    async function loadPositionsV0(){
+    container.innerHTML = "";
+      //document.getElementById("table-body").innerHTML = "";
+      await loadStudentsV0();
+    if (!students) return;
+    let ssi = sessionSelect.selectedIndex;
+    let termIndex = sessionSelect.options[ssi].getAttribute("data-term");
+ // alert(termIndex);
+    let stdList = new StdList();
+    let subHeads = new Set();
+   
+    students.forEach(student=>{
+       
+      student.score=0;
+      student.sc = 0;
+      let subjects = student.subjects;
+      let stdReg = student.religion;
+      if (!stdReg) {
+     // alert("STUDENT " + student.name +"NRS"); 
+      //return;
+      }
+      let faith = stdReg == "Islam"? "Muslim" : "Christrian";
+      for (const subj in subjects) {
+        
+        let sN = subjects[subj][termIndex].name;
+        if (!sectSubjs.includes(sN))
+          delete subjects[subj]
+     //   console.log(sN);
+        if (srp[sN]) {
+       // console.log("sss");
+       //   console.log(JSON.stringify(srp), "---", subj);
+          if (!(srp[sN]==faith))
+          delete subjects[subj]
+        }
+       // console.log(JSON.stringify(subjects[subj]))
+        try {
+          let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
+          let test2 = Number(subjects[subj][termIndex].test2 ?? 0);
+          let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
+          student.score += test1 + test2 +t3 + Number(subjects[subj][termIndex].exam);
+          subHeads.add(subjects[subj][termIndex].name);
+          student.sc++;
+        } catch(e) {
+          console.error(e.message)
+          console.log(subj + "is  not recorded for", student.name);
+        }
+      }
+      //stdList.push(student);
+    })       
+   // console.log(JSON.stringify(stdList));
+    assignPositions(students);
+    students.forEach(std=>{
+     // console.log(std.religion);
+      let reportCard = document.createElement("table");
+            reportCard.innerHTML = `
+      <caption>
+      <header>
+      <h2>${schoolName.toUpperCase()}</h2>
+      <address>
+      PMB 1017, GOMBOLE ROAD, G.R.A, MAIDUGURI, BORNO STATE
+      <br>
+      <i>maiduguricapitalschool@yahoo.com</i>
+      </address>
+      </header>
+      <div id="logo-container">
+      <small id="p">
+      H/Master: 08061717939
+      <br>
+      Principal: 08036410712
+      <br>
+      Bursar: 08033986802
+      </small>
+
+      <div id="top-hl">
+      </div>
+      <div id="bottom-hl">     
+      </div>
+      <img class="logo" src="../../logo.jpg">
+      </div>
+      <h3>TERMINAL REPORT</h3>
+      <table class="student-info-table">
+      <tr class="std-name">      
+        <td colspan="2">NAME OF PUPIL: ${std.name.toUpperCase()}</td>
+      </tr>
+      <tr>
+      <td>GENDER: ${std.gender}</td>
+      <td>CLASS: ${classSelect.value}</td>
+      </tr>
+      <tr>    
+      <td>SESSION: ${sessionSelect.value}</td>
+      <td>RESUMPTION DATE: <strong><time>8<sup>th</sup> SEPTEMBER, 2025</time></strong></td>
+      </tr>
+      <tr>
+      <td>NUMBER IN CLASS: ${students.length}</td>      
+      <td>POSITION: ${std.position}</td>
+      </tr>
+      </table>   
+      </caption>
+      <tr>  
+          <th>Subject</th>
+          <th>Test</th>
+          <th>Exam</th>
+          <th>Total</th>
+          <th>Grade</th>
+          <th>Remark</th>
+        </tr>
+      `;
+      let subjects = std.subjects;
+      let stdReg = std.religion;
+      if (!stdReg) {
+     // alert("STUDENT " + std.name + "NRS"); 
+     // return;
+      }
+      let faith = stdReg == "Islam"? "Muslim" : "Christrian";
+ 
+      for (const subj in subjects) {
+        
+      let t1= Number(subjects[subj][termIndex].test1 ?? 0);
+      let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
+        let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
+
+ //     subjects.forEach(subj=>{
+        let row =document.createElement("tr");
+        row.innerHTML = `
+        <td>${subjects[subj][termIndex].name}</td>
+        <td>${t1 + t2 + t3}</td>
+        <td>${subjects[subj][termIndex].exam}</td>
+        <td>${t1 + t2 +t3 + Number(subjects[subj][termIndex].exam)}</td>
+        <td>${grade(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
+        <td>${remark(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
+        
+        `;
+        reportCard.appendChild(row);
+      }//);
+    const comnt = comment(std.score/std.sc, averageInterps);
+      
+      let wrapper = document.createElement("div");
+      let hr = document.createElement("hr");
+      wrapper.className = "table-container";
+      //wrapper.innerHTML = '<img class="stamp" src="../../stamp.jpg">'
+      wrapper.appendChild(reportCard);
+      let p = document.createElement("p");
+      p.innerHTML = `
+      TOTAL SCORE: ${std.score}<br>
+      AVERAGE SCORE: ${tosf(std.score/std.sc, 4)}
+      <br>
+      
+      HEAD MASTER COMMENT: <strong class="comment">${comnt}</strong>
+    <img id="stamp" src="stamp.png">
+      `;
+      wrapper.append(p);
+      p.classList.add("rfooter");
+      p = document.createElement("p");
+      p.innerHTML = `
+      Powered by <strong>mainafly.com</strong>
+      
+      `;
+      wrapper.append(p);
+      p.classList.add("powered");
+container.append(hr, wrapper);
+    });
+        function remark(test, exam){
+      let total = test+exam;
+      let dict= {
+        "F": "Fail",
+        "E": "Poor",
+        "D": "Fair", 
+        "C": "Good", 
+        "B": "Very Good",
+        "A": "Excellent"
+      };
+      let g = grade(test, exam);
+      return dict[g]
+    }
+    
+    function grade(test, exam){
+      let total = test + exam;
+      /* <40 F, <=45 E,  <=49 D, <=59 C, <= 69 B, * 70 A */
+      let grade = null;
+        if (total < 40){ grade="F"}
+        else if (total <= 45) {grade="E"}
+        else if (total <= 49 ) {grade="D"}
+        else if (total <= 59 ) {grade="C"}
+        else if (total <= 69 ) {grade="B"}
+        else grade = "A";
+        
+          
+          return grade;
+    }
+
   }
   
   
