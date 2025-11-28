@@ -4,12 +4,15 @@
 <head>
   <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Include this in the <head> of your HTML -->
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
   <script src="rc/rc.js"></script>
   <title>Position</title>
 </head>
 <body>
   <h1 class="no-print">
-    Report Cards
+    Report Cards <br>
+    <a href="#print">Down &darr;</a>
   </h1>
      <div class="select-container no-print">
    <select id="sessionSelect">
@@ -118,10 +121,10 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
 
   let user = auth.currentUser;
   let id = user.email.replace(/@.*/, "");
-   let hodHolder = teachersDoc.data()[id];
+   let hos = teachersDoc.data()[id];
   const sections = {};
-  var srp;
-    var scoreInterpretations;
+  var srp; //subject religion profile
+  var scoreInterpretations;
   var averageInterps;
   var scoreSheetConfig;
   var predefinedAsms;
@@ -133,52 +136,23 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
    let keys = Object.keys(sects);
    
    keys.forEach(key=>{
-    // if (!hos.role.hos.sections.includes(key)) return;
+         
+   //  if (!hos.role.hod.classes.includes(key)) return;
        sections[key] =  sects[key];
      let optG = document.createElement("optgroup");
        optG.label = key;
        let classes = sects[key].classes;
-     let belongs = true;
        classes.forEach(clas=>{
-         if (!hodHolder.role.hod.classes.includes(clas)) return;
-         optG.innerHTML +=`<option>${clas}</option>`;
+         if (!hos.role.hod.classes.includes(clas)) return;
+         let opt = new Option(clas);
+         optG.append(opt);
        });
-       if (optG.children.length)
-       classSelect.append(optG);
+     classSelect.append(optG);
    });
 
  }
   
-  async function loadStudents() {
-   
-    let clas = key(classSelect.value);
-    let session = key(sessionSelect.value);
-    if (!(clas && session)) return null;
-    let sectK = classSelect.selectedOptions[0].parentElement.label;
-    srp = sections[sectK].srp;
-    sectSubjs = sections[sectK].subjects;
-    console.log(srp);
-    let stdsRef = doc(db, schoolId, session, clas, "students");
-    let stdsDoc = await getDoc(stdsRef);
-    if (stdsDoc.exists()){
-      students = Object.values(stdsDoc.data());
-     // console.log(JSON.stringify(students));
-      
-      //return students
-      
-    } else
-    students = null;
-    
-    
-    
-    function key(token){
-      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
-    }
-    
-  }
-  
-  
-  async function loadStudentsV2() {   
+  async function loadStudents() {   
     let clas = key(classSelect.value);
     let session = key(sessionSelect.value);
     if (!(clas && session)) return null;
@@ -186,7 +160,6 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     srp = sections[sectK].srp;
     scoreInterpretations = sections[sectK].scoreInterpretations;
     scoreSheetConfig = sections[sectK].scoreSheetConfig;
-  //  alert(scoreSheetConfig);
     let assessments = scoreSheetConfig.assessments??[{name: "CA", subtotal: 30}];
     averageInterps = sections[sectK].averageInterpretations;
     console.log(averageInterps);
@@ -226,201 +199,17 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     
   }
   
-    
- 
+  
   classSelect.onchange= async e=>{
-    let c = classSelect.value;
-   // console.log
-    if (inPrimary(c, sections))
-    await loadPositionsV2()
-    else await loadPositions();
+    await loadPositions();
    }
   sessionSelect.onchange =async  e=>{
-    let c = classSelect.value;
-    if (inPrimary(c, sections))
-    await loadPositionsV2()
-    else await loadPositions();
+    await loadPositions();
   }
   
   async function loadPositions(){
     container.innerHTML = "";
-      //document.getElementById("table-body").innerHTML = "";
-      await loadStudents();
-    if (!students) return;
-    let ssi = sessionSelect.selectedIndex;
-    let termIndex = sessionSelect.options[ssi].getAttribute("data-term");
- // alert(termIndex);
-    let stdList = new StdList();
-    let subHeads = new Set();
-   
-    students.forEach(student=>{
-       
-      student.score=0;
-      student.sc = 0;
-      let subjects = student.subjects;
-      let stdReg = student.religion;
-      if (!stdReg) {
-     // alert("STUDENT " + student.name +"NRS"); 
-      //return;
-      }
-      let faith = stdReg == "Islam"? "Muslim" : "Christrian";
-      for (const subj in subjects) {
-        
-        let sN = subjects[subj][termIndex].name;
-        if (!sectSubjs.includes(sN))
-          delete subjects[subj]
-     //   console.log(sN);
-        if (srp[sN]) {
-       // console.log("sss");
-       //   console.log(JSON.stringify(srp), "---", subj);
-          if (!(srp[sN]==faith))
-          delete subjects[subj]
-        }
-       // console.log(JSON.stringify(subjects[subj]))
-        try {
-          let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
-          let test2 = Number(subjects[subj][termIndex].test2 ?? 0);
-          let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
-          student.score += test1 + test2 +t3 + Number(subjects[subj][termIndex].exam);
-          subHeads.add(subjects[subj][termIndex].name);
-          student.sc++;
-        } catch(e) {
-          console.error(e.message)
-          console.log(subj + "is  not recorded for", student.name);
-        }
-      }
-      //stdList.push(student);
-    })       
-   // console.log(JSON.stringify(stdList));
-    assignPositions(students);
-    students.forEach(std=>{
-     // console.log(std.religion);
-      let reportCard = document.createElement("table");
-      reportCard.innerHTML = `
-      <caption>
-      <h2>${schoolName}</h2>
-      <img class="logo" src="../../logo.jpg">
-      <h3>Terminal Report</h3>
-      Name of Student: ${std.name.toUpperCase()} <br>
-      Sex: ${std.gender}<br>
-      Class: ${classSelect.value} <br>
-      Session: ${sessionSelect.value} <br>
-      <!--Term: ${"?"}<br-->
-      Number in Class: ${students.length} <br>
-      Position: ${std.position}
-     
-      
-      </caption>
-         <tr>
-          <th>Subject</th>
-          <th>Test</th>
-          <th>Exam</th>
-          <th>Total</th>
-          <th>Grade</th>
-          <th>Remark</th>
-        </tr>
-      `;
-      let subjects = std.subjects;
-      let stdReg = std.religion;
-      if (!stdReg) {
-     // alert("STUDENT " + std.name + "NRS"); 
-     // return;
-      }
-      let faith = stdReg == "Islam"? "Muslim" : "Christrian";
- 
-      for (const subj in subjects) {
-        
-      let t1= Number(subjects[subj][termIndex].test1 ?? 0);
-      let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
-        let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
-
- //     subjects.forEach(subj=>{
-        let row =document.createElement("tr");
-        row.innerHTML = `
-        <td>${subjects[subj][termIndex].name}</td>
-        <td>${t1 + t2 + t3}</td>
-        <td>${subjects[subj][termIndex].exam}</td>
-        <td>${t1 + t2 +t3 + Number(subjects[subj][termIndex].exam)}</td>
-        <td>${grade(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
-        <td>${remark(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
-        
-        `;
-        reportCard.appendChild(row);
-      }//);
-      let wrapper = document.createElement("div");
-      let hr = document.createElement("hr");
-      wrapper.className = "table-container";
-wrapper.appendChild(reportCard);
-      let p = document.createElement("p");
-      p.innerHTML = `
-      Total Score: ${std.score}<br>
-      Average: ${std.score/std.sc}
-      `;
-      wrapper.append(p);
-container.append(hr, wrapper);
-    });
-    
-    function remark(test, exam){
-      let total = test+exam;
-      let dict= {
-        "F": "Fail",
-        "E": "Poor",
-        "D": "Fair", 
-        "C": "Good", 
-        "B": "Very Good",
-        "A": "Excellent"
-      };
-      let g = grade(test, exam);
-      return dict[g]
-    }
-    
-    function grade(test, exam){
-      let total = test + exam;
-      /* <40 F, <=45 E,  <=49 D, <=59 C, <= 69 B, * 70 A */
-      let grade = null;
-        if (total < 40){ grade="F"}
-        else if (total <= 45) {grade="E"}
-        else if (total <= 49 ) {grade="D"}
-        else if (total <= 59 ) {grade="C"}
-        else if (total <= 69 ) {grade="B"}
-        else grade = "A";
-        
-          
-          return grade;
-    }
-
-  }
-  
-  
-  function inPrimary(cls, sections){
-    for (const k in sections){
-      if (sections[k].classes.includes(cls) && k[0].toLowerCase()!="j" && k[0].toLowerCase()!="s") return true;
-    }
-    return false;
-  }
-  
-   function assignPositions(students){
-    students.sort((a, b)=>b.score/b.sc - a.score/a.sc);
-  students.forEach((student, i)=>{
-    student.position = i+1
-    if (students[i+1])
-    student.next = students[i+1];
-    if (students[i-1])
-    student.prev = students[i-1];
-    if ((!!student.prev) && (student.score/student.sc == student.prev.score/student.prev.sc))
-    student.position = student.prev.position;
-    console.log(student.position);
-  });
-   
-    
-  }
-  
-  
-  
-  
-  async function loadPositionsV2(){
-    container.innerHTML = "";
-    await loadStudentsV2();
+    await loadStudents();
     if (!students) return;
     //selected session index
     let ssi = sessionSelect.selectedIndex;
@@ -454,15 +243,13 @@ container.append(hr, wrapper);
           delete subjects[subj];
         }
         try {
-          
           let termScores = subjects[subj][termIndex];
           let score = 0;
           let asms = scoreSheetConfig.assessments??[{name: "CA", subtotal: 30}];
           asms.forEach(a=>{
             let k = a.name.toLowerCase();
             score += Number(termScores[k].replace("-", "0"))
-        });
-       //  score += Number(termScores.exam.replace("-", "0"))
+        })
           
           student.score += score + Number(subjects[subj][termIndex].exam.replace("-", "0"));
           subHeads.add(subjects[subj][termIndex].subject);
@@ -532,7 +319,8 @@ container.append(hr, wrapper);
       <th>REMARK</th>
       </tr>
       `;
-           let subjects = std.subjects??{};
+     
+      let subjects = std.subjects??{};
       let subjKeys = Object.keys(subjects).sort();
       let stdReg = std.religion;
       if (!stdReg) {
@@ -565,7 +353,6 @@ container.append(hr, wrapper);
           let k = a.name.toLowerCase();
           total += Number(termScores[k].replace("-", "0"))
         })
-        total += Number(termScores.exam.replace("-", "0"))
         console.log(total);
         let t1= Number(subjects[subj][termIndex].test1 ?? 0);
         let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
@@ -603,6 +390,7 @@ container.append(hr, wrapper);
       <br>
       
       HEAD MASTER COMMENT: <strong class="comment">${comnt}</strong>
+    <img id="stamp" src="stamp.png">
       `;
       wrapper.append(p);
       p.classList.add("rfooter");
@@ -629,6 +417,7 @@ container.append(hr, wrapper);
       let g = grade(test, exam);
       return dict[g]
     }
+    
     function grade(test, exam){
       let total = test + exam;
       /* <40 F, <=45 E,  <=49 D, <=59 C, <= 69 B, * 70 A */
@@ -646,13 +435,32 @@ container.append(hr, wrapper);
   }
   
   
+  
+  
+   function assignPositions(students){
+    students.sort((a, b)=>b.score/b.sc - a.score/a.sc);
+  students.forEach((student, i)=>{
+    student.position = i+1
+    if (students[i+1])
+    student.next = students[i+1];
+    if (students[i-1])
+    student.prev = students[i-1];
+    if ((!!student.prev) && (student.score/student.sc == student.prev.score/student.prev.sc))
+    student.position = student.prev.position;
+    //console.log(student.position);
+  });
+   
+    
+  }
+  
+  
+  
 /*  print.onclick = e=>{
     alert();
     window.print();
   }*/
   
-  
-    function getAsmHeads(asms, examTotal){
+  function getAsmHeads(asms, examTotal){
     /*
     [{name, subtotal}, ..]
     examTotal
@@ -695,21 +503,98 @@ container.append(hr, wrapper);
   }
   
   
+  
+  
+  
+  
+  
+  
   </script>
   
 <style>
+  /* Apply handwriting font to a class or the body */
+.comment {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.5rem; /* adjust as needed */
+  line-height: 1.5;
+}
+     .student-info-table * {
+     border: none;
+     }
+  .student-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  
+}
+
+  
+.student-info-table th {
+//  background-color: #f9f9f9;
+  width: 20%;
+}
+
+.student-info-table td {
+  width: 30%;
+  text-align: left;
+}
+
+     .student-info-table.std-name {
+    
+      border-top: 1px solid black;
+       border-top-radius: 25px;
+   }
+.std-name,  .std-name > th{
+    background: white;
+    color: black;
+    
+  }
+
+  .std-name>td {
+    border-bottom: 1px solid black;
+    background-color: white;
+    color:black;
+    font-weight: bolder;
+    text-align: center;
+        
+  }
+    
+
+
+
+  
+  .rfooter {
+     border-bottom: 1px solid black;
+  }
+  .powered {
+    postion: absolute;
+    bottom: 0px;
+    color: indianred;
+    text-align: right;
+    font-size: 12px;
+    right: 0;
+    font-style: italic;
+  }
+  *{
+    box-sizing: border-box;
+  }
  table {
   border-collapse: collapse;
   width: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  //box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+   
 }
 
  th,
 td {
   border: 1px solid #ddd;
-  padding: 10px;
+  padding: 6px;
   text-align: center;
+}
+
+  table td:first-child,
+table th:first-child {
+ 
 }
 
 .vertical-header-table .thead th.subject {
@@ -743,14 +628,14 @@ td {
 }
 
   body {
-      background-color: #121212;
-      color: #ffffff;
+    //  background-color: #121212;
+  //    color: #ffffff;
       font-family: Arial, sans-serif;
-      padding: 20px;
+      padding: 10px;
     }
   select {
-    background-color: #121212;
-      color: #ffffff;
+ //   background-color: #121212;
+   //   color: #ffffff;
       font-family: Arial, sans-serif;
   }
   
@@ -771,12 +656,12 @@ td {
     table {
       width: fit-content;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 10px;
     }
 
     th, td{
-      padding: 4px;
-      border: 1px solid #333;
+      padding: 2px;
+      border: 1px solid #007dbb;
       text-align: center;
     }
  h1, .save-container {
@@ -789,18 +674,19 @@ text-align: center;
    .select-container, .table-container {
     text-align: center;
     margin: auto;
-    padding: 10px;
+    padding: 3px;
     //border: 1px solid white;
     width: 100%;
     overflow-x: auto;
+     position: relative;
   }
  
  
  select {
-    background-color: #121212;
-      color: #ffffff;
+  //  background-color: #121212;
+ //     color: #ffffff;
       font-family: Arial, sans-serif;
-      border: none;
+   //   border: none;
     font-size: 24px;
     text-align: center;
     width: 100%;
@@ -814,19 +700,71 @@ text-align: center;
 }
   
   .logo {
-    border-radius: 50%;
+   // border-radius: 50%;
     height: 100px;
     width:100px;
+  position: relative;
+   
+    z-index: 100;
+    
+    
   }
+  
+    #stamp {
+    border-radius: 50%;
+    height: 100px;
+    width: 100px;
+  position: absolute;
+   bottom: 10px;
+   right:100px;
+    z-index: 100;
+    
+    
+  }
+  #logo-container {
+   // height: 120px;
+ //   width: 100%;
+   // border-bottom: 1px solid black;
+    position: relative;
+  }
+  
+  #top-hl, #bottom-hl {
+    border: 8px solid #007dbb;
+    position: absolute;
+    width: calc(100% - 22px);
+    left: 0;
+    bottom: 40px;
+    z-index: 1;
+    height: 0;
+  }
+  #p{
+    position: absolute;
+    bottom: 60px;
+    right: 30px;
+    text-align: left;
+    font-size: 10px;
+    
+  }
+  
+  #bottom-hl {
+ 
+    position: absolute;
+    width: calc(100% - 22px);
+    left: 0;
+    bottom: 20px;
+  }
+  
   tr:nth-child(1) {
-    padding: 0.7rem;
-      background-color: #3f51b5;
-      color: #fff;
+   // padding: 0.7rem;
+     // background-color: #007dbb;
+    //  color: #fff;
       border: none;
       border-radius: 5px;
       font-size: 1rem;
   }
-
+.table-container {
+  border: 2px solid #007dbb;
+}
   @media print {
     hr {
       page-break-after: always;
@@ -834,14 +772,57 @@ text-align: center;
     .no-print {
       display: none;
     }
-    .table-container, .table-container > *{
+   table, .table-container, .table-container > *{
       margin: auto;
     }
-    .table-container > * {}
+    
+    .table-container > * {
+    //  color: black;
+      //text-transform: uppercase;
+    }
 
     .logo {
       border-radius: 0%;
     }
+     
+    .stamp {
+    
+  
+      
+    
+    
+  }
+
+    
+    
+    table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table th, table td {
+  padding: 2px;
+  text-align: left;
+  
+//border: 1px solid #ccc;
+}
+
+table tr:nth-child(even) {
+  //background-color: #f2f2f2;
+}
+
+table tr:nth-child(odd) {
+ // background-color: #ffffff;
+}
+    table td {
+  white-space: nowrap;
+      word-break: keep-all;
+    }
+
+  }
+
+  .n, .c {
+    display: none;
   }
   </style>
 </body>
