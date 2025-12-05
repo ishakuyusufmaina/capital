@@ -293,7 +293,7 @@ let sectionDoc = await getDoc(sectionRef);
     let picURL = optimizeCloudinaryUrl(result.picURL??'');
       row.innerHTML = `
       <td class="passport">
-      <img src="${picURL}">
+      <!--img src="${picURL}"-->
       <input type="file" accept="image/*" capture="environment" id="cameraInput">
       </td>
       <td class="id">${result.id??"Not Yet Generated"}</td>
