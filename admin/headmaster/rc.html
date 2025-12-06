@@ -311,6 +311,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       reportCard.innerHTML = `
       <caption>
       <header>
+          <img class="logo" src="${std.pic}">
       <h2>${schoolName.toUpperCase()}</h2>
       <address>
       PMB 1017, GOMBOLE ROAD, G.R.A, MAIDUGURI, BORNO STATE
@@ -335,11 +336,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </div>
       <h3>TERMINAL REPORT</h3>
       <table class="student-info-table">
-      <tr>
-      <td colspan="2" class="std-pic-container">
-            <img class="logo" src="${std.pic}">
-      </td>
-      </tr>
+      
       <tr class="std-name">          
         <td>NAME: ${std.name.toUpperCase()}</td>
         <td>GENDER: ${std.gender}</td>
@@ -884,9 +881,17 @@ h2 {
   font-size: 30px;
 }
   
-   
-.std-pic-container > img {
-    display: block;
+  header {
+    position: relative;
+  } 
+  header > img {
+    position: absolute;
+    
+    left: 0;
+    top: 0;
+  }
+header > img {
+    display: none;
     margin: auto;
     max-width: 100px;
     max-height: 120px;
@@ -894,6 +899,12 @@ h2 {
   border-radius: 12px;
   padding: 4px;
 }
+  
+  @media print {
+      header > img {
+    display: block;
+  }
+  }
   </style>
 </body>
 </html>
