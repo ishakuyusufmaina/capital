@@ -202,7 +202,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
      // alert("STUDENT " + student.name +"NRS"); 
       //return;
       }
-      let faith = stdReg == "Islam"? "Muslim" : "Christrian";
+      let faith = stdReg == "Islam"? "Muslim" : "Christian";
       for (const subj in subjects) {
         
         let sN = subjects[subj][termIndex].name;
