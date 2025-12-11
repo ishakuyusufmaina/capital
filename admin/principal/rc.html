@@ -10,7 +10,7 @@
 
   <script src="rc/rc.js"></script>
     <script src="../../resultConfig.js"></script>
-  <title>Position</title>
+  <title id="title">Position</title>
 </head>
 <body>
   <h1 class="no-print">
@@ -159,7 +159,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
 
  }
   
-  async function loadStudents() {   
+  async function loadStudents() {  
+    title.innerHTML = classSelect.value;
     let clas = key(classSelect.value);
     let cls = classSelect.value.trim().toLowerCase();
     let session = key(sessionSelect.value);
