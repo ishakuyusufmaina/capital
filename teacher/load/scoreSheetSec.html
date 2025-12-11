@@ -330,9 +330,9 @@ async function saveScores() {
   await runTransaction(db, async (transaction) => {
     // Optionally read existing data (if needed)
     // const existing = await transaction.get(stdsRef);
-
+    let stds = await transaction.get(stdsRef);
     // Write new data atomically
-    transaction.set(stdsRef, students, { merge: true });
+    await transaction.set(stdsRef, students, { merge: true });
   });
 
    alert("Saved!");
