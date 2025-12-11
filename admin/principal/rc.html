@@ -17,6 +17,9 @@
     Report Cards <br>
     <a href="#print">Down &darr;</a>
   </h1>
+  <div class="no-print" id="error">
+    
+  </div>
      <div class="select-container no-print">
    <select id="sessionSelect">
     <option> -select session- </option>
@@ -271,7 +274,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       student.score=0;
       student.sc = 0; //subject count
       let subjects = student.subjects;
-     console.log(JSON.stringify(subjects));
+     //console.log(JSON.stringify(subjects));
       let stdReg = student.religion;
       if (!stdReg) {
         //mixed school? report card => error
@@ -293,13 +296,12 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         }
         try {
           let termScores = subjects[subj][termIndex];
-          let score = Number(termScores.test1) + Number(termScores.test2) + Number(termScores.test3);
+          let score = Number(termScores.test1 ?? 0) + Number(termScores.test2 ?? 0) + Number(termScores.test3 ?? 0);
           let asms = scoreSheetConfig.assessments??[{name: "CA", subtotal: 30}];
       /*    asms.forEach(a=>{
             let k = a.name.toLowerCase();
             score += Number(termScores[k].replace("-", "0"))
-        })*/
-          
+        })*/          
           student.score += score + Number(subjects[subj][termIndex].exam);
           subHeads.add(subjects[subj][termIndex].name);
           student.sc++;
@@ -312,7 +314,9 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
    // position students
     assignPositions(students);
     //present each students' rc
+    error.innerHTML = "";
     students.forEach(std=>{
+     
      // console.log(std.religion);
       std.result = {};
       if (std.picURL) std.pic = optimizeCloudinaryUrl(std.picURL)
@@ -447,6 +451,10 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         //std.result.subjects[subj] = {name: subjects[subj][termIndex].name, score: scores, exam, total};
        std.result.scoreInterps = scoreInterpretations;
         reportCard.appendChild(row);
+        if (score > 100 || score < 0){
+         let s= subjects[subj][termIndex].name.toUpperCase();
+         error.innerHTML +=`• Error: Out of range - <strong>Subject: ${s}</strong> - Name: ${std.name} - Wrong Position: ${std.position} - Score: ${std.score} <br>`
+     } 
       });
       
       const comnt = comment(std.score/std.sc, averageInterps);
@@ -464,8 +472,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       AVERAGE SCORE: ${tosf(std.score/std.sc, 4)}
       <br>
       
-      HEAD MASTER COMMENT: <strong class="comment">${comnt}</strong>
-    <img id="stamp" src="stamp.png">
+      V. PRINCIPAL'S COMMENT: <strong class="comment">${comnt}</strong>
+      <img id="stamp" src="stamp.png">
       `;
       wrapper.append(p);
       p.classList.add("rfooter");
@@ -548,7 +556,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
      // alert("STUDENT " + student.name +"NRS"); 
       //return;
       }
-      let faith = stdReg == "Islam"? "Muslim" : "Christrian";
+      let faith = stdReg == "Islam"? "Muslim" : "Christian";
       for (const subj in subjects) {
         
         let sN = subjects[subj][termIndex].name;
@@ -560,6 +568,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
        //   console.log(JSON.stringify(srp), "---", subj);
           if (!(srp[sN]==faith))
           delete subjects[subj]
+          continue;
         }
        // console.log(JSON.stringify(subjects[subj]))
         try {
@@ -576,7 +585,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       }
       //stdList.push(student);
     })       
-   // console.log(JSON.stringify(stdList));
+   // console.log(JSON.stringimfy(stdList));
     assignPositions(students);
     students.forEach(std=>{
      // console.log(std.religion);
@@ -674,7 +683,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       AVERAGE SCORE: ${tosf(std.score/std.sc, 4)}
       <br>
       
-      HEAD MASTER COMMENT: <strong class="comment">${comnt}</strong>
+      V. PRINCIPAL'S COMMENT: <strong class="comment">${comnt}</strong>
     <img id="stamp" src="stamp.png">
       `;
       wrapper.append(p);
@@ -918,6 +927,11 @@ header > img {
       header > img {
     visibility: visible;
   }
+  }
+  
+  
+  #error {
+    color: red;
   }
   </style>
 </body>
