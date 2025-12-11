@@ -844,6 +844,8 @@ const email = auth.currentUser.email;
   
   
   publish.onclick = async e=>{
+    alert("You can't perform this action please yet.");
+    return;
     let v = sessionSelect.value;
     if (!v) return;
     if (v.split("/")[0].trim()=="2024") return;
