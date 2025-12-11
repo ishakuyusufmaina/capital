@@ -158,6 +158,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
   
   async function loadStudents() {   
     let clas = key(classSelect.value);
+    let cls = classSelect.value.trim().toLowerCase();
     let session = key(sessionSelect.value);
     if (!(clas && session)) return null;
     let sectK = classSelect.selectedOptions[0].parentElement.label;
@@ -167,6 +168,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     let assessments = scoreSheetConfig.assessments??[{name: "CA", subtotal: 30}];
     averageInterps = sections[sectK].averageInterpretations;
     console.log(averageInterps);
+    
+    
    // console.log(JSON.stringify(scoreSheetConfig));
     sectSubjs = sections[sectK].subjects;
     predefinedAsms = [];
@@ -255,6 +258,14 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     let stdList = new StdList();
     let subHeads = new Set();   
     //prepare each student for positioning.
+    let session = sessionSelect.value.split(",")[0].replaceAll(" ", "");
+    let cls = classSelect.value.trim().toLowerCase();
+    const metaRef = doc(pubDb, session+termIndex+cls);
+    const metaDoc = await getDoc(metaRef);
+    if (metaDoc.exists())
+    publish.innerHTML = "Published";
+    
+
     students.forEach(student=>{     
       //console.log(student.name);      
       student.score=0;
