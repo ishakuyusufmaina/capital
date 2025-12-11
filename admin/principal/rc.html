@@ -284,7 +284,11 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       for (const subj in subjects) {     
         //console.log(subjects[subj]);        
         let sN = subjects[subj][termIndex].name;    
-      //  console.log(sN);        
+      //  console.log(sN); 
+        if (subjects[subj][termIndex].inactive) {
+         delete subjects[subj];
+         continue;
+       }  
         if (!sectSubjs.includes(sN)){//subj not in the section subjects
           delete subjects[subj];
          // console.log(subj, "deleted out");
