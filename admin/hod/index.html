@@ -308,7 +308,7 @@
       
       <div class="card">
       <h2>Academic Performance</h2>
-      <a href="rc.html">View report cards computation progress</a>
+      <a id="rcLink">Report Cards</a>
     </div>  
       <hr>
     
@@ -486,6 +486,11 @@ const adminFunctions = [
     teacher.role ??={};
     teacher.role.hod ??={};
     let classes = teacher.role.hod.classes ?? [];
+    if (classes[0].toLowerCase().trim()[0]=="j"||classes[0].toLowerCase().trim()[0]=="s"){
+      rcLink.href = "rcSec.html";
+    } else {
+      rcLink.href = "rc.html";
+    }
     plh.style.display = "block";
     plh.onclick = e=>{
         localStorage.setItem("classes", JSON.stringify(classes));
