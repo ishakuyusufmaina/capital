@@ -116,7 +116,7 @@
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
       const firebaseConfig = {
@@ -313,22 +313,30 @@ const  subjK = key(subj);
   }
   
   
-async function  saveScores(){
-  let subjK = key(subj);
+//import { runTransaction, doc } from "firebase/firestore";
+
+async function saveScores() {
+  const subjK = key(subj);
   if (!subjK) return;
 
-  let clas = key(cls);
-    let session = key(ses.year + terms[ses.term]);
-    if (!(clas && session)) return null;
-   if (!Object.values(students).length) return;
- 
-  
- let stdsRef = doc(db, schoolId, session, clas, "students");
- 
-  await setDoc(stdsRef, students);
- // alert("save!");
-  }
-  
+  const clas = key(cls);
+  const session = key(ses.year + terms[ses.term]);
+  if (!(clas && session)) return null;
+
+  if (Object.values(students).length === 0) return;
+
+  const stdsRef = doc(db, schoolId, session, clas, "students");
+
+  await runTransaction(db, async (transaction) => {
+    // Optionally read existing data (if needed)
+    // const existing = await transaction.get(stdsRef);
+
+    // Write new data atomically
+    transaction.set(stdsRef, students, { merge: true });
+  });
+
+   alert("Saved!");
+}
   saveBtn.onclick= async e=>{
     if (!students) return;
     if (Object.values(students).length){
@@ -339,7 +347,6 @@ async function  saveScores(){
     }
 
   }
-  
   function key(token){
       return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
     }
