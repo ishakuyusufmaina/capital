@@ -302,6 +302,7 @@ const  subjK = key(subj);
     if (!(clas && session)) return null;
     let stdsRef = doc(db, schoolId, session, clas, "students");
     let stdsDoc = await getDoc(stdsRef);
+    
     if (stdsDoc.exists()){
       students = stdsDoc.data();
       
@@ -323,16 +324,20 @@ async function saveScores() {
   const session = key(ses.year + terms[ses.term]);
   if (!(clas && session)) return null;
 
-  if (Object.values(students).length === 0) return;
+  if (!Object.values(students).length) return;
 
   const stdsRef = doc(db, schoolId, session, clas, "students");
 
   await runTransaction(db, async (transaction) => {
     // Optionally read existing data (if needed)
     // const existing = await transaction.get(stdsRef);
-    let stds = await transaction.get(stdsRef);
+    let stdsDoc = await transaction.get(stdsRef);
+    let stds = stdsDoc.exists()? stdsDoc.data() : {};
     // Write new data atomically
-    await transaction.set(stdsRef, students, { merge: true });
+    for (const stu in students){
+      stds[stu] = students[stu];
+    }
+     transaction.set(stdsRef, stds, { merge: true });
   });
 
    alert("Saved!");
