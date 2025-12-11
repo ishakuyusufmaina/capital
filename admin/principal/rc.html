@@ -14,6 +14,9 @@
     Report Cards <br>
     <a href="#print">Down &darr;</a>
   </h1>
+  <div class="no-" id="report">
+    
+  </div>
      <div class="select-container no-print">
    <select id="sessionSelect">
     <option> -select session- </option>
@@ -484,9 +487,10 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
   
   
   
-  
+ var subjectCounts = []; 
     async function loadPositionsV0(){
     container.innerHTML = "";
+      subjectCounts = [];
       //document.getElementById("table-body").innerHTML = "";
       await loadStudentsV0();
     if (!students) return;
@@ -540,6 +544,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     })       
    // console.log(JSON.stringify(stdList));
     assignPositions(students);
+      report.innerHTML = "";
     students.forEach(std=>{
      // console.log(std.religion);
       let reportCard = document.createElement("table");
@@ -605,13 +610,21 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
      // return;
       }
       let faith = stdReg == "Islam"? "Muslim" : "Christrian";
- 
-      for (const subj in subjects) {
-       if (subjects[subj][termIndex].inactive) continue;
+      let subKeys = Object.keys(subjects).sort();
+      subKeys.forEach(subj=> {
+       if (subjects[subj][termIndex].inactive) return; //continue;
       let t1= Number(subjects[subj][termIndex].test1 ?? 0);
       let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
         let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
-
+        const sumTotal = t1+t2+t3+Number(subjects[subj][termIndex].exam);
+        if (sumTotal > 100 || sumTotal < 0) {
+          let subName = subjects[subj][termIndex].name;
+          let reportTxt = `
+          Name: ${std.name} - Subject: ${subName} - Score: ${sumTotal}
+          - Position: ${std.position} - Error: Score out of range error
+          <hr>`;
+          report.innerHTML +=reportTxt;
+        }
  //     subjects.forEach(subj=>{
         let row =document.createElement("tr");
         row.innerHTML = `
@@ -624,7 +637,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         
         `;
         reportCard.appendChild(row);
-      }//);
+      });
     const comnt = comment(std.score/std.sc, averageInterps);
       
       let wrapper = document.createElement("div");
@@ -641,12 +654,12 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       V. Principal's Comment: <strong class="comment">${comnt}</strong>
     <img id="stamp" src="stamp.png">
       `;
+      subjectCounts.push(std.sc);
       wrapper.append(p);
       p.classList.add("rfooter");
       p = document.createElement("p");
       p.innerHTML = `
-      Powered by <strong>mainafly.com</strong>
-      
+      Powered by <strong>mainafly.com</strong>   
       `;
       wrapper.append(p);
       p.classList.add("powered");
@@ -680,10 +693,26 @@ container.append(hr, wrapper);
           
           return grade;
     }
+      
+    let set= countOccurrences(subjectCounts.sort((a, b)=>b-a));
+      let txt = "";
+      Object.keys(set).forEach(sc=>{
+        let stdC = set[sc];
+        txt +=`•[std(${stdC})] - subj(${sc})] <br>`;
+      })
+      report.innerHTML +=""+txt; //JSON.stringify(set).replace("{", "").replace("}", "");
 
   }
   
-  
+  function countOccurrences(numbers) {
+  const result = {};
+
+  for (const num of numbers) {
+    result[num] = (result[num] || 0) + 1;
+  }
+
+  return result;
+}
   
 /*  print.onclick = e=>{
     alert();
@@ -1103,6 +1132,12 @@ header > img {
       header > img {
     visibility: visible;
   }
+  }
+  
+  
+  #report {
+    text-transform: uppercase;
+    color: red;
   }
   </style>
 </body>
