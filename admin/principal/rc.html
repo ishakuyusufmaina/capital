@@ -508,7 +508,10 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       }
       let faith = stdReg == "Islam"? "Muslim" : "Christian";
       for (const subj in subjects) {
-        
+        if (subjects[subj][termIndex].inactive){
+        delete subjects[subj];
+          continue;
+        }
         let sN = subjects[subj][termIndex].name;
         if (!sectSubjs.includes(sN))
           delete subjects[subj]
@@ -518,6 +521,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
        //   console.log(JSON.stringify(srp), "---", subj);
           if (!(srp[sN]==faith))
           delete subjects[subj]
+          
         }
        // console.log(JSON.stringify(subjects[subj]))
         try {
@@ -562,28 +566,30 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </div>
       <div id="bottom-hl">     
       </div>
-      <img class="logo" src="../../logo.jpg">
+      <img class="logo" src="../../logo.jpg" >
       </div>
       <h3>TERMINAL REPORT</h3>
       <table class="student-info-table">
-      <tr class="std-name">      
-        <td colspan="2">NAME OF PUPIL: ${std.name.toUpperCase()}</td>
+      
+      <tr class="std-name">          
+        <td>NAME: ${std.name.toUpperCase()}</td>
+        <td>GENDER: ${std.gender}</td>
       </tr>
       <tr>
-      <td>GENDER: ${std.gender.toUpperCase()}</td>
+      <td>TERM: ${sessionSelect.value.split(",")[1]}</td>
       <td>CLASS: ${classSelect.value}</td>
       </tr>
       <tr>    
-      <td>SESSION: ${sessionSelect.value}</td>
-      <td>RESUMPTION DATE: <strong><time>5<sup>th</sup> JANUARY, 2026</time></strong></td>
+      <td>SESSION: ${sessionSelect.value.split(",")[0]}</td>
+      <td>RESUMPTION: <strong><time>5<sup>th</sup> JANUARY, 2026</time></strong></td>
       </tr>
       <tr>
-      <td>NUMBER IN CLASS: ${students.length}</td>      
-      <td>POSITION: ${std.position}</td>
+      <td>NO: IN CLASS: ${students.length}</td>      
+      <td>POSITION: ${toSuperscriptOrdinal(Number(std.position))}</td>
       </tr>
       </table>   
       </caption>
-      <tr>  
+      <tr>
           <th>Subject</th>
           <th>Test</th>
           <th>Exam</th>
@@ -601,7 +607,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       let faith = stdReg == "Islam"? "Muslim" : "Christrian";
  
       for (const subj in subjects) {
-        
+       if (subjects[subj][termIndex].inactive) continue;
       let t1= Number(subjects[subj][termIndex].test1 ?? 0);
       let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
         let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
@@ -725,6 +731,29 @@ container.append(hr, wrapper);
     let lastInterp = interpsModel[interpsModel.length-1];
     return lastInterp?.comment || '';
   }
+  
+  
+  function toSuperscriptOrdinal(num) {
+  const suffixes = {
+    '1': 'ˢᵗ',
+    '2': 'ⁿᵈ',
+    '3': 'ʳᵈ'
+  };
+
+  // Handle 11th, 12th, 13th as special cases
+  const lastTwo = num % 100;
+  let suffix = 'ᵗʰ';
+
+  if (lastTwo < 11 || lastTwo > 13) {
+    const lastDigit = num % 10;
+    suffix = suffixes[lastDigit] || 'ᵗʰ';
+  }
+
+  return num + suffix;
+}
+  
+  
+  
   </script>
   
 <style>
@@ -947,7 +976,7 @@ text-align: center;
   #top-hl, #bottom-hl {
     border: 8px solid #007dbb;
     position: absolute;
-    width: calc(100% - 22px);
+    width: calc(100%);
     left: 0;
     bottom: 40px;
     z-index: 1;
@@ -965,7 +994,7 @@ text-align: center;
   #bottom-hl {
  
     position: absolute;
-    width: calc(100% - 22px);
+    width: calc(100%);
     left: 0;
     bottom: 20px;
   }
@@ -1039,6 +1068,41 @@ table tr:nth-child(odd) {
 
   .n, .c {
     display: none;
+  }
+  
+  
+   .student-info-table {
+   text-transform: uppercase;
+ }
+  
+h2 {
+  font-size: 30px;
+}
+  
+  header {
+    position: relative;
+  } 
+  header > img {
+    position: absolute;
+    
+    left: 0;
+    top: 0;
+  }
+header > img {
+    display: block;
+  visibility: hidden;
+    
+    max-width: 100px;
+    max-height: 120px;
+  border: 2px solid #e5e7eb; /* light gray */
+  border-radius: 12px;
+  padding: 4px;
+}
+  
+  @media print {
+      header > img {
+    visibility: visible;
+  }
   }
   </style>
 </body>
