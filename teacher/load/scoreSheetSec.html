@@ -345,7 +345,7 @@ async function saveScores() {
   saveBtn.onclick= async e=>{
     if (!students) return;
     if (Object.values(students).length){
-    e.target.textContent = "Saving..";
+    e.target.textContent = "Saving...";
     await saveScores();
     e.target.textContent = "Saved!";
     setTimeout(_=>e.target.textContent = "Save", 1500);
