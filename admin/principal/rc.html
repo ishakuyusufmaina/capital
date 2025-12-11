@@ -843,6 +843,7 @@ const email = auth.currentUser.email;
   
   
   publish.onclick = async e=>{
+    return;
     let v = sessionSelect.value;
     if (!v) return;
     if (v.split("/")[0].trim()=="2024") return;
