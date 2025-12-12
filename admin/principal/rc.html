@@ -302,7 +302,9 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
             let k = a.name.toLowerCase();
             score += Number(termScores[k].replace("-", "0"))
         })*/          
-          student.score += score + Number(subjects[subj][termIndex].exam);
+          let exm = subjects[subj][termIndex].exam+"";
+          exm = exm.replace("-", 0);
+          student.score += score + Number(exm);
           subHeads.add(subjects[subj][termIndex].name);
           student.sc++;
         } catch(e) {
