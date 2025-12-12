@@ -10,7 +10,7 @@
 
   <script src="rc/rc.js"></script>
     <script src="../../resultConfig.js"></script>
-  <title id="title">Position</title>
+  <title>Position</title>
 </head>
 <body>
   <h1 class="no-print">
@@ -81,7 +81,7 @@ const firebaseConfig = {
     }
     super.unshift(elm);
     super.sort((a, b) => {
-      return b.score - a.score;
+      return Number(b.score) - Number(a.score);
     });
   }
 
@@ -159,8 +159,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
 
  }
   
-  async function loadStudents() {  
-    title.innerHTML = classSelect.value;
+  async function loadStudents() {   
     let clas = key(classSelect.value);
     let cls = classSelect.value.trim().toLowerCase();
     let session = key(sessionSelect.value);
@@ -284,11 +283,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       for (const subj in subjects) {     
         //console.log(subjects[subj]);        
         let sN = subjects[subj][termIndex].name;    
-      //  console.log(sN); 
-        if (subjects[subj][termIndex].inactive) {
-         delete subjects[subj];
-         continue;
-       }  
+      //  console.log(sN);        
         if (!sectSubjs.includes(sN)){//subj not in the section subjects
           delete subjects[subj];
          // console.log(subj, "deleted out");
@@ -331,7 +326,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       reportCard.innerHTML = `
       <caption>
       <header>
-       
+       <img src="${std.pic}">
       <h2>${schoolName.toUpperCase()}</h2>
       <address>
       PMB 1017, GOMBOLE ROAD, G.R.A, MAIDUGURI, BORNO STATE
@@ -523,7 +518,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
   }
   
    function assignPositions(students){
-    students.sort((a, b)=>b.score/b.sc - a.score/a.sc);
+    students.sort((a, b)=>Number(b.score)/b.sc - Number(a.score)/a.sc);
   students.forEach((student, i)=>{
     student.position = i+1
     if (students[i+1])
@@ -843,7 +838,6 @@ const email = auth.currentUser.email;
   
   
   publish.onclick = async e=>{
-    return;
     let v = sessionSelect.value;
     if (!v) return;
     if (v.split("/")[0].trim()=="2024") return;
