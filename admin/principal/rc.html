@@ -313,6 +313,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     })       
    // position students
     assignPositions(students);
+    
     //present each students' rc
     error.innerHTML = "";
     students.forEach(std=>{
@@ -517,21 +518,46 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
 
   }
   
-   function assignPositions(students){
-    students.sort((a, b)=>Number(b.score)/b.sc - Number(a.score)/a.sc);
-  students.forEach((student, i)=>{
-    student.position = i+1
-    if (students[i+1])
-    student.next = students[i+1];
-    if (students[i-1])
-    student.prev = students[i-1];
-    if ((!!student.prev) && (student.score/student.sc == student.prev.score/student.prev.sc))
-    student.position = student.prev.position;
-    //console.log(student.position);
+   function assignPositions(students) {
+  // Defensive: ensure score and sc numeric
+  students.forEach(s => {
+    s.score = Number(s.score) || 0;
+    s.sc = Number(s.sc) || 0;
   });
-   
-    
-  }
+
+  // Compute average guardedly (students with sc===0 go to the end)
+  students.sort((a, b) => {
+    const aAvg = a.sc > 0 ? (a.score / a.sc) : -Infinity;
+    const bAvg = b.sc > 0 ? (b.score / b.sc) : -Infinity;
+    // sort descending by average, and if tie, fall back to total score descending
+    if (bAvg === aAvg) return Number(b.score) - Number(a.score);
+    return bAvg - aAvg;
+  });
+
+  // Assign positions with tie-handling using tolerance
+  const EPS = 1e-9;
+  let currentPosition = 0;
+  let lastAvg = null;
+  let lastPositionAssigned = 0;
+
+  students.forEach((student, idx) => {
+    currentPosition = idx + 1;
+    const avg = student.sc > 0 ? student.score / student.sc : -Infinity;
+
+    if (lastAvg !== null && Math.abs(avg - lastAvg) <= EPS) {
+      // tie -> same position as previous
+      student.position = lastPositionAssigned;
+    } else {
+      student.position = currentPosition;
+      lastPositionAssigned = currentPosition;
+      lastAvg = avg;
+    }
+
+    // Link prev/next for convenience (clear first to avoid stale refs)
+    student.prev = students[idx - 1] || null;
+    student.next = students[idx + 1] || null;
+  });
+}
   
   
   
