@@ -335,7 +335,8 @@ async function saveScores() {
     let stds = stdsDoc.exists()? stdsDoc.data() : {};
     // Write new data atomically
     for (const stu in students){
-      console.log(stu, students[stu].id);
+      console.log(stu, students[stu].id, subjK);
+      stds[stu].subjects??={};
       stds[stu].subjects[subjK] = students[stu].subjects[subjK];
     }
      transaction.set(stdsRef, stds);
