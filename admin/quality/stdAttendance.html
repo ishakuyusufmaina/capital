@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance</title>
+  
+  <style>
+  /* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* Body Styling */
+body {
+  background-color: #f9f9f9;
+  padding: 20px;
+  color: #333;
+}
+
+/* Header */
+h1 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Select Dropdowns */
+select {
+  padding: 10px;
+  margin: 10px 5px 20px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 16px;
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-top: 20px;
+}
+
+caption {
+  background-color: #2980b9;
+  color: #fff;
+  font-weight: bold;
+  padding: 10px;
+  text-align: left;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f1f1f1;
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Optional Styling for Summary Section (if re-enabled) */
+div > h2, div > h3 {
+  margin-top: 20px;
+  color: #34495e;
+}
+
+ol {
+  margin: 10px 0 20px 20px;
+}
+
+li {
+  margin-bottom: 5px;
+}
+  
+  .present {
+  color: green;
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-right: 8px;
+}
+
+.absent {
+  color: red;
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-right: 8px;
+}
+
+
+  </style>
+  
+</head>
+<body>
+  <h1>
+    Student Attendance
+  </h1>
+  <select id="sessionSelect">
+    <option>
+      -session-
+    </option>
+  </select>
+ <select id="classSelect">
+    <option value=""> -select class- </option>
+    
+  </select>
+  
+  
+  <select id="dateSelect">
+    <option value="">
+      -date-
+    </option>
+  </select>
+  
+  <!--div>
+    <h2>Summary</h2>
+    Total Attendance Taken: 3 <br>
+    Average attendance: 68% <br>
+     <br>
+    <h3>
+      Absentees
+    </h3>
+    <ol>
+      <li>Std 1</li>
+      <li>Std 2</li>
+    </ol>
+    
+    
+  </div-->
+  <!--table id="table">
+    <caption>
+      Submitted at <span id="time"></span> by <span id="by"></span>
+    </caption>
+    <tr>
+      <th>
+        Student
+      </th>
+      <th>Present</th>
+    </tr>
+  </table-->
+<div id="tableContainer">
+</div>
+  
+  
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc, serverTimestamp} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+ 
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  
+let schoolId = "capital";
+    let sessionsRef = doc(db, schoolId, "sessions");
+let teachersRef = doc(db, schoolId, "teachers");
+  let teachersDoc = await getDoc(teachersRef);
+  let sectionRef = doc(db, schoolId, "section");
+  let sectionDoc = await getDoc(sectionRef);
+  const attendance = {};
+  
+function getDate(){
+  let d = new Date();
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day = d.getDate();
+  return `${day}/${month}/${year}`
+}
+
+
+  const terms = ["first term", "second term", "third term"];
+  
+  let session;
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sessions= sessions.sort((a, b)=>b.no - a.no);
+    sessions.forEach((session, i)=>{
+        let year = session.year;
+      let opt = document.createElement("option");
+      opt.innerHTML = year + ", " + terms[session.term];
+      sessionSelect.appendChild(opt);
+        if (i==0)
+        opt.selected = true;
+    });
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+  
+  
+  let user = auth.currentUser;
+  let id = user.email.replace(/@.*/, "");
+   let hos = teachersDoc.data()[id];
+    
+ if (sectionDoc.exists()){
+   let sections = sectionDoc.data();
+     
+   let keys = hos.adminV2Functions.quality.resources; // Object.keys(sections);
+   
+   keys.forEach(key=>{
+       let optG = document.createElement("optgroup");
+       optG.label = key;
+       let classes = sections[key].classes;
+       classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
+       classSelect.append(optG);
+   });
+
+ }
+ 
+/*session = key(sessionSelect.value);
+    let clas = key(classSelect.value);
+    let superAttendRef = doc(db, schoolId, session, clas, "attendance");
+    let superAttendDoc = await getDoc(superAttendRef);
+    let superAttendance = superAttendDoc.exists()? superAttendDoc.data() : {};
+*/
+  
+  classSelect.onchange= async e=>{
+    dateSelect.children[0].selected = true;
+
+     presentAllAttendance();
+  }
+
+
+sessionSelect.onchange = e=>{
+  dateSelect.children[0].selected = true;
+  presentAllAttendance();
+}
+
+dateSelect.onchange = e=>{
+  if (dateSelect.value)
+  presentAllAttendance();
+  else
+  tableContainer.innerHTML = "";
+}
+
+  function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+    }
+function presentAttendance(attendance){
+  
+    attendance.forEach(point=>{
+      let time = `${to12Hour(point.time.h)} : ${point.time.min} : ${point.time.sec} ${getAMPM(point.time.h)}`;
+    let by = point.submitedBy;
+
+    let students = point.students;
+    let table = document.createElement("table");
+      table.innerHTML =`
+       <caption>
+      Submitted at ${time} by ${by}
+    </caption>
+    <tr>
+      <th>
+        Student
+      </th>
+      <th>Present</th>
+    </tr>
+      `;
+      let presentCount = 0;
+      let totalCount = 0;
+    for (const id in students){
+      let row = table.insertRow();
+      let student = students[id];
+      let name = row.insertCell();
+      name.innerHTML = student.name;
+      let present = row.insertCell();
+      present.innerHTML = student.isPresent? "<span class='present'>✓</span>" : "<span class='absent'>X</span>";
+      presentCount += student.isPresent? 1 : 0;
+      totalCount +=1;
+    }
+      let footer = document.createElement("tfoot");
+      let statRow = footer.insertRow();
+      let th = document.createElement("th");
+      th.textContent = "Total (%)";
+      th.scope = "row";
+      let perc = document.createElement("td");
+      perc.textContent = Math.round((presentCount/totalCount)*100) + "%";
+      statRow.append(th, perc);
+      table.append(statRow);
+      tableContainer.append(table);
+  })
+}
+
+//var superAttendance;
+
+async function presentAllAttendance(){
+  tableContainer.innerHTML = "";
+  
+  session = key(sessionSelect.value);
+    let clas = key(classSelect.value);
+    let superAttendRef = doc(db, schoolId, session, clas, "attendance");
+    let superAttendDoc = await getDoc(superAttendRef);
+    let superAttendance = superAttendDoc.exists()? superAttendDoc.data() : {};
+    let dates = Object.keys(superAttendance).sort();
+    let date = dateSelect.value;
+  let attendance;
+  if (date){
+    attendance = superAttendance[date];
+  } else {
+    dateSelect.innerHTML = "<option value=''> -date- </option>";
+  dates.forEach(date=>{
+    let opt = document.createElement("option");
+    opt.value = date;
+    opt.innerHTML = (date.replaceAll("_", "/") == getDate())? "today" : date.replaceAll("_", "/");
+    dateSelect.append(opt);
+    if (date.replaceAll("_", "/") == getDate()){
+      attendance = superAttendance[date];
+      opt.selected = true;
+    }
+    
+  })
+  }
+  if (attendance) 
+  presentAttendance(attendance);
+  
+}
+
+
+function to12Hour(hour24) {
+  if (hour24 === 0 || hour24 === 24) {
+    return 12;
+  } else if (hour24 > 12) {
+    return hour24 - 12;
+  } else {
+    return hour24;
+  }
+}
+
+function getAMPM(hour24) {
+  return (hour24 >= 12 && hour24 < 24) ? "PM" : "AM";
+}
+
+  </script>
+</body>
+</html>
