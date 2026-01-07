@@ -263,7 +263,7 @@
               <li></li>
              <li id="switch">Switch <span>Account</span></li>
               <li id="signout">Logout <span id="username"></span></li>
-              <li><a href="/changePsw.html">Change password </a></li>
+              <li><a href="../changePsw.html">Change password </a></li>
             </ul>
      </div>
     <div id="sess">session/term not initialized</div>
@@ -416,13 +416,6 @@
       <a href="formMaster.html">Assign Form Masters</a>
     </div>
       
-      
-  
-      
-      
-      
- 
-
 
     <div class="card admins">
       <h2>Manage Admins</h2>
@@ -621,13 +614,17 @@ const adminFunctions = [
      else if (id=="kamilu")
        window.location.href = "headmaster/index.html";
      } 
-    
+     
     if (teacher.role.fm.length)
     window.location.href = "fm/index.html";
     else if (teacher.role.hod.classes.length)
     window.location.href = "hod/index.html";
 
   
+    teacher.adminV2Functions??={};
+   if (teacher.adminV2Functions.quality)
+    window.location.href = "quality/index.html";
+
     //alert(teacher.role.fm
     return;
    // teacher.role.hod ??={};
@@ -641,7 +638,8 @@ const adminFunctions = [
       teacher.adminFunctions.push("fmssm");
       classesElm.textContent = classes;
     }
-
+    
+    
    
     teacher.role.hos ??={};
     let sections = teacher.role.hos.sections;
