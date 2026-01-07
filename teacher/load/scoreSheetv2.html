@@ -120,7 +120,7 @@
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, enableIndexedDbPersistence, runTransaction, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
       const firebaseConfig = {
@@ -136,6 +136,15 @@
       const analytics = getAnalytics(app);
       const auth = getAuth(app);
     const db = getFirestore(app);
+  
+  enableIndexedDbPersistence(db)
+  .catch((err) => {
+    if (err.code === 'failed-precondition') {
+      console.log("Multiple tabs open");
+    } else if (err.code === 'unimplemented') {
+      console.log("Browser not supported");
+    }
+  });
 
   const schoolId = "capital";
   const terms = ["first term", "second term", "third term"];
@@ -221,10 +230,45 @@ await  render();
       students = stdsDoc.data();
       let studentsArr = Object.values(students).sort((a, b)=>a.name.trim().localeCompare(b.name.trim()));
       studentsArr.forEach(student=>present(student, table.insertRow()));  
-      saveBtn.onclick = async e=>{
-        await setDoc(stdsRef, students, {merge:true});
-        alert("saved!");
-      }      
+      
+      
+      async function saveScores() {
+        const subjK = key(subj);
+        if (!subjK) return;
+        const clas = key(cls);
+        const session = key(ses.year + terms[ses.term]);
+        if (!(clas && session)) return null;
+        if (!Object.values(students).length) return;
+
+  const stdsRef = doc(db, schoolId, session, clas, "students");
+
+  await runTransaction(db, async (transaction) => {
+    // Optionally read existing data (if needed)
+    // const existing = await transaction.get(stdsRef);
+    let stdsDoc = await transaction.get(stdsRef);
+    let stds = stdsDoc.exists()? stdsDoc.data() : {};
+    // Write new data atomically
+    for (const stu in students){
+      console.log(stu, students[stu].id, subjK);
+      stds[stu].subjects??={};
+      stds[stu].subjects[subjK] = students[stu].subjects[subjK];
+    }
+     transaction.set(stdsRef, stds);
+  });
+
+   alert("Saved!");
+}
+  saveBtn.onclick= async e=>{
+    if (!students) return;
+    if (Object.values(students).length){
+    e.target.textContent = "Saving..";
+    await saveScores();
+    e.target.textContent = "Saved!";
+    setTimeout(_=>e.target.textContent = "Save", 1500);
+    }
+
+  }
+      
       function present(student, row){
         row.innerHTML = "";
         let id = row.insertCell();

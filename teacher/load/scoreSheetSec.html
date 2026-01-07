@@ -116,22 +116,30 @@
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, enableIndexedDbPersistence, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
       const firebaseConfig = {
-  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
-  authDomain: "school-in-the-box.firebaseapp.com",
-  projectId: "school-in-the-box",
-  storageBucket: "school-in-the-box.firebasestorage.app",
-  messagingSenderId: "596350496353",
-  appId: "1:596350496353:web:84c66c351700ddf0824420",
-  measurementId: "G-3MGCDH4FRF"
-};
+        apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+        authDomain: "school-in-the-box.firebaseapp.com",
+        projectId: "school-in-the-box",
+        storageBucket: "school-in-the-box.firebasestorage.app",
+        messagingSenderId: "596350496353",
+        appId: "1:596350496353:web:84c66c351700ddf0824420",
+        measurementId: "G-3MGCDH4FRF"
+      };
       const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
       const auth = getAuth(app);
-    const db = getFirestore(app);
+      const db = getFirestore(app);
+  
+  enableIndexedDbPersistence(db)
+  .catch((err) => {
+    if (err.code === 'failed-precondition') {
+      console.log("Multiple tabs open");
+    } else if (err.code === 'unimplemented') {
+      console.log("Browser not supported");
+    }
 
   const schoolId = "capital";
   const terms = ["first term", "second term", "third term"];
