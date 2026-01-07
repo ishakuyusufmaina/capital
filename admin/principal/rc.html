@@ -280,12 +280,17 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         //mixed school? report card => error
       }
       let faith = stdReg == "Islam"? "Muslim" : "Christian";
-      for (const subj in subjects) {     
+      for (const subj in subjects) { 
+         if (subjects[subj][termIndex].inactive) {
+           delete subjects[subj];
+           continue;
+         }
         //console.log(subjects[subj]);        
         let sN = subjects[subj][termIndex].name;    
       //  console.log(sN);        
         if (!sectSubjs.includes(sN)){//subj not in the section subjects
           delete subjects[subj];
+          continue;
          // console.log(subj, "deleted out");
           
         }          
@@ -293,17 +298,18 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
           //if the srp of the subj is not as of the faith of the student, delete the subject among the student's subjects
           if (!(srp[sN]==faith))
           delete subjects[subj];
+          continue;
         }
         try {
           let termScores = subjects[subj][termIndex];
           let score = Number(termScores.test1 ?? 0) + Number(termScores.test2 ?? 0) + Number(termScores.test3 ?? 0);
           let asms = scoreSheetConfig.assessments??[{name: "CA", subtotal: 30}];
-      /*    asms.forEach(a=>{
+        /*asms.forEach(a=>{
             let k = a.name.toLowerCase();
             score += Number(termScores[k].replace("-", "0"))
-        })*/          
+        })*/         
           let exm = subjects[subj][termIndex].exam+"";
-          exm = exm.replace("-", 0);
+          exm = Number(exm.replace("-", 0));        
           student.score += score + Number(exm);
           subHeads.add(subjects[subj][termIndex].name);
           student.sc++;
@@ -389,7 +395,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       std.result.term = sessionSelect.value.split(",")[1],
       std.result.class = classSelect.value;
       std.result.session = sessionSelect.value;
-      std.result.pic = std.picURL;
+      //std.result.pic = std.picURL;
       std.result.position = std.position;
       std.result.predefinedAsms = predefinedAsms;
       std.result.predefinedExam = scoreSheetConfig.exam;
@@ -409,27 +415,10 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         //score of the currrent term
         let termScores = subjects[subj][termIndex];
         let total = 0;
-       /* let asms = scoreSheetConfig.assessments??[{name: "CA", subtotal: 30}];
-        let termScores = subjects[subj][termIndex];
-        let scores = predefinedAsms.map(a=>{
-          let score;
-          let k = a.name.toLowerCase();
-          if (a.derivatives){
-            score = 0;
-            a.derivatives.forEach(d=>{
-              k = d.toLowerCase();
-              score += Number(termScores[k].replace("-"));
-            })
-          } else {
-            score = termScores[k];
-          }
-          return score;
-        })*/
-       /* asms.forEach(a=>{
-          let k = a.name.toLowerCase();
-          total += Number(termScores[k].replace("-", "0"))
-        })*/
-        total = Number(termScores.exam ?? 0); //+ Number(termScores.test1) + Number(termScores.test2) + Number(termScores.test3) ;
+       let exm = subjects[subj][termIndex].exam+"";
+          exm = Number(exm.replace("-", 0));        
+
+        total = exm; //Number(termScores.exam ?? 0); //+ Number(termScores.test1) + Number(termScores.test2) + Number(termScores.test3) ;
        // total += Number(termScores.exam);
         console.log(total, termScores.exam);
         let t1= Number(subjects[subj][termIndex].test1 ?? 0);
@@ -438,21 +427,20 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         total +=t1+t2+t3;
         let score = t1 + t2 +t3 + Number(subjects[subj][termIndex].exam);
         let interp = interpret(total, scoreInterpretations);
-       // console.log(interp);
-        //subjects.forEach(subj=>{
+        
         let row =document.createElement("tr");
         row.innerHTML = `
         <td>${subjects[subj][termIndex].name.toUpperCase()}</td>
         <td>${t1+t2+t3}</td>
-        <td>${subjects[subj][termIndex].exam}</td>
+        <td>${exm}</td>
         <td>${total}</td>
         <td>${interp.grade? interp.grade : grade(0, score) /*grade(t1+t2+t3, Number(subjects[subj][termIndex].exam))*/}</td>
         <td>${interp.remark? interp.remark : remark(0, score) /*remark(t1+t2+t3, Number(subjects[subj][termIndex].exam))*/}</td>
         
         `;
-        let exam = subjects[subj][termIndex].exam;
-        //std.result.subjects[subj] = {name: subjects[subj][termIndex].name, score: scores, exam, total};
-       std.result.scoreInterps = scoreInterpretations;
+        let exam = exm; // subjects[subj][termIndex].exam;
+        std.result.subjects[subj] = {name: subjects[subj][termIndex].name, score: t1+t2+t3, exam, total};
+        std.result.scoreInterps = scoreInterpretations;
         reportCard.appendChild(row);
         if (score > 100 || score < 0){
          let s= subjects[subj][termIndex].name.toUpperCase();
