@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+  <title>Admin Manager</title>
+  
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+  }
+
+  body {
+    padding: 2rem;
+    background: #f4f6f8;
+    color: #333;
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+  }
+
+  button {
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.2rem;
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #5c6bc0;
+  }
+
+  hr {
+    margin: 2rem 0;
+    border: none;
+    height: 1px;
+    background-color: #ddd;
+  }
+
+  details {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+
+  summary {
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+
+  th, td {
+    padding: 0.8rem;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+    vertical-align: middle;
+  }
+  .resource{
+    border: 1px solid #e0e0e0;
+    padding: 0.8rem;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  td label {
+    font-weight: 500;
+  }
+
+  td input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    padding: 2rem;
+    border-radius: 14px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    overflow-y: auto;
+    max-height: 80vh;
+  }
+
+  .modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+    color: #2c3e50;
+  }
+
+  #closeBtn {
+    position: absolute;
+    top: 0;
+    right: 1rem;
+    font-size: 1.2rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: black;
+  }
+
+  .modal input[type="search"] {
+    width: 100%;
+    padding: 0.7rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  #save {
+    background-color: #27ae60;
+  }
+
+  #save:hover {
+    background-color: #2ecc71;
+  }
+</style>
+
+</head>
+<body>
+  <h1>
+    Admins Management
+  </h1>
+  <a href="role.html">+Role</a>
+  <div id="admins">
+   
+  </div>
+        
+  <hr>
+  <button id="newAdd">Please wait..</button>
+  
+    <!-- Modal -->
+  <div  id="modal" class="modal">
+    <div class="modal-content"> 
+      <h3>New Admin</h3>
+      <button id="closeBtn">X</button>
+      <input id="s" type="search">
+      <table id="table">
+        
+      </table>
+      
+    </div>
+  </div>
+  <button id="save">Save</button>
+  
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, onSnapshot, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, updateProfile, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+
+  
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+const schoolId= "capital";
+      
+  
+  
+  let teacherDoc = await getDoc(doc(db, schoolId, "teachers"));
+  let teachers = teacherDoc.exists()? teacherDoc.data() : {};
+  let sectionDoc = await getDoc(doc(db, schoolId, "section"));
+  let sects = sectionDoc.exists()? Object.keys(sectionDoc.data()) : [];
+  const rolesRef = doc(db, schoolId, "roles");
+  let rolesDoc = await getDoc(rolesRef);
+  let roles = rolesDoc.exists()? rolesDoc.data().list : [];
+  
+  let user = await new Promise(resolve=>{
+    onAuthStateChanged(auth, u=>resolve(u))
+  });
+ let id = user.email.replace(/@.*/, "");
+  const teacher = teachers[id];
+  const userId = id;
+  console.log(sects);
+  let classes = [];
+ //if (id!==schoolId) sects = teacher.adminFunctions.admins.resources;  
+  sects.forEach(sect=>{
+    let section = sectionDoc.data()[sect];
+    classes = classes.concat(section.classes);
+  }) 
+  /*
+  t.adminFxns = {
+      
+  }
+  */
+  /*
+  using the first, teachers, as an example.
+  teachers is implicitly lower resources,
+  and resources are the upper resources 
+  containing the lower resource.
+  */
+  const adminFunctions = {
+    quality: {
+      action: "Inspect school",
+      resources: sects
+    }
+    
+  };
+  
+  
+  newAdd.innerHTML = "New admin";
+  save.onclick = async e=>{
+   await setDoc(doc(db, schoolId, "teachers"), teachers);
+    alert("saved!");
+  }
+  
+  
+  let teacherList = [];
+  for (const username in teachers){
+    let teacher = teachers[username];
+ //   let tSects = teacher.sections??[];
+  //  let intersects = tSects.filter(sect=>sects.includes(sect));
+  //  console.log(intersects);
+   // if (!intersects.length && id!==schoolId) continue;
+    teacherList.push(teacher);
+    console.log(teacher.name);
+    if (teacher.isAdminV2){      
+      presentAdmin(teacher);
+    }
+  }
+  teacherList.sort((a, b)=> a.name.trim().localeCompare(b.name.trim()));
+  
+  function presentAdmin(admin){
+    let teacher = admin;
+    let name= teacher.name;
+    let adminFxns = Object.keys(teacher.adminFunctions);
+    let details = document.createElement("details");
+    let summary = document.createElement("summary");
+    let tb = document.createElement("table");
+    details.append(summary, tb);
+    admins.append(details);
+    render();
+    function render(){
+      summary.innerHTML = name + " is <select multiple></select>" + " and can ..";
+      let roleSelect = summary.querySelector("select");
+      teacher.roles??=[];
+      roles.forEach(role=>{
+        let opt = new Option(role);
+        roleSelect.append(opt);
+        opt.selected = teacher.roles.includes(role);
+      })
+      roleSelect.onchange = e=>{
+        teacher.roles = Array.from(roleSelect.selectedOptions).map(opt=>opt.value);
+        console.log(teacher.roles);
+      }
+      tb.innerHTML = "";
+      let supFxns = Array.from(Object.keys(adminFunctions));
+
+      supFxns.forEach((fx, i)=>{
+        let admFx = teacher.adminV2Functions??{};
+        let id = `${teacher.username}${fx.replaceAll(" ","")}${i}no`;
+        let row = tb.insertRow();
+        let tdFx = row.insertCell();
+        let tdCan = row.insertCell();
+        let {resources, action}  = adminFunctions[fx];
+        console.log(userId);
+        if (userId==schoolId && !resources){
+          resources = sects;
+        }
+        if (!resources && id!==schoolId) return;
+        tdFx.innerHTML = `<input id="${id}" type="checkbox" value="${fx}"> <label for="${id}">${action}</label>`;
+        
+        if (admFx[fx] && resources) resources.forEach(res=>{
+          let resElm = document.createElement("div");
+          resElm.classList.add("resource");
+          resElm.innerHTML = `<div>
+          <input id="${id+res}" type="checkbox" value="${res}">
+          <label for="${id+res}">${res}</label>
+          </div>
+          `;
+          tdCan.append(resElm);
+          let resIn = resElm.querySelector("input");
+          let ress = teacher.adminV2Functions[fx].resources??[];
+          resIn.checked = ress.includes(resIn.value);
+          resIn.onchange = e=>{
+              if (e.target.checked){
+                teacher.adminV2Functions[fx].resources??=[];
+                teacher.adminV2Functions[fx].resources.push(resIn.value)
+                console.log(fx, resIn.value);
+              } else {
+                let i = teacher.adminV2Functions[fx].resources.indexOf(resIn.value);
+                teacher.adminV2Functions[fx].resources.splice(i, 1);
+              }
+            }
+        })
+        let actIn = tdFx.querySelector("input");
+        actIn.checked = !!admFx[fx];
+     
+        
+        actIn.onchange = e=>{
+          if (e.target.checked){
+            teacher.isAdminV2 = true;
+            teacher.adminV2Functions??= {};
+            teacher.adminV2Functions[fx] = {action}
+            console.log(fx, action);
+            
+          } else {
+            delete teacher.adminV2Functions[fx]
+          }
+          render();
+        }
+      })
+    } //end of render fx
+  }
+  //let list = ["ux11 ma", "u12 xa", "ux t 3"];
+  
+  
+  teacherList.forEach(teacher =>{
+    if (teacher.isAdminV2) return;
+    let row = table.insertRow();
+     let name = row.insertCell();
+     name.innerHTML = teacher.name;
+     let addCell = row.insertCell();
+     let btn = document.createElement("button");
+     addCell.append(btn);
+     btn.innerHTML = "add";
+     btn.onclick = e=>{
+       row.remove();
+       teacher.isAdminV2 = true;
+       teacher.adminV2Functions = {};
+       presentAdmin(teacher);
+     }
+    // table.innerHTML +=`<tr><td>${teacher.name}</td> <td><button>add</button></td></tr>`;
+   }) 
+  s.oninput = e=>{
+    let val = s.value;
+    let reg = new RegExp(`${val}`, "i");
+   let sublist = teacherList.filter(el => reg.test(el.name))
+    table.innerHTML = "";
+   sublist.forEach(list =>{
+     if (list.isAdminV2) return;
+     let row = table.insertRow();
+     let name = row.insertCell();
+     name.innerHTML = list.name;
+     let addCell = row.insertCell();
+     let btn = document.createElement("button");
+     addCell.append(btn);
+     btn.innerHTML = "add";
+     btn.onclick = e=>{
+       let teacher = list;
+       row.remove();
+       teacher.isAdminV2 = true;
+       teacher.adminV2Functions = {};
+       presentAdmin(teacher);
+   
+     }
+     //table.innerHTML +=`<tr><td>${list.name}</td> <td><button>add</button></td></tr>`;
+   }) 
+  }
+  
+  
+  function openModal() {
+    modal.style = "display: block";
+  }
+
+    function closeModal() {
+      document.getElementById("modal").style = "display: none";
+    }
+  newAdd.onclick = e=> openModal();
+  closeBtn.onclick = e=> closeModal();
+  </script>
+</body>
+</html>
