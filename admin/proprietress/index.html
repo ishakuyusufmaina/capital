@@ -471,9 +471,10 @@ table {
   </div>
   
   <div class="card card-2" id="hos" onclick="window.location.href='assignHOS.html'">Heads of Sections</div>
+    <div class="card card-6" onclick="window.location.href='admin-mgt/index.html'">Admin Management</div>
 
   <div class="card card-5"  onclick="window.location.href='../bill.html'">Cloud Storage, Usage and Billing</div>
-
+ 
 </main>
 
 
@@ -631,7 +632,7 @@ function updateTPPP(){
     p.status = {};
     p.status[sectK] = getStatus(p);
     p.mec = {};
-    p.mec[sectK] = sect.classes.length;
+    p.mec[sectK] = sect.classes.length;p
     return p;
   })
  secKeys.forEach((k, i)=>{
