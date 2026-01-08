@@ -162,7 +162,7 @@
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, setDoc, getDoc, serverTimestamp} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
       const firebaseConfig = {
@@ -212,7 +212,7 @@ let schoolId = "capital";
    if (!authObj.auths.length) keys.forEach(key=>{
        let classes = sections[key].classes;
        classes.forEach((clas, i)=>{
-         let auth = {class: clas, code: "123"+i, status: "inactive"};
+         let auth = {class: clas.trim().toLowerCase(), code: "123"+i, status: "inactive"};
          authObj.auths.push(auth);
       });
    });
@@ -247,6 +247,10 @@ let schoolId = "capital";
         .onclick = e=>generateNew(index)
 
         tableBody.appendChild(tr);
+        tr.onclick = async e=>{
+        //  let ds = await queryAuthExact(db, schoolId, auth.class, auth.code, auth.status);
+         // console.log(JSON.stringify(ds[0]));
+        }
       });
     }
 
@@ -285,6 +289,25 @@ let schoolId = "capital";
   reset.onclick = e=> resetAll();
 
     renderTable();
+  
+  
+  
+
+async function queryAuthExact(db, schoolId, className, code, status) {
+  const authObject = {
+    class: className,
+    code: code,
+    status: status
+  };
+
+  const q = query(
+    collection(db, `${schoolId}/db/auths`),
+    where("auths", "array-contains", authObject)
+  );
+
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(d => d.data());
+}
   </script>
 
 </body>
