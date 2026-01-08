@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SCORE SHEET</title>
+ 
+    <style>
+  * {
+    box-sizing: border-box;
+  }
+  h1 {
+    text-align: center;
+  }
+  
+  button {
+      margin-top: 1.5rem;
+     width: 100%;
+      padding: 0.7rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    display: inline-block;
+    margin: auto;
+    }
+
+    button:hover {
+      background-color: #5c6bc0;
+    }
+    
+    
+        input {
+      padding: 8px;
+      border: 1px solid #333;
+      border-radius: 5px;
+     // background-color: inherit; //#1e1e1e;
+    //color: white;
+    }
+
+    
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+   th, td{
+      padding: 10px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+      body {
+     // background-color: #121212;
+      //color: #ffffff;
+      font-family: Arial, sans-serif;
+     // padding: 20px;
+    }
+  select {
+      font-family: Arial, sans-serif;
+      border: none;
+    font-size: 24px;
+    text-align: center;
+    width: 100%;
+    display: inline-block;
+  }
+    
+    .name {
+        width: fit-content;
+    }
+  
+  .select-container, .table-container {
+    text-align: center;
+    margin: auto;
+    padding: 10px;
+    //border: 1px solid white;
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  td {
+    text-transform: uppercase;
+  }
+  </style>
+</head>
+<body>
+  <h1>
+    Score Sheet
+  </h1>
+    <header>
+    <div id="date">Date: </div>
+    <div id="session">Session: </div>
+    <div id="clas">Class: </div>
+    <div> <span id="subject">Subject:</span>  <input id="statusInp" type="checkbox"> </div>
+  </header>
+
+  <div class="table-container">
+  <table id="table">
+    <tr>
+      <th>SN</th>
+      <th>Name</th>
+      <th>1st CA (10)</th>
+      <th>2nd CA (10)</th>
+      <th>3rd CA (10)</th>
+      <th>Exam (70)</th>
+      <th>Total (100)</th>
+    </tr>
+    <tbody id="table-body"></tbody>
+  </table>
+  </div>
+ 
+  
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, enableIndexedDbPersistence, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+        apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+        authDomain: "school-in-the-box.firebaseapp.com",
+        projectId: "school-in-the-box",
+        storageBucket: "school-in-the-box.firebasestorage.app",
+        messagingSenderId: "596350496353",
+        appId: "1:596350496353:web:84c66c351700ddf0824420",
+        measurementId: "G-3MGCDH4FRF"
+      };
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+  
+  enableIndexedDbPersistence(db)
+  .catch((err) => {
+    if (err.code === 'failed-precondition') {
+      console.log("Multiple tabs open");
+    } else if (err.code === 'unimplemented') {
+      console.log("Browser not supported");
+    }
+  });
+
+  const schoolId = "capital";
+  const terms = ["first term", "second term", "third term"];
+  
+  
+  let d = new Date();
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day = d.getDate();
+  let sec = d.getSeconds()+1;
+  let min = d.getMinutes()+1;
+  let h = d.getHours()+1;
+  //time.innerHTML = `${h} : {}{
+  date.innerHTML = `${day}/${month}/${year}`;
+
+   
+  
+  
+  var students = {};
+  let ses;
+  let cls = localStorage.getItem("class");;
+  clas.textContent = cls;
+  let subj = localStorage.getItem("subject");
+  subject.textContent = subj;
+  let sessionsRef = doc(db, schoolId, "sessions");
+  let sessionsDoc = await getDoc(sessionsRef);
+    if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+    ses= sessions.sort((a, b)=>b.no - a.no)[0];
+      session.textContent = ses.year + ", " + terms[ses.term];
+  }
+  
+  loadStudents();
+  loadScores();
+  
+const  subjK = key(subj);
+ 
+  const termIndex = ses.term;
+ async function loadScores(){
+   
+   
+   await loadStudents();
+   if (!students) return; 
+   
+ // let ssi = sessionSelect.selectedIndex;
+  
+  
+        const container = document.getElementById('table-body');
+   container.innerHTML = "";
+   if (subjK) {
+      
+     Object.values(students).sort((a, b)=>a.name.localeCompare(b.name)).forEach((student, i)=>{
+       //let student = students[key];
+       student.subjects ??={};
+       student.subjects[subjK] ??= [{}, {}, {}];
+       student.subjects[subjK][termIndex].name ??= subj;
+       student.subjects[subjK][termIndex].test ??= 0;
+       student.subjects[subjK][termIndex].exam ??= 0;
+       statusInp.checked = !student.subjects[subjK][termIndex].inactive;
+          const row = document.createElement('tr');
+       let name = student.name;
+       let [test1, test2, test3, exam]=[0,0,0,0];
+         
+       test1 = student.subjects[subjK][termIndex].test1 ?? 0;
+       test2 = student.subjects[subjK][termIndex].test2 ?? 0;
+       test3 = student.subjects[subjK][termIndex].test3 ?? 0;
+       exam = student.subjects[subjK][termIndex].exam ?? 0;
+       
+    row.classList.add("record");
+    let sn= container.children.length;
+      row.innerHTML = `
+      <td>
+      ${i+1}
+      </td>
+       <td>
+         ${student.name}
+      </td> 
+      <td>
+        <input disabled id="test1-${i}" type="number" min="0" max="40" value="${test1? test1 : 0}">
+    </td> 
+    <td>
+        <input disabled id="test2-${i}" type="number" min="0" max="40" value="${test2? test2 : 0}">
+    </td>   
+    <td>
+        <input disabled id="test3-${i}" type="number" min="0" max="40" value="${test3? test3 : 0}">
+    </td>        
+       <td >
+        <input disabled id="exam${i}" type="number" min="0" max="100" value="${exam? exam : 0}">
+    </td>  
+    <td id="total${i}">
+        ${function (){
+          test1 = test1? test1 : 0;
+          test2 = test2? test2 : 0;
+          test3 = test3? test3 : 0;
+          exam = exam? exam : 0;
+          return Number(test1) + Number(test2) + Number(test3) + Number(exam);
+         }()}
+    </td>            
+      `;
+
+      container.appendChild(row);
+       let testInp1 = document.getElementById("test1-"+ i);
+       let testInp2 = document.getElementById("test2-"+ i);
+       let testInp3 = document.getElementById("test3-"+ i);
+       let examInp = document.getElementById("exam"+ i);
+       let totalElm = document.getElementById("total"+ i);
+       [testInp1, testInp2, testInp3, examInp].forEach(inp=> {
+         inp.oninput = e=>{
+         let test1 = Number(testInp1.value);
+         let test2 = Number(testInp2.value);
+         let test3 = Number(testInp3.value);
+         let exam = Number(examInp.value);
+         let total = test1 + test2 + test3 + exam;
+         totalElm.innerHTML = total;
+           student.subjects[subjK][termIndex].test1 = test1;
+           student.subjects[subjK][termIndex].test2 = test2;
+           student.subjects[subjK][termIndex].test3 = test3;
+           student.subjects[subjK][termIndex].exam = exam;
+           student.subjects[subjK][termIndex].name = subj;
+          
+
+       }
+       });
+         
+       
+       
+
+     });
+   } else {
+      Object.keys(students).forEach((key, i)=>{
+    // const container = document.getElementById('table-body');
+        let student = students[key];
+      const row = document.createElement('tr');
+    
+    row.classList.add("record");
+      row.innerHTML = `
+      <td>
+      ${i+1}
+      </td>
+       <td>
+         ${student.name}
+      </td> 
+      <td>
+        no subject seleted    
+      </td>    
+       <td>
+        no subject seleted    
+      </td>  
+    <td>
+        none
+    </td>            
+      `;
+
+      container.appendChild(row);
+
+     });
+   }
+   
+   
+   
+ }
+  
+  async function loadStudents() {
+    let clas = key(cls);
+    
+    let session = key(ses.year+terms[ses.term]);
+  //  alert(session)
+    if (!(clas && session)) return null;
+    let stdsRef = doc(db, schoolId, session, clas, "students");
+    let stdsDoc = await getDoc(stdsRef);
+    
+    if (stdsDoc.exists()){
+      students = stdsDoc.data();
+      
+      //return students
+      
+    } else
+    students = null;
+    
+  }
+  
+  
+//import { runTransaction, doc } from "firebase/firestore";
+
+
+  
+  function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+    }
+  
+
+  
+  
+  </script>
+</body>
+</html>
