@@ -141,7 +141,7 @@
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, writeBatch, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, runTransaction, doc, writeBatch, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
       const firebaseConfig = {
@@ -232,76 +232,102 @@
   })
   
   
-   if (authDoc.exists()){
-     let authObjs = authDoc.data();
-     for (const id in authObjs){
-       let authObj = authObjs[id];
-       let opt = document.createElement("option");
-       opt.value = id;
-       opt.innerHTML = authObj.authorizer;
-       supervisor.append(opt);
-     }
-   }
+ 
   
 
-  submit.onclick = async e=>{
-    
+  submit.onclick = async e=>{   
+    await runTransaction(db, async (transaction)=>{
+      
     let time = getTime();
     console.log(JSON.stringify(time));
     let todayDate = date.textContent.replaceAll("/", "_");
-    let cls = key(clas.textContent);
+    let cls = clas.textContent.trim().toLowerCase();
+    let className = clas.textContent;
     let sesId = key(session.textContent);
-    //alert(sesId);
-    let code1;
-    let code2;
-    let supvsor;
-    if (supervisor.children.length > 1){
-       code1 = code.value;
-      let id = supervisor.value;
-      if (!id) return;
-       code2 = authDoc.data()[id].code;
-      if (code2 != code1) {
-        alert("Wrong authorization");
-        return
-      }
-      supvsor = authDoc.data()[id].authorizer;
-      
+    let supervisorId = supervisor.value;
+      let sName = supervisor.options[supervisor.selectedIndex].text;
+    if (!supervisorId) {
+      alert("Please choose a supervisor");
+      return;
     }
-    
+    const code1 = code.value;
+      //21738
+      let authRef = doc(db, schoolId, "db", "auths", supervisorId);
+    const authDoc = await transaction.get(authRef);
+    if (!authDoc.exists()) {
+      alert("Wrong code/supervisor match");
+      return;
+    }
+    const auths = authDoc.data().auths;
+   let aut
+   try {
+     aut = auths.find(a=> 
+      a.class == cls && 
+      a.code == code1 && 
+      a.status == "active"
+     )
+   } catch (e) {
+     alert("Wrong code")
+     return;
+   };
+     
+   
+   if (!aut){
+     alert("Wrong code")
+     return;
+   }   
+
     let per = period.value;
-    if (!per) return;
+    if (!per) {
+      alert("Please select the class period");
+      return;
+    }
+     
     let perLabl = pLabels[per] + " period";
     let top = topic.value;
-    if (!top) return;
+    if (!top) {
+      alert("Please enter the topic");
+      return;
+    }
     let entry = {
       subject: subject.textContent,
       period: perLabl,
       topic: top,
-      supervisedBy: supvsor,
+      supervisedBy: sName,
       authCode: code1,
       timeSubmitted: time ,
-      class: cls,
+      class: className,
       teacher: teacher.name
     }
     console.log(JSON.stringify(entry))
     
-    let tsRef = doc(db, schoolId, sesId, cls, "teachAndSign");
+    let tsRef = doc(db, schoolId, sesId, key(className), "teachAndSign");
     let pLHxRef = doc(db, schoolId, sesId, `d${todayDate}p${per}`, "lessonHistory"); //ref to periodic lesson history;
-    let tsDoc = await getDoc(tsRef);
+    //  let pLHxRef = doc(db, schoolId, sesId, `d${date}p${i}`, "lessonHistory"); //ref to periodic lesson history;
+    
+    let tsDoc = await transaction.get(tsRef);
     let ts = tsDoc.exists()? tsDoc.data() : {};
     ts[todayDate] ??=[];
     ts[todayDate].push(entry);
     let id = auth.currentUser.email.replace(/@.*/, "");
     let pLHxEntry = {};
     pLHxEntry[id] = entry;
-    batch.set(tsRef, ts, {merge: true});//await setDoc(tsRef, ts, {merge: true});
-    batch.set(pLHxRef, pLHxEntry, {merge:true});
-    await batch.commit();
-    document.body.innerHTML =`
+    transaction.set(tsRef, ts, {merge: true});//await setDoc(tsRef, ts, {merge: true});
+    transaction.set(pLHxRef, pLHxEntry, {merge:true});
+      
+   // const auths = authDoc.data();
+    aut.status = "used";
+    transaction.update(authRef, { auths: [...auths] });
+    //await batch.commit();
+    
+      document.body.innerHTML =`
     Good teacher, <br>
-    You have successfully logged in your teach and sign.
+    You have successfully lodged in your teach and sign.
     <hr>
     `;
+      
+    });
+    
   }
   
   function key(token){
@@ -316,7 +342,35 @@
     teacher = teachers[id];
     submit.disabled = false;
     tName.textContent = "Teacher: "+ teacher.name;
+    
+        for (const t in teachers){
+      let staff = teachers[t];
+      staff.adminV2Functions??={};
+      if (staff.adminV2Functions.quality){
+        let opt = document.createElement("option");
+       opt.value = t;
+       opt.innerHTML = staff.name;
+       supervisor.append(opt);
+
+      }
+    }
   })
+  
+  async function queryAuthExact(className, code, status) {
+  const authObject = {
+    class: className,
+    code: code,
+    status: status
+  };
+
+  const q = query(
+    collection(db, `${schoolId}/db/auths`),
+    where("auths", "array-contains", authObject)
+  );
+
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(d => d.data());
+}
   </script>
 </body>
 </html>

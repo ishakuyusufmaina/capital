@@ -60,8 +60,7 @@
 <body>
  <a href="../index.html"><i class="fas fa-home"></i></a>
   <main>
-  <header>
-   
+  <header>   
     <div id="date">Date: </div>
     <div id="session">Session: </div>
     <div id="clas">Class: </div>
@@ -72,7 +71,7 @@
     <a class="fw" href="teachAndSign.html">Teach and Sign</a>
   </div>
   <div>
-    <a class="fw" id="scoreSheet">Score Sheet</a>
+    <a class="fw" id="scoreSheet" href="scoreSheetv2.html">Score Sheet</a>
   </div>
   </main>
   
@@ -104,17 +103,8 @@
   let subj = localStorage.getItem("subject");
   subject.innerHTML = subj;
   
-  if (cls[0].toLowerCase() == "j" || cls[0].toLowerCase() == "s")
-  scoreSheet.href = "scoreSheetSec.html";
-  else scoreSheet.href="scoreSheetv2.html"
-
-      let sessionsRef = doc(db, schoolId, "sessions");
-let teachersRef = doc(db, schoolId, "teachers");
-  let teachersDoc = await getDoc(teachersRef);
- // let sectionRef = doc(db, schoolId, "section");
-  //let sectionDoc = await getDoc(sectionRef);
-//  const attendance = {};
-
+  
+  let sessionsRef = doc(db, schoolId, "sessions");
   onAuthStateChanged(auth, user=>{
     if (!user){
       window.location.href = "../../signin.html"

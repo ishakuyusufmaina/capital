@@ -97,7 +97,7 @@
     <div id="date">Date: </div>
     <div id="session">Session: </div>
     <div id="clas">Class: </div>
-    <div id="subject">Subject: </div>
+    <div> <span id="subject">Subject:</span>  <input id="statusInp" type="checkbox"> </div>
   </header>
 
   <div class="table-container">
@@ -270,6 +270,7 @@ await  render();
   }
       
       function present(student, row){
+        
         row.innerHTML = "";
         let id = row.insertCell();
         id.innerHTML = student.id;
@@ -279,6 +280,8 @@ await  render();
         student.subjects[subjK]??=[{}, {}, {}];
         student.subjects[subjK][termIndex]??={}
         let scores = student.subjects[subjK][termIndex];
+        statusInp.checked = !student.subjects[subjK][termIndex].inactive;
+
         let sum = 0;
         scores.exam??="-";
         scores.exam = String(scores.exam);
@@ -358,7 +361,22 @@ await  render();
   
 
   
-  
+  statusInp.oninput= async e =>{
+    if (!(students && Object.keys(students).length)) return;
+    if (!window.confirm("Are you sure you want to change activation status of this score sheet?")) return;
+      Object.values(students).forEach((student, i)=>{
+       //let student = students[key];
+        student.subjects ??={};
+        student.subjects[subjK] ??= [{}, {}, {}];
+        student.subjects[subjK][termIndex].inactive = !!student.subjects[subjK][termIndex].inactive
+        student.subjects[subjK][termIndex].inactive = !student.subjects[subjK][termIndex].inactive;
+        statusInp.checked = !student.subjects[subjK][termIndex].inactive;
+      });
+  //  await saveScores();
+//    alert("done");
+  //  window.location.reload();
+   // console.log(subjK);
+  }
   </script>
 </body>
 </html>
