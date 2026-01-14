@@ -218,10 +218,10 @@
   const schoolId = "capital";
      // Replace with your Cloudinary details
   //const cloudName = "daktkkz2k"; // Replace with your Cloudinary cloud name
-//  const uploadPreset = "passport"; // Replace with your unsigned preset
-  // const schoolId = "alhidayah";
-    const cloudName = "dwmknlhpa";
+ // const uploadPreset = "passport"; // Replace with your unsigned preset
+  const cloudName = "dwmknlhpa";
   const uploadPreset = "uty99obt";
+  // const schoolId = "alhidayah";
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
   const auth = getAuth(app);
@@ -258,21 +258,7 @@
   
   let sectionRef = doc(db, schoolId, "section");
 let sectionDoc = await getDoc(sectionRef);
-/* if (sectionDoc.exists()){
-   let sections = sectionDoc.data();
-     
-   let keys = Object.keys(sections);
-   
-   keys.forEach(key=>{
-       let optG = document.createElement("optgroup");
-       optG.label = key;
-       let classes = sections[key].classes;
-       classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
-       classSelect.append(optG);
-   });
 
- }*/
-  
   
  onAuthStateChanged(auth, async user=>{ 
        if (!user) return;
@@ -305,11 +291,11 @@ let sectionDoc = await getDoc(sectionRef);
     let clas = key(classSelect.value);
     if (!clas) return;
     row.classList.add("record");
-    console.log(result.picURL);
+    //console.log(result.picURL);
     let picURL = optimizeCloudinaryUrl(result.picURL);
       row.innerHTML = `
       <td class="passport">
-      <!--img src="${picURL}"-->
+      <!-- Pict -->
       <input type="file" accept="image/*" capture="environment" id="cameraInput">
       </td>
       <td class="id">${result.id??"Not Yet Generated"}</td>
@@ -321,8 +307,7 @@ let sectionDoc = await getDoc(sectionRef);
             <option value=""> -select gender- </option>
             <option value="female">Female</option>
            <option value="male">Male</option>
-        </select>
-    
+        </select>  
     </td>    
     <td>
     <select class="religion" value="Islam">
@@ -363,7 +348,7 @@ let sectionDoc = await getDoc(sectionRef);
             alert("Parent/guardian with PIN "+ pin+" is not found");
           }
         })
-        console.log(pin);
+        //console.log(pin);
       }
       row.querySelector(".parent > .match-link").onclick = async e=>{
         const p = (await searchAndMatch(result.id, result.name, classSelect.value)).parent;
@@ -410,7 +395,7 @@ let sectionDoc = await getDoc(sectionRef);
         );
         const data = await res.json();
         preview.src = data.secure_url; // Final Cloudinary URL
-        console.log("Uploaded to Cloudinary:", data);
+        //console.log("Uploaded to Cloudinary:", data.secure_url);
         result.picURL = data.secure_url;
        /* if (result.id){
           await setDoc(doc(db, schoolId, "db", "students", id.replaceAll("/", "_")), {picURL: data.secure_url}, {merge:true});
@@ -439,7 +424,7 @@ let sectionDoc = await getDoc(sectionRef);
           result.religion = relIn.value; //.toLowerCase();
       }
     relIn.value = result.religion;
-    console.log(result.id, result.religion);
+    //console.log(result.id, result.religion);
      if (result.gender.toLowerCase()[0]=="m" || result.gender.toLowerCase()[0] == "f") 
       genderIn.value = !result.gender? "" : result.gender.toLowerCase();
   }
@@ -469,6 +454,8 @@ add.onclick = e=>{
     let stdsRef = doc(db, schoolId, session, clas, "students");   
     if (!currentStudents) return;
     if (!Object.values(currentStudents).length) return;
+    saveBtn.innerHTML = "saving..";
+    saveBtn.disabled = true;
     await batch.commit();
     await runTransaction(db, async transaction=>{
       let stdsDoc = await transaction.get(stdsRef);
@@ -484,7 +471,9 @@ add.onclick = e=>{
       await transaction.set(stdsRef, currentStudents);
    });
       await loadStudents();
-    alert("saved!");
+    saveBtn.innerHTML = "saved!";
+    saveBtn.disabled = false;
+    setTimeout(_=>saveBtn.innerHTML = "Save", 2000);
     //console.log(JSON.stringify(students));
      
   }
@@ -498,7 +487,7 @@ add.onclick = e=>{
         loadStudents();
         let opt = sessionSelect.selectedOptions[0];
         sessionIndex = opt.dataset.index;
-        console.log(sessionIndex);
+        //console.log(sessionIndex);
         
   }
     
@@ -507,37 +496,38 @@ add.onclick = e=>{
     async function loadStudents(){
         table.innerHTML = "";
         let clas = key(classSelect.value);
-    let session = key(sessionSelect.value);
+      let session = key(sessionSelect.value);
     if (!(clas && session)) return;
     let cls = classSelect.value.toLowerCase();
     let year = sessionSelect.value.split(",")[0].trim().replaceAll(" ", "");
-    console.log(year);
+    //console.log(year);
     let yearsNum = sessionsDoc.data().sessions.length;
     let activeYear = sessionsDoc.data().sessions[yearsNum-1].year.trim().replaceAll(" ", "");
-    console.log(activeYear);
-    console.log(classSelect.value);
+    //console.log(activeYear);
+    //console.log(classSelect.value);
     let q = query(collection(db, schoolId, "db", "students"), where("class", "==", cls));
     let countSnap = await getCountFromServer(q);
     let stdCountQ = query(collection(db, schoolId, "db", "students"));
     let StdCountSnap = await getCountFromServer(stdCountQ);
     let stdCount = StdCountSnap.data().count;
-    console.log("total student: ", stdCount);
+    //console.log("total student: ", stdCount);
 
     let count = countSnap.data().count;
-    console.log(count);
+    //console.log(count);
             
     let stdsRef = doc(db, schoolId, session, clas, "students");
-      console.log(clas, session);
+      //console.log(clas, session);
       
     let stdsDoc = await getDoc(stdsRef);
     let stds = stdsDoc.exists()? stdsDoc.data() : {};
+      console.log(JSON.stringify(stds).length);
     //class based std id  
     let cbsIds = Object.values(stds).map(std => std.id).filter(id=> !!id);
     let cbCount = cbsIds.length;
-     console.log(cbCount);
-      console.log(cbsIds);
-      console.log(Object.keys(stds));
-      console.log(year === activeYear);
+     //console.log(cbCount);
+      //console.log(cbsIds);
+      //console.log(Object.keys(stds));
+      //console.log(year === activeYear);
     if (count  !== cbCount && year === activeYear) {
       //alert(); return;
         let gStdsDoc = await getDocs(q);
@@ -549,14 +539,14 @@ add.onclick = e=>{
           
             let std = doc.data();
             let id = std.id;
-            console.log(id);
+            //console.log(id);
             stdIds.push(id);
             if (!stds[id]) {
               std.picURL ??="";
               std.religion ??="";
                let {name, gender, id, picURL, religion} = std;
                stds[id] = {name, gender, id, picURL, religion};
-              console.log(std.gender, std.name, std.picURL);
+              //console.log(std.gender, std.name, std.picURL);
            }           
         });
         let supersetIds = Array.from(new Set(cbsIds.concat(stdIds)));
@@ -564,7 +554,7 @@ add.onclick = e=>{
       .forEach(id=>{
             if (!stdIds.includes(id))
              delete stds[id]
-          console.log(id);
+          //console.log(id);
         });
       
         await setDoc(stdsRef, stds);  
@@ -593,14 +583,14 @@ add.onclick = e=>{
             await runTransaction(db, async transaction=>{
                 //if (Number(sessionIndex)) return;
                 let upgradeDoc = await transaction.get(upgradeRef);
-        let upgrade = upgradeDoc.exists()? upgradeDoc.data() : {upscaledClasses: []};
+                let upgrade = upgradeDoc.exists()? upgradeDoc.data() : {upscaledClasses: []};
 
-                 let sesDoc = await transaction.get(doc(db, schoolId, key(session.year+terms[session.term])));
+                let sesDoc = await transaction.get(doc(db, schoolId, key(session.year+terms[session.term])));
                 let stds = (await transaction.get(stdsRef)).data();
                 let lastId = sesDoc.exists()? sesDoc.data().lastStudentId?? 0 : 0;
                 lastId++;
-                console.log(lastId);
-               
+                //console.log(lastId);
+              
                 const lastStdId = `${y1.slice(-2)}/${y2.slice(-2)}/${t}/${lastId}`;
               /*  let newDoc = await transaction.get(doc(db, schoolId, "db", "students", lastStdId.replaceAll("/","_")));
                 if (newDoc.exists()){
@@ -611,7 +601,7 @@ add.onclick = e=>{
                 student.id = lastStdId;
                 upStd.class = classSelect.value.toLowerCase();
                 upStd.id = student.id;
-                console.log(student.name);
+                //console.log(student.name);
                 upStd.names = student.name.trim().split(" ").map(n=>n.toLowerCase());
                 upStd.name = student.name.toLowerCase();
                 upStd.gender = student.gender.toLowerCase();
@@ -622,7 +612,7 @@ add.onclick = e=>{
                 await transaction.set(doc(db, schoolId, "db", "students", upStd.id.replaceAll("/", "_")), upStd);
                 await transaction.set(stdsRef, stds);
                 await transaction.set(doc(db, schoolId, key(session.year+terms[session.term])), {lastStudentId: lastId}, {merge:true});
-                console.log(lastStdId);
+                //console.log(lastStdId);
              }) 
           }
           addRow(student)
@@ -635,7 +625,7 @@ add.onclick = e=>{
        });
       table.append(...sortedRows);
       //  await updateDoc(upgradeRef, {upscaledClasses: arrayUnion(clas)});
-        console.log("Done");
+        //console.log("Done");
         let opt = classSelect.selectedOptions[0];
       
     } else 
@@ -682,7 +672,7 @@ function isEqual(a, b) {
     return await new Promise(resolve=>{
       window.addEventListener("message", e=>{
         if (e.data.fromParentMatching){
-          console.log("Message", JSON.stringify(e.data));
+          //console.log("Message", JSON.stringify(e.data));
           resolve(e.data);
           iframe.classList.remove("show");
         }
