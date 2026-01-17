@@ -17,9 +17,6 @@
     Report Cards <br>
     <a href="#print">Down &darr;</a>
   </h1>
-  <div class="no-print" id="error">
-    
-  </div>
      <div class="select-container no-print">
    <select id="sessionSelect">
     <option> -select session- </option>
@@ -81,7 +78,7 @@ const firebaseConfig = {
     }
     super.unshift(elm);
     super.sort((a, b) => {
-      return Number(b.score) - Number(a.score);
+      return b.score - a.score;
     });
   }
 
@@ -131,10 +128,9 @@ let sectionRef = doc(db, schoolId, "section");
 let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
   
 
-let user = auth.currentUser;
+  let user = auth.currentUser;
   let id = user.email.replace(/@.*/, "");
    let hos = teachersDoc.data()[id];
-  let cls = hos.role.fm[0];
   const sections = {};
   var srp; //subject religion profile
   var scoreInterpretations;
@@ -142,6 +138,7 @@ let user = auth.currentUser;
   var scoreSheetConfig;
   var predefinedAsms;
   var useDerivedAsm;
+  var classSubjects;
      var sectSubjs =[];
    if (sectionDoc.exists()){
    let sects = sectionDoc.data();
@@ -149,17 +146,16 @@ let user = auth.currentUser;
    let keys = Object.keys(sects);
    
    keys.forEach(key=>{
-     if (!sects[key].classes.includes(cls)) return;
+     if (!sects[key].classes.includes(hos.role.fm[0])) return;
        sections[key] =  sects[key];
      let optG = document.createElement("optgroup");
        optG.label = key;
-       let classes = [cls] // sects[key].classes;
+       let classes = hos.role.fm;
        classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
        classSelect.append(optG);
    });
 
  }
-  
   
   async function loadStudents() {   
     let clas = key(classSelect.value);
@@ -196,6 +192,11 @@ let user = auth.currentUser;
     //console.log(srp);
     let stdsRef = doc(db, schoolId, session, clas, "students");
     let stdsDoc = await getDoc(stdsRef);
+   /* const classRef = doc(db, schoolId, clas);
+  const classDoc = await getDoc(classRef);
+  const classData = classDoc.exists()? classDoc.data() : {};
+  classSubjects = classData.subjects? classData.subjects : [];
+*/
     if (stdsDoc.exists()){     
       students = Object.values(stdsDoc.data());
      // console.log(JSON.stringify(students));
@@ -276,44 +277,40 @@ let user = auth.currentUser;
       student.score=0;
       student.sc = 0; //subject count
       let subjects = student.subjects;
-     //console.log(JSON.stringify(subjects));
+     // console.log(JSON.stringify(subjects));
       let stdReg = student.religion;
       if (!stdReg) {
         //mixed school? report card => error
       }
       let faith = stdReg == "Islam"? "Muslim" : "Christian";
-      for (const subj in subjects) { 
-         if (subjects[subj][termIndex].inactive) {
-           delete subjects[subj];
-           continue;
-         }
+      for (const subj in subjects) {     
         //console.log(subjects[subj]);        
-        let sN = subjects[subj][termIndex].name;    
+        let sN = subjects[subj][termIndex].subject;    
       //  console.log(sN);        
         if (!sectSubjs.includes(sN)){//subj not in the section subjects
           delete subjects[subj];
-          continue;
          // console.log(subj, "deleted out");
           
-        }          
+        }         
         if (srp[sN]) {
           //if the srp of the subj is not as of the faith of the student, delete the subject among the student's subjects
           if (!(srp[sN]==faith))
           delete subjects[subj];
-          continue;
         }
+        /*if (!classSubjects.includes(sN)){
+          delete subjects[subj];
+        }*/
         try {
           let termScores = subjects[subj][termIndex];
-          let score = Number(termScores.test1 ?? 0) + Number(termScores.test2 ?? 0) + Number(termScores.test3 ?? 0);
+          let score = 0;
           let asms = scoreSheetConfig.assessments??[{name: "CA", subtotal: 30}];
-        /*asms.forEach(a=>{
+          asms.forEach(a=>{
             let k = a.name.toLowerCase();
             score += Number(termScores[k].replace("-", "0"))
-        })*/         
-          let exm = subjects[subj][termIndex].exam+"";
-          exm = Number(exm.replace("-", 0));        
-          student.score += score + Number(exm);
-          subHeads.add(subjects[subj][termIndex].name);
+        })
+          
+          student.score += score + Number(subjects[subj][termIndex].exam.replace("-", "0"));
+          subHeads.add(subjects[subj][termIndex].subject);
           student.sc++;
         } catch(e) {
           console.error(e.message);
@@ -323,11 +320,8 @@ let user = auth.currentUser;
     })       
    // position students
     assignPositions(students);
-    
     //present each students' rc
-    error.innerHTML = "";
     students.forEach(std=>{
-     
      // console.log(std.religion);
       std.result = {};
       if (std.picURL) std.pic = optimizeCloudinaryUrl(std.picURL)
@@ -382,10 +376,9 @@ let user = auth.currentUser;
       </table>   
       </caption>
       <tr>
-      <th>SUBJECT</th>
-      <th>TEST</th>
-      <th>EXAM</th>
-      <th>TOTAL</th>
+      <th>SUBJECT</th>${
+          getAsmHeads(predefinedAsms, scoreSheetConfig.exam)
+      }
       <th>GRADE</th>
       <th>REMARK</th>
       </tr>
@@ -397,7 +390,7 @@ let user = auth.currentUser;
       std.result.term = sessionSelect.value.split(",")[1],
       std.result.class = classSelect.value;
       std.result.session = sessionSelect.value;
-      //std.result.pic = std.picURL;
+      std.result.pic = std.picURL;
       std.result.position = std.position;
       std.result.predefinedAsms = predefinedAsms;
       std.result.predefinedExam = scoreSheetConfig.exam;
@@ -415,39 +408,52 @@ let user = auth.currentUser;
       std.result.subjects = {};
       subjKeys.forEach(subj=>{
         //score of the currrent term
-        let termScores = subjects[subj][termIndex];
         let total = 0;
-       let exm = subjects[subj][termIndex].exam+"";
-          exm = Number(exm.replace("-", 0));        
-
-        total = exm; //Number(termScores.exam ?? 0); //+ Number(termScores.test1) + Number(termScores.test2) + Number(termScores.test3) ;
-       // total += Number(termScores.exam);
+        let asms = scoreSheetConfig.assessments??[{name: "CA", subtotal: 30}];
+        let termScores = subjects[subj][termIndex];
+        let scores = predefinedAsms.map(a=>{
+          let score;
+          let k = a.name.toLowerCase();
+          if (a.derivatives){
+            score = 0;
+            a.derivatives.forEach(d=>{
+              k = d.toLowerCase();
+              score += Number(termScores[k].replace("-"));
+            })
+          } else {
+            score = termScores[k];
+          }
+          return score;
+        })
+        asms.forEach(a=>{
+          let k = a.name.toLowerCase();
+          total += Number(termScores[k].replace("-", "0"))
+        })
+        total += Number(termScores.exam.replace("-", "0"));
         console.log(total, termScores.exam);
         let t1= Number(subjects[subj][termIndex].test1 ?? 0);
         let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
         let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
-        total +=t1+t2+t3;
-        let score = t1 + t2 +t3 + Number(subjects[subj][termIndex].exam);
+        //let score = t1 + t2 +t3 + Number(subjects[subj][termIndex].exam);
         let interp = interpret(total, scoreInterpretations);
-        
+       // console.log(interp);
+        //subjects.forEach(subj=>{
         let row =document.createElement("tr");
         row.innerHTML = `
-        <td>${subjects[subj][termIndex].name.toUpperCase()}</td>
-        <td>${t1+t2+t3}</td>
-        <td>${exm}</td>
+        <td>${subjects[subj][termIndex].subject.toUpperCase()}</td>
+        ${
+        getScores(scores)
+        }
+        <td>${subjects[subj][termIndex].exam}</td>
         <td>${total}</td>
         <td>${interp.grade? interp.grade : grade(0, score) /*grade(t1+t2+t3, Number(subjects[subj][termIndex].exam))*/}</td>
         <td>${interp.remark? interp.remark : remark(0, score) /*remark(t1+t2+t3, Number(subjects[subj][termIndex].exam))*/}</td>
         
         `;
-        let exam = exm; // subjects[subj][termIndex].exam;
-        std.result.subjects[subj] = {name: subjects[subj][termIndex].name, score: t1+t2+t3, exam, total};
-        std.result.scoreInterps = scoreInterpretations;
+        let exam = subjects[subj][termIndex].exam;
+        std.result.subjects[subj] = {name: subjects[subj][termIndex].subject, score: scores, exam, total};
+       std.result.scoreInterps = scoreInterpretations;
         reportCard.appendChild(row);
-        if (score > 100 || score < 0){
-         let s= subjects[subj][termIndex].name.toUpperCase();
-         error.innerHTML +=`• Error: Out of range - <strong>Subject: ${s}</strong> - Name: ${std.name} - Wrong Position: ${std.position} - Score: ${std.score} <br>`
-     } 
       });
       
       const comnt = comment(std.score/std.sc, averageInterps);
@@ -465,8 +471,8 @@ let user = auth.currentUser;
       AVERAGE SCORE: ${tosf(std.score/std.sc, 4)}
       <br>
       
-      V. PRINCIPAL'S COMMENT: <strong class="comment">${comnt}</strong>
-      <img id="stamp" src="stamp.png">
+      V. PRINCIPAL COMMENT: <strong class="comment">${comnt}</strong>
+    <img id="stamp" src="stamp.png">
       `;
       wrapper.append(p);
       p.classList.add("rfooter");
@@ -574,7 +580,7 @@ let user = auth.currentUser;
      // alert("STUDENT " + student.name +"NRS"); 
       //return;
       }
-      let faith = stdReg == "Islam"? "Muslim" : "Christian";
+      let faith = stdReg == "Islam"? "Muslim" : "Christrian";
       for (const subj in subjects) {
         
         let sN = subjects[subj][termIndex].name;
@@ -586,7 +592,6 @@ let user = auth.currentUser;
        //   console.log(JSON.stringify(srp), "---", subj);
           if (!(srp[sN]==faith))
           delete subjects[subj]
-          continue;
         }
        // console.log(JSON.stringify(subjects[subj]))
         try {
@@ -603,7 +608,7 @@ let user = auth.currentUser;
       }
       //stdList.push(student);
     })       
-   // console.log(JSON.stringimfy(stdList));
+   // console.log(JSON.stringify(stdList));
     assignPositions(students);
     students.forEach(std=>{
      // console.log(std.religion);
@@ -701,7 +706,7 @@ let user = auth.currentUser;
       AVERAGE SCORE: ${tosf(std.score/std.sc, 4)}
       <br>
       
-      V. PRINCIPAL'S COMMENT: <strong class="comment">${comnt}</strong>
+      HEAD MASTER COMMENT: <strong class="comment">${comnt}</strong>
     <img id="stamp" src="stamp.png">
       `;
       wrapper.append(p);
@@ -879,6 +884,7 @@ const email = auth.currentUser.email;
     students.forEach(std=>{
       //console.log(JSON.stringify(std).length);
      // return;
+      std.result.pic??="";
       let result = {
         student: std.result,
         term: termIndex,
@@ -945,11 +951,6 @@ header > img {
       header > img {
     visibility: visible;
   }
-  }
-  
-  
-  #error {
-    color: red;
   }
   </style>
 </body>
