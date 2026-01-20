@@ -632,7 +632,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       <h3>TERMINAL REPORT</h3>
       <table class="student-info-table">
       <tr class="std-name">      
-        <td>NAME OF PUPIL: ${std.name.toUpperCase()}</td>
+        <td>NAME: ${std.name.toUpperCase()}</td>
         <td>GENDER: ${std.gender}</td>
       </tr>
       <tr>
@@ -641,7 +641,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </tr>
       <tr>    
       <td>SESSION: ${sessionSelect.value.split(",")[0]}</td>
-      <td>RESUMPTION: <strong><time>8<sup>th</sup> SEPTEMBER, 2025</time></strong></td>
+      <td>RESUMPTION: <strong><time>5th<sup>th</sup> JANUARY, 2026</time></strong></td>
       </tr>
       <tr>
       <td>NO: IN CLASS: ${students.length}</td>      
@@ -697,7 +697,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       AVERAGE SCORE: ${tosf(std.score/std.sc, 4)}
       <br>
       
-      HEAD MASTER COMMENT: <strong class="comment">${comnt}</strong>
+      V. PRINCIPAL'S COMMENT: <strong class="comment">${comnt}</strong>
     <img id="stamp" src="stamp.png">
       `;
       wrapper.append(p);
