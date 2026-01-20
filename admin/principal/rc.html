@@ -244,7 +244,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
   sessionSelect.onchange =async  e=>{
     let v = sessionSelect.value;
     if (!v) return;
-    if (v.split("/")[0].trim()=="2024") await loadPositionsV0()
+    if (v.replaceAll(" ", "").trim()=="2025/2026,firstterm") await loadPositionsV0()
     else await loadPositions();
   }
   
