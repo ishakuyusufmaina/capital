@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SCORE SHEET</title>
+ 
+    <style>
+  * {
+    box-sizing: border-box;
+  }
+  h1 {
+    text-align: center;
+  }
+  
+  button {
+      margin-top: 1.5rem;
+     width: 100%;
+      padding: 0.7rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    display: inline-block;
+    margin: auto;
+    }
+
+    button:hover {
+      background-color: #5c6bc0;
+    }
+    
+    
+        input {
+      padding: 8px;
+      border: 1px solid #333;
+      border-radius: 5px;
+          width: 65px;
+     // background-color: inherit; //#1e1e1e;
+    //color: white;
+    }
+
+    
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+   th, td{
+      padding: 10px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+      body {
+     // background-color: #121212;
+      //color: #ffffff;
+      font-family: Arial, sans-serif;
+     // padding: 20px;
+    }
+  select {
+      font-family: Arial, sans-serif;
+      border: none;
+    font-size: 24px;
+    text-align: center;
+    width: 100%;
+    display: inline-block;
+  }
+    
+    .name {
+        width: fit-content;
+    }
+  
+  .select-container, .table-container {
+    text-align: center;
+    margin: auto;
+    padding: 10px;
+    //border: 1px solid white;
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  header, th {
+    text-transform: uppercase;
+  }
+  </style>
+</head>
+<body>
+  <h1>
+   Student Score Sheet
+  </h1>
+    <header>
+    <div id="date">Date: </div>
+    
+      <select id="sessionSelect">
+    <option> -select session- </option>
+  </select>
+    <div> <span id="name">Name: </span>  </div>
+    <div id="clas">Class: </div>
+      <details>
+        <summary>Subjects</summary>
+        <div id="subjects"></div>
+      </details>
+  </header>
+
+  <div class="table-container">
+  <table id="table">
+    <tr>
+      <th>SN</th>
+      <th>Subject</th>
+      <th>1st CA</th>
+      <th>2nd CA</th>
+      <th>3rd CA</th>
+      <th>Exam</th>
+      <th>Total</th>
+    </tr>
+    <tbody id="table-body"></tbody>
+  </table>
+  </div>
+  <button id="saveBtn">Save</button>
+  <script src="../../config.js"></script>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, writeBatch, collection, getDocs, query, where, enableIndexedDbPersistence, runTransaction, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  
+  const rc = {
+  apiKey: "AIzaSyCWgh5RIrma5iVSnMNU4vedtQadReDDxqA",
+  authDomain: "result-32f33.firebaseapp.com",
+  projectId: "result-32f33",
+  storageBucket: "result-32f33.firebasestorage.app",
+  messagingSenderId: "518318428794",
+  appId: "1:518318428794:web:0e49851c783ea8c90d61c3",
+  measurementId: "G-N1EV4XNHNL"
+};
+  
+      const app = initializeApp(firebaseConfig);
+      const rapp = initializeApp(rc, "results");
+  const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  const rdb = getFirestore(rapp);
+  const batch = writeBatch(db);
+  
+  const student = JSON.parse(window.localStorage.getItem("student"));
+  clas.textContent = "Class: "+student.class;
+  document.getElementById("name").textContent = "Name: "+ student.name.toUpperCase();
+const schoolId = "capital";
+/*  let snap = await getDocs(
+    query(
+      collection(rdb, "results"),
+      where("class", "==", student.class.toLowerCase())
+  ));
+  let i=0;
+  snap.forEach(d=>{
+    let data = d.data();
+   i++;
+    let safeId = data.id.replaceAll("/", "_");
+    console.log("id: ", safeId, i);
+    const std = {
+      id: data.id,
+      names: data.student.name.split(" "),
+      name: data.student.name,
+      gender: data.student.gender || "",
+      class: data.class,
+      section: data.sectK      
+    }
+    batch.set(doc(db, schoolId, "db", "students", safeId), std);
+   
+  });*/
+ // await batch.commit();
+  //alert(9); 
+  /*enableIndexedDbPersistence(db)
+  .catch((err) => {
+    if (err.code === 'failed-precondition') {
+      console.log("Multiple tabs open");
+    } else if (err.code === 'unimplemented') {
+      console.log("Browser not supported");
+    }
+  }); */
+
+  
+  const terms = ["first term", "second term", "third term"];
+  const cls = student.class;
+  let d = new Date();
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day = d.getDate();
+  let sec = d.getSeconds()+1;
+  let min = d.getMinutes()+1;
+  let h = d.getHours()+1;
+  //time.innerHTML = `${h} : {}{
+  date.innerHTML = `Date: ${day}/${month}/${year}`;
+
+   
+  var students = {};
+  let ses;
+  
+  
+
+  let sessionsRef = doc(db, schoolId, "sessions");
+  let sessionsDoc = await getDoc(sessionsRef);
+
+  
+  var sessions;
+  
+  if (sessionsDoc.exists()){
+    sessions =  sessionsDoc.data().sessions;
+     sessions= sessions.sort((a, b)=>b.no - a.no);
+    sessions.forEach((session, i)=>{
+        let year = session.year;
+      let opt = document.createElement("option");
+      opt.innerHTML = year + ", " + terms[session.term];
+      opt.value = i;
+      sessionSelect.appendChild(opt);
+        if (i==0)
+        opt.selected = true;
+    });
+    
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+ses= sessions[0];
+await  render();
+
+  sessionSelect.onchange = e=>{
+    let i = sessionSelect.value;
+    ses= sessions[i];
+    
+    render();
+  }
+ 
+
+ async function render(){
+   let sections = (await getDoc(doc(db, schoolId, "section"))).data();
+   let rsects = Object
+   .values(sections)
+   .filter(section=>{
+     let classes = section.classes;
+     return  classes.includes(cls)
+   });
+   let section = rsects[0];
+   if (!section){     
+     alert(cls + " does not belong to any section");
+     return
+   }
+   section.subjects.sort();
+   let scoreSheetConfig = section.scoreSheetConfig;
+   scoreSheetConfig??= {
+     total: 100,
+     assessments: [
+     {name: "1st CA", subtotal: 10},
+     {name: "2nd CA", subtotal: 10},
+     {name: "3rd CA", subtotal: 10},
+     {name: "exam", subtotal: 70}
+     ]
+   }
+    let clas = key(cls);   
+  
+   let termIndex = ses.term;
+    let session = key(ses.year+terms[ses.term]);
+    
+   console.log(session);
+    if (!(clas && session)) return null;
+    let stdsRef = doc(db, schoolId, session, clas, "students");
+    let stdsDoc = await getDoc(stdsRef);
+   console.log(clas, stdsDoc.exists());
+    if (stdsDoc.exists()){
+      const {exam, assessments} = scoreSheetConfig;
+      students = stdsDoc.data();
+      let studentsArr = Object.values(students); //.sort((a, b)=>a.name.trim().localeCompare(b.name.trim()));
+     // alert(studentsArr.length);
+      console.log(student.id);
+      let std = studentsArr.find(std=> std.id == student.id);
+      console.log(std.subjects);
+      std.subjects??={};
+     /* if (!Number(termIndex))  {    
+      snap.forEach(e=>{
+          for (const sbj in e.data().student.subjects){
+            let point = e.data().student.subjects[sbj];;
+            let stu = studentsArr.find(std=> std.id == e.data().id);
+
+          const {name, score, exam} = point;
+            console.log(JSON.stringify(point));
+            let scores = [0,0,0].map(s=> Math.round(Number(score)/3));
+            const [test1, test2, test3] = scores;
+           stu.subjects[key(name)] = [{name, test1, test2, test3, exam, subject: name, name}, {}, {}];
+         }
+      })
+      await setDoc(stdsRef, students);
+      alert(9090);
+    }*/
+      
+  
+    
+      
+      presentResults();
+      function presentResults(){
+      
+      let subjects = Object.keys(std.subjects).sort();
+        
+        const subjectsElm = document.getElementById("subjects");
+        subjectsElm.innerHTML = "";
+   section.subjects.forEach(subj=>{
+     let subjElm = document.createElement("div");
+     subjElm.innerHTML = `
+     <input type="checkbox" value="${key(subj)}" id="${subj}">
+     <label for = "${subj}">${subj}</label>
+     `;
+     const inp = subjElm.querySelector("input");
+     inp.oninput = e=>{
+       if (inp.checked && !std.subjects[inp.value]){
+         std.subjects[inp.value] = [{}, {}, {}];
+        std.subjects[inp.value][termIndex]??={}
+        std.subjects[inp.value][termIndex].name = subj;
+  
+       } 
+       presentResults();
+     }
+     subjectsElm.append(subjElm);
+     if (subjects.includes(key(subj))) {
+       inp.checked = true;
+     }
+   })
+      table.innerHTML = "";
+       table.innerHTML = "<tr><th>SN</th><th>Subject</th></tr>";
+      let r = table.querySelector("tr");
+      assessments.forEach(asm=>{
+        //table.innerHTML +=`<th>${asm.name}(${asm.subtotal})</th>`;
+        let th = document.createElement("th");
+        th.innerHTML = asm.name + " ("+asm.subtotal+")";
+        r.append(th);
+      });
+      
+       r.innerHTML +=`<th>Exam</th><th>Total</th>`;
+         
+      subjects.forEach((subj, i)=>present(std, table.insertRow(), subj, i+1));  
+    }//end of presentResults
+      
+      async function saveScores() {
+        
+        const clas = key(cls);
+        const session = key(ses.year + terms[ses.term]);
+        if (!(clas && session)) return null;
+        if (!Object.values(students).length) return;
+
+  const stdsRef = doc(db, schoolId, session, clas, "students");
+
+  await runTransaction(db, async (transaction) => {
+    // Optionally read existing data (if needed)
+    // const existing = await transaction.get(stdsRef);
+    let stdsDoc = await transaction.get(stdsRef);
+    let stds = stdsDoc.exists()? stdsDoc.data() : {};
+    // Write new data atomically
+    for (const stu in students){
+      let gStudent = stds[stu];
+      if (gStudent.id == std.id){
+        stds[stu] = std;
+        break;
+      }
+    }
+     transaction.set(stdsRef, stds);
+  });
+
+   alert("Saved!");
+}
+  saveBtn.onclick= async e=>{
+    if (!students) return;
+    if (Object.values(students).length){
+    e.target.textContent = "Saving..";
+    await saveScores();
+    e.target.textContent = "Saved!";
+    setTimeout(_=>e.target.textContent = "Save", 1500);
+    }
+
+  }
+      
+      function present(student, row, subjK, sn){
+        console.log(subjK);
+        row.innerHTML = "";
+        let snElm = row.insertCell();
+
+        let subjElm = row.insertCell(); 
+        snElm.innerHTML = sn; // student.name.toUpperCase();
+        student.subjects??={};
+        student.subjects[subjK]??=[{}, {}, {}];
+        student.subjects[subjK][termIndex]??={}
+        let scores = student.subjects[subjK][termIndex];
+            
+        subjElm.innerHTML = student.subjects[subjK][termIndex].subject || student.subjects[subjK][termIndex].name;
+        let sum = 0;
+        scores.exam??="-";
+        scores.exam = String(scores.exam);
+        scores.subject = student.subjects[subjK][termIndex].name;
+        sum +=Number(scores.exam.replace("-", 0))??0;
+        assessments.forEach((asm, i)=>{
+          //backward compatibility
+          let k = !Number(termIndex)? "test"+(i+1) : asm.name.toLowerCase().trim().replaceAll();
+          scores[k]??="-";
+          let subjScore = scores[k].toString();
+         
+          sum +=Number(subjScore.replace("-", 0))??0;
+          let score = row.insertCell();
+          score.innerHTML = `
+           <input
+            min="0" max="40"
+            type="text" 
+            pattern="^(-|[0-9]|[1-9][0-9]|${asm.subtotal})$" 
+            title="Enter a number between 0 and ${asm.subtotal}, or just '- to indicate absence'"
+            value="${subjScore}"
+            inputmode="numeric"
+            required
+            />`;
+          
+         // console.log(asm.subtotal);
+          let inp = score.querySelector("input");
+          inp.onchange = e=>{
+            let val = e.target.value;
+            let oldScore = scores[k];
+            if (!e.target.checkValidity() || asm.subtotal < Number(e.target.value)){
+              e.target.value = oldScore;
+              alert("Wrong input means no input!");
+              return;
+            }
+            scores[k] = val;
+            
+              present(student, row, subjK, sn)
+          }
+        });
+        let examCell = row.insertCell();
+        examCell.innerHTML = `
+        <input
+            min="0" max="40"
+            type="text" 
+            pattern="^(-|[0-9]|[1-9][0-9]|${exam})$" 
+            title="Enter a number between 0 and ${exam}, or just '- to indicate absence'"
+            value="${scores.exam}"
+            inputmode="numeric"
+            required
+            />`;
+          
+         // console.log(asm.subtotal);
+          let inp = examCell.querySelector("input");
+          inp.onchange = e=>{
+            let val = e.target.value;
+            let oldScore = scores.exam;
+            if (!e.target.checkValidity() || exam < Number(e.target.value)){
+              e.target.value = oldScore;
+              alert("Wrong input means no input!");
+              return;
+            }
+            scores.exam = val;
+            
+              present(student, row, subjK, sn)
+          }
+        
+        //total.innerHTML = sum 
+        let total = row.insertCell();
+        total.innerHTML = sum;        
+      }
+      
+    }
+ }
+  
+  
+ 
+  
+    function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "").trim();
+    }
+  
+
+  
+  
+  </script>
+</body>
+</html>
