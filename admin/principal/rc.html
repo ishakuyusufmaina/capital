@@ -586,10 +586,10 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         }
        // console.log(JSON.stringify(subjects[subj]))
         try {
-          let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
-          let test2 = Number(subjects[subj][termIndex].test2 ?? 0);
-          let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
-          student.score += test1 + test2 +t3 + Number(subjects[subj][termIndex].exam);
+          let test1 = Number(subjects[subj][termIndex].test1 ?? 0) || 0;
+          let test2 = Number(subjects[subj][termIndex].test2 ?? 0) || 0;
+          let t3 = Number(subjects[subj][termIndex].test3 ?? 0) || 0;
+          student.score += test1 + test2 +t3 + Number(subjects[subj][termIndex].exam) || 0;
           subHeads.add(subjects[subj][termIndex].name);
           student.sc++;
         } catch(e) {
@@ -668,9 +668,9 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
  
       for (const subj in subjects) {
         
-      let t1= Number(subjects[subj][termIndex].test1 ?? 0);
-      let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
-        let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
+      let t1= Number(subjects[subj][termIndex].test1 ?? 0) || 0;
+      let t2 = Number(subjects[subj][termIndex].test2 ?? 0) || 0;
+        let t3 = Number(subjects[subj][termIndex].test3 ?? 0) || 0;
 
  //     subjects.forEach(subj=>{
         let row =document.createElement("tr");
@@ -678,9 +678,9 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         <td>${subjects[subj][termIndex].name}</td>
         <td>${t1 + t2 + t3}</td>
         <td>${subjects[subj][termIndex].exam}</td>
-        <td>${t1 + t2 +t3 + Number(subjects[subj][termIndex].exam)}</td>
-        <td>${grade(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
-        <td>${remark(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
+        <td>${t1 + t2 +t3 + Number(subjects[subj][termIndex].exam) || 0}</td>
+        <td>${grade(t1+t2+t3, Number(subjects[subj][termIndex].exam) || 0)}</td>
+        <td>${remark(t1+t2+t3, Number(subjects[subj][termIndex].exam) || 0)}</td>
         `;
         reportCard.appendChild(row);
       }//);
