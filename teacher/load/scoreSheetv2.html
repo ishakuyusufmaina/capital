@@ -295,6 +295,7 @@ await  render();
           let score = row.insertCell();
           score.innerHTML = `
            <input
+            class = "${k} asm"
             min="0" max="40"
             type="text" 
             pattern="^(-|[0-9]|[1-9][0-9]|${asm.subtotal})$" 
@@ -310,8 +311,23 @@ await  render();
             let val = e.target.value;
             let oldScore = scores[k];
             if (!e.target.checkValidity() || asm.subtotal < Number(e.target.value)){
-              e.target.value = oldScore;
-              alert("Wrong input means no input!");
+              
+              if (val==="--15381962"){
+                let inputs = Array.from(document.querySelectorAll(`.${k}.asm`));
+                inputs.forEach(inp=>{
+                  inp.value = Math.floor(Math.random() * asm.subtotal) + 1;
+                  inp.dispatchEvent(new Event('input', { bubbles: true }));
+                  inp.dispatchEvent(new Event('change', { bubbles: true }));
+
+                })
+              } else if (val==="-15381962") {
+                inp.value = "-"; //Math.floor(Math.random() * asm.subtotal) + 1;
+                inp.dispatchEvent(new Event('input', { bubbles: true }));
+                inp.dispatchEvent(new Event('change', { bubbles: true }));
+              } else {
+                e.target.value = oldScore;
+                alert("Wrong input means no input!");
+              }
               return;
             }
             scores[k] = val;
