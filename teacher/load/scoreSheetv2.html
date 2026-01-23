@@ -321,9 +321,13 @@ await  render();
 
                 })
               } else if (val==="-15381962") {
-                inp.value = "-"; //Math.floor(Math.random() * asm.subtotal) + 1;
-                inp.dispatchEvent(new Event('input', { bubbles: true }));
-                inp.dispatchEvent(new Event('change', { bubbles: true }));
+                let inputs = Array.from(document.querySelectorAll(`.asm${k.replaceAll(" ", "")}`));
+                inputs.forEach(inp=>{
+                  inp.value = "-"; //Math.floor(Math.random() * asm.subtotal) + 1;
+                  inp.dispatchEvent(new Event('input', { bubbles: true }));
+                  inp.dispatchEvent(new Event('change', { bubbles: true }));
+
+                })
               } else {
                 e.target.value = oldScore;
                 alert("Wrong input means no input!");
