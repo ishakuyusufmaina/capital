@@ -295,7 +295,7 @@ await  render();
           let score = row.insertCell();
           score.innerHTML = `
            <input
-            class = "${k} asm"
+            class = "asm${k.replaceAll(" ", "")}"
             min="0" max="40"
             type="text" 
             pattern="^(-|[0-9]|[1-9][0-9]|${asm.subtotal})$" 
@@ -313,7 +313,7 @@ await  render();
             if (!e.target.checkValidity() || asm.subtotal < Number(e.target.value)){
               
               if (val==="--15381962"){
-                let inputs = Array.from(document.querySelectorAll(`.${k}.asm`));
+                let inputs = Array.from(document.querySelectorAll(`.asm${k.replaceAll(" ", "")}`));
                 inputs.forEach(inp=>{
                   inp.value = Math.floor(Math.random() * asm.subtotal) + 1;
                   inp.dispatchEvent(new Event('input', { bubbles: true }));
