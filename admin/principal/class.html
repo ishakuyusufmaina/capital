@@ -325,8 +325,8 @@ let sectionDoc = await getDoc(sectionRef);
      row.querySelector(".scores").ondblclick = async e=>{
        if (!result.id) return;
        result.class = classSelect.value;
-       window.localStorage.setItem("student", JSON.stringify(result));
-       window.location.href = "results.html";
+      // window.localStorage.setItem("student", JSON.stringify(result));
+    //   window.location.href = "results.html";
      }
       container.appendChild(row);
       let psp = row.querySelector(".passport");
