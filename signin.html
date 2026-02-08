@@ -162,9 +162,8 @@ footer small {
     <h2>Sign In</h2>
     <input type="email" id="email" placeholder="Username or ID" required />
     <input type="password" id="password" placeholder="Password or PIN" required />
-    <button id="loginBtn" onclick="signIn()">Login as Staff</button>
-    <button id="loginBtnS" onclick="signInAsStd()">Login as Student/Pupil</button>
-    
+    <button id="loginBtn" >Login</button>
+        
   </div>
   </main>
  <footer>
@@ -192,7 +191,7 @@ footer small {
   const stdDb = getFirestore(stdApp);
 
 
-     loginBtn.textContent = "Please wait..";
+   
   const schoolId = "capital";
     const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
@@ -211,7 +210,7 @@ footer small {
   let teacherDoc;
    let teachers;
 
-      loginBtn.textContent = "Login as Staff";
+      
   var schoolGeneratedUsername;
   
  async function onLoginSuccess(user, role) {
@@ -256,12 +255,12 @@ footer small {
   const logBtn = document.getElementById("loginBtn");
   const logBtnS = document.getElementById("loginBtnS");
   logBtn.onclick = signIn;
-  logBtnS.onclick = signInAsStd;
+ 
   let reg = /.*@/;
   
  
   async function signInAsStd(){
-    logBtnS.textContent = "Logging..";
+    //logBtnS.textContent = "Logging..";
       const id = document.getElementById("email").value;
       const pin = document.getElementById("password").value;
 
@@ -284,13 +283,20 @@ footer small {
   }
   
   async function signIn() {
+    
+      logBtn.textContent = "Logging..";
+      const username = document.getElementById("email").value;
+    if (isStudent(username)){
+      await signInAsStd();
+      logBtn.textContent = "Login"
+      return;
+    }
     teachersRef = doc(db, schoolId, "teachers");
    teacherDoc = await getDoc(teachersRef);
    teachers = teacherDoc.exists()? teacherDoc.data() : {};
 
-      logBtn.textContent = "Logging..";
-      const username = document.getElementById("email").value;
       const email = username.replace(/@.*/, "")+`@teacher.${schoolId}`;
+    
      schoolGeneratedUsername = username.replace(/@.*/, "");
       const role = username.replace(reg, "");
       const password = document.getElementById("password").value;
@@ -384,7 +390,9 @@ footer small {
     }
 
       
-      
+  function isStudent(id){
+    return id.includes("/");
+  }    
   </script>
   
 </body>
