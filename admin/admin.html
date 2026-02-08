@@ -609,11 +609,13 @@ const adminFunctions = [
     let role = teacher.role;
     if (role.hos){
      // console.log(role.hos.sections) ;      
-     if (role.hos.sections.includes("sss"))
+     if (role.hos.sections.includes("sss")) {
        window.location.href = "principal/index.html";
-       else if (id=="kamilu")
+       return
+     } else if (id=="kamilu"){
        window.location.href = "headmaster/index.html";
        return;
+     }
      } 
      
     if (teacher.role.fm.length){
@@ -635,7 +637,7 @@ const adminFunctions = [
    }
     
   
-        window.location.href = "../adminV2/admin.html";
+     window.location.href = "../adminV2/admin.html";
   
 
     //alert(teacher.role.fm
