@@ -609,16 +609,23 @@ const adminFunctions = [
     let role = teacher.role;
     if (role.hos){
      // console.log(role.hos.sections) ;      
-     if (role.hos.sections.includes("sss"))      
+     if (role.hos.sections.includes("sss"))
        window.location.href = "principal/index.html";
-     else if (id=="kamilu")
+       else if (id=="kamilu")
        window.location.href = "headmaster/index.html";
+       return;
      } 
      
-    if (teacher.role.fm.length)
+    if (teacher.role.fm.length){
     window.location.href = "fm/index.html";
-    else if (teacher.role.hod.classes.length)
+      return;
+    }
+    else if (teacher.role.hod.classes.length){
     window.location.href = "hod/index.html";
+      return;
+    }
+      
+    
 
   
     teacher.adminV2Functions??={};
@@ -627,9 +634,9 @@ const adminFunctions = [
      return;
    }
     
-  if (teacher.adminV2Functions){
+  
         window.location.href = "../adminV2/admin.html";
-  }
+  
 
     //alert(teacher.role.fm
     return;
