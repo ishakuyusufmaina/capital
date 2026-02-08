@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Section-based Subject Reg</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    select, input {
+      background-color: #121212;
+      color: #ffffff;
+      border: 1px solid #333;
+      padding: 5px;
+    }
+
+    form {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      min-width: 700px;
+    }
+
+    th, td {
+      padding: 6px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+
+    td > span {
+      padding: 6px;
+      border: 1px solid #333;
+      border-radius: 5px;
+      background-color: #1e1e1e;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+
+    button {
+      margin-top: 1rem;
+      padding: 0.6rem 1rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #5c6bc0;
+    }
+
+    button.delete {
+      background-color: #dc3545;
+    }
+
+    button.delete:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+
+<body>
+
+  <select id="setSelect">
+    <option value="">-- select set --</option>
+  </select>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Active</th>
+          <th>Religion</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="table"></tbody>
+    </table>
+  </div>
+
+  <button id="addBtn">Add</button>
+  <button id="saveBtn">Save</button>
+
+  <script src="../../config.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+      authDomain: "school-in-the-box.firebaseapp.com",
+      projectId: "school-in-the-box",
+      storageBucket: "school-in-the-box.firebasestorage.app",
+      messagingSenderId: "596350496353",
+      appId: "1:596350496353:web:84c66c351700ddf0824420",
+      measurementId: "G-3MGCDH4FRF"
+    };
+
+    const schoolId = "capital";
+
+    const app = initializeApp(firebaseConfig);
+    getAnalytics(app);
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+  
+  const stdApp = initializeApp(studentsConfig, "std"); 
+  const stdDb = getFirestore(stdApp);
+
+
+    const setSelect = document.getElementById("setSelect");
+    const table = document.getElementById("table");
+    const addBtn = document.getElementById("addBtn");
+    const saveBtn = document.getElementById("saveBtn");
+
+    let teacher;
+
+    // ---- AUTH & SECTION LOAD ----
+    onAuthStateChanged(auth, async user => {
+      if (!user) return;
+
+      const teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
+      const teachers = teachersDoc.data();
+
+      const id = user.email.replace(/@.*/, "");
+      teacher = teachers[id];
+
+      const sections = new Set(teacher.role.hos.sections);
+      sections.forEach(sec => {
+        const opt = document.createElement("option");
+        opt.value = sec;
+        opt.textContent = sec.toUpperCase();
+        setSelect.appendChild(opt);
+      });
+    });
+
+    // ---- ADD SUBJECT ROW ----
+    function addRow(subj) {
+      let subject = subj;
+      //{name: "", active: true, religion: "christian" }
+      if (!subject.name){
+        subject ={name: subject, active: true, for: "" }
+      }
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>
+          <span class="subject-name" contenteditable>${subject.name}</span>
+        </td>
+        <td>
+          <input type="checkbox" class="subject-active" ${subject.active ? "checked" : ""}>
+        </td>
+        <td>
+          <select class="subject-religion">
+          <option value=""}>Both</option>
+          <option value="muslim" ${subject.for === "muslim" ? "selected" : ""}>Muslim</option>
+          <option value="christian" ${subject.for === "christian" ? "selected" : ""}>Christian</option>
+            
+          </select>
+        </td>
+        <td>
+          <button class="delete">Remove</button>
+        </td>
+      `;
+
+      row.querySelector(".delete").onclick = () => row.remove();
+      table.appendChild(row);
+    }
+
+    addBtn.onclick = () => addRow("");
+
+    // ---- LOAD SUBJECTS ----
+    setSelect.onchange = async () => {
+      const section = setSelect.value;
+      if (!section) return;
+
+      table.innerHTML = "";
+
+      const sectionRef = doc(db, schoolId, "section");
+      const sectDoc = await getDoc(sectionRef);
+
+      if (sectDoc.exists()) {
+        const subjects = sectDoc.data()?.[section.toLowerCase()]?.subjectsV2 || sectDoc.data()?.[section.toLowerCase()]?.subjects || [];
+        subjects.forEach(subj => addRow(subj));
+      }
+    };
+
+    // ---- SAVE SUBJECTS ----
+    saveBtn.onclick = async () => {
+      const section = setSelect.value;
+      if (!section) return;
+
+      const subjects = [];
+
+      table.querySelectorAll("tr").forEach(row => {
+        const name = row.querySelector(".subject-name").textContent.trim();
+        if (!name) return;
+
+        subjects.push({
+          name,
+          active: row.querySelector(".subject-active").checked,
+          for: row.querySelector(".subject-religion").value
+        });
+      });
+
+      const sectionRef = doc(db, schoolId, "section");
+      
+      const dataDoc = await getDoc(sectionRef);
+      const data = dataDoc.exists() ? dataDoc.data() : {};
+
+      const key = section.toLowerCase();
+      const stdSectionRef = doc(stdDb, "sections", key);
+      data[key] = data[key] || {};
+      data[key].subjectsV2 = subjects;
+      data[key].subjects = subjects.map(sub=>sub.name);
+      await setDoc(sectionRef, data, { merge: true });
+      await setDoc(stdSectionRef, {subjects}, { merge: true });
+      
+      alert("Saved successfully");
+    };
+  </script>
+</body>
+</html>
