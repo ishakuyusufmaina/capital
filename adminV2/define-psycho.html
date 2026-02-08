@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psychometrics Manager</title>
+<style>
+  :root {
+      --primary: #4f8cff;
+      --primary-hover: #3b6fd9;
+      --card: #1e1e1e;
+      --text: #ffffff;
+      --muted: #aaaaaa;
+      --border: #2a2a2a;
+    }
+  body {
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #e0f7fa, #fce4ec);
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+
+  h1 {
+    margin-bottom: 20px;
+    font-size: 2em;
+    color: #00796b;
+  }
+
+  .manager {
+    background: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-radius: 16px;
+    padding: 20px;
+    max-width: 400px;
+    width: 100%;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+  }
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+  }
+
+  li:hover {
+    background: #e0f2f1;
+  }
+
+  button {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 0.9em;
+  }
+
+  .add-btn {
+    background: #00796b;
+    color: white;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .add-btn:hover {
+    background: #004d40;
+  }
+
+  .edit-btn {
+    background: #29b6f6;
+    color: white;
+    margin-right: 4px;
+  }
+
+  .edit-btn:hover {
+    background: #0288d1;
+  }
+
+  .delete-btn {
+    background: #ef5350;
+    color: white;
+  }
+
+  .delete-btn:hover {
+    background: #c62828;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: 1em;
+  }
+
+  .footer {
+    margin-top: 30px;
+    font-size: 0.9em;
+    color: #777;
+  }
+  
+  select {
+      padding: 0.6rem 0.8rem;
+      margin: 0.5rem 0.4rem 1rem 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: teal;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+</style>
+</head>
+<body>
+
+  <h1>Psychometrics Manager</h1>
+ 
+ 
+  <div class="manager">
+     <select id="sectionSelect">
+       <option value="">-section-</option>
+     </select>
+    <input type="text" id="psychometricInput" placeholder="Enter new psychometric...">
+    <button id="add" class="add-btn" onclick="addPsychometric()">Add Psychometric</button>
+
+    <ul id="psychometricList"></ul>
+      <hr>
+      <button id="save">Save</button>
+  </div>
+
+  <div class="footer">© 2025 Mainafy</div>
+<script src="../config.js"></script>
+ <script src="../batch2.js"></script>
+
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+
+    
+    const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let sectionRef = doc(db, schoolId, "section");
+  let sectionDoc = await getDoc(sectionRef);
+let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
+  const sections = sectionDoc.data();
+
+  let user = auth.currentUser;
+  let id = user.email.replace(/@.*/, "");
+   let hos = teachersDoc.data()[id];
+
+    //Object.keys(sections)
+    hos.adminFunctions.managePsycho.resources.forEach(s=>{
+        sectionSelect.innerHTML +=`<option>${s}</option>`;
+    })
+    
+  let psychometrics; // = ["Attention", "Neatness", "Self Control", "Punctuality"];
+
+  const list = document.getElementById("psychometricList");
+  const input = document.getElementById("psychometricInput");
+    
+    sectionSelect.onchange = e=>{
+        let sect = sectionSelect.value;
+        if (sect){
+            sections[sect].psychometrics??=[];
+            psychometrics = sections[sect].psychometrics;
+            renderList();
+        } else psychometrics=undefined;
+    }
+
+    add.onclick = addPsychometric;
+    save.onclick = async e=>{
+        if (!psychometrics) return;
+        save.innerHTML = "Saving..";
+        await setDoc(sectionRef, sections);
+        save.innerHTML = "Saved!";
+        setTimeout(_=>save.innerHTML = "Save", 2000);
+    }
+  function renderList() {
+      if (!psychometrics) return;
+    list.innerHTML = "";
+    psychometrics.forEach((item, index) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span>${item}</span>
+        <div>
+          <button class="edit-btn">Edit</button>
+          <button class="delete-btn">Delete</button>
+        </div>
+      `;
+       li.querySelector(".edit-btn").onclick= e=>editItem(index);
+        li.querySelector(".delete-btn").onclick= e=>deleteItem(index);
+      list.appendChild(li);
+    });
+  }
+
+  function addPsychometric() {
+    const value = input.value.trim();
+    if (value === "") {
+      alert("Please enter a valid psychometric name.");
+      return;
+    }
+    if (psychometrics) psychometrics.push(value);
+    input.value = "";
+    renderList();
+  }
+
+  function deleteItem(index) {
+    if (confirm(`Delete "${psychometrics[index]}"?`)) {
+      psychometrics.splice(index, 1);
+      renderList();
+    }
+  }
+
+  function editItem(index) {
+    const newValue = prompt("Edit psychometric:", psychometrics[index]);
+    if (newValue !== null && newValue.trim() !== "") {
+      psychometrics[index] = newValue.trim();
+      renderList();
+    }
+  }
+
+  renderList();
+</script>
+
+</body>
+</html>

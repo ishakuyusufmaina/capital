@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="../config.js"></script>
+ <script src="../batch2.js"></script>
+
+  <title>School Fees Manager</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #8ec5fc, #e0c3fc);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .fee-list {
+      margin-bottom: 2rem;
+    }
+
+    .fee-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .75rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: .5rem;
+      background: #f9f9f9;
+    }
+
+    .fee-item input {
+      width: 120px;
+      padding: .25rem .5rem;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+    }
+
+    .controls {
+      display: flex;
+      gap: .5rem;
+    }
+
+    .controls button {
+      background: #008cff;
+      color: #fff;
+      border: none;
+      padding: .4rem .75rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .controls .delete {
+      background: #dc3545;
+    }
+
+    form {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    form input, #newSection {
+      flex: 1;
+      min-width: 120px;
+      padding: .5rem;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+    }
+
+    form button {
+      padding: .5rem 1rem;
+      border: none;
+      background: #28a745;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  
+    .button-primary {
+  background-color: indianred; //coral; //#007bff;
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button-primary:hover {
+  background-color: #0056b3;
+}
+
+    @media (max-width: 500px) {
+      .fee-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>School Fees Setting for <span id="sessionLabel"></span></h2>
+    <div class="fee-list" id="feeList"></div>
+
+    <form id="addForm">
+      <!--input type="text" id="newSection" placeholder="Section Name" required /-->
+      <select id="newSection" placeholder="Fee Amount (₦)" required >
+        <option value="">Select section</option>
+     </select>
+      <input type="number" id="newFee" placeholder="Fee Amount (₦)" required />
+      <button type="submit">Add Section</button>
+    </form>
+    <hr>
+    <button id="setBtn" class="button-primary">Set</button>
+  </div>
+
+ 
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+   /*   const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};*/
+    
+    
+//  let schoolId = "almadeenah";
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    let currentStudents = null;
+    
+    const terms = ["first term", "second term", "third term"];
+var session;
+  let sessionsRef = doc(db, schoolId, "sessions");
+  //let studentsRef = doc(db, schoolId, "classes");
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sessions= sessions.sort((a, b)=>b.no - a.no);
+    sessionLabel.innerText =terms[sessions[0].term] + ", "+ sessions[0].year;
+    session = sessions[0];
+    console.log(JSON.stringify(session.year));
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+  
+  let schoolFee = {
+    /*  "Section A": 33000,
+      "Section B": 50007*/
+    };
+  let sectionRef = doc(db, schoolId, "section");
+  
+
+    
+  
+  
+  let sessRef = doc(db, schoolId, key(session.year+"term"+session.term).replace("_", ""));
+  
+  let sessDoc = await getDoc(sessRef);
+  if (sessDoc.exists() && sessDoc.data() && sessDoc.data().fees){
+      schoolFee = sessDoc.data().fees;
+      setBtn.style.display = "none";
+      setBtn.onclick = e=>{};
+    } else {
+      let sectionDoc = await getDoc(sectionRef);
+      console.log("no session data");
+      if (sectionDoc.exists()){
+   // let sessK = key(session.year + "t" + session.term)
+        let sections = sectionDoc.data();
+        for (const sect in sections){
+        let opt = new Option(sect);
+        newSection.append(opt);
+        opt.value = sect;
+        }
+        setBtn.onclick = async e=>{
+          if (Object.keys(schoolFee).length === Object.keys(sections).length){
+            await setDoc(sessRef, {fees: schoolFee}, {merge:true});
+            alert("Set!");
+          }
+          else alert("A fee must be set for each section");
+        }
+      } else {
+        alert("No section is registered");
+      }
+    }
+  
+
+    const feeList = document.getElementById("feeList");
+    const addForm = document.getElementById("addForm");
+  //  const newSection = document.getElementById("newSection");
+    const newFee = document.getElementById("newFee");
+
+    function renderFees() {
+      feeList.innerHTML = "";
+      Object.entries(schoolFee).forEach(([section, fee]) => {
+        const item = document.createElement("div");
+        item.className = "fee-item";
+
+        const sectionInput = document.createElement("input");
+        sectionInput.value = section;
+        sectionInput.disabled = true;
+        
+        const feeInput = document.createElement("input");
+        feeInput.type = "number";
+        feeInput.value = fee;
+        feeInput.disabled = true;
+
+        const controls = document.createElement("div");
+        controls.className = "controls";
+
+
+        item.appendChild(sectionInput);
+        item.appendChild(feeInput);
+        item.appendChild(controls);
+
+        feeList.appendChild(item);
+      });
+    }
+
+    addForm.onsubmit = (e) => {
+      e.preventDefault();
+      const section = newSection.value.trim();
+      const fee = parseInt(newFee.value);
+      if (!section || isNaN(fee)) return alert("Enter valid data.");
+      schoolFee[section] = fee;
+      newSection.value = "";
+      newFee.value = "";
+      renderFees();
+    };
+
+    renderFees();
+  
+  
+  function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "_").replaceAll(",", "").trim();
+    }
+  </script>
+</body>
+</html>

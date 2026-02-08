@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Role Manager</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    body {
+      background: linear-gradient(135deg, #5cc4ff, #b86bff);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    button {
+      background: #5cc4ff;
+      border: none;
+      color: white;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover { background: #40b3ff; }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      background: #f8f9fa;
+      padding: 12px 14px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      transition: 0.2s;
+      animation: fadeIn 0.3s ease;
+    }
+
+    li:hover { background: #eef3ff; }
+
+    .remove-btn {
+      background: #ff6b6b;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .remove-btn:hover { background: #e04343; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <script src="../config.js"></script>
+<script src="../batch2.js"></script>
+
+</head>
+<body>
+  <div class="container">
+    <h2>Role Manager</h2>
+    <div class="input-area">
+      <input type="text" id="roleInput" placeholder="Enter a role..." />
+      <button id="add">Add</button>
+    </div>
+    <ul id="roleList"></ul>
+    <hr>
+    <button id="save">Save</button>
+  </div>
+
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+
+  const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  
+  
+  const rolesRef = doc(db, schoolId, "roles");
+  let rolesDoc = await getDoc(rolesRef);
+  let roles = rolesDoc.exists()? rolesDoc.data().list : [];
+  roles.sort();
+  
+  add.onclick = addRole;
+  save.onclick = async e=>{
+    save.innerHTML = "Saving..";
+    await setDoc(rolesRef, {list: roles});
+    save.innerHTML = "Saved";
+    setTimeout(e=>save.innerHTML = "Save", 2000);
+  }
+    const roleList = document.getElementById("roleList");
+    const roleInput = document.getElementById("roleInput");
+
+    function renderRoles() {
+      roleList.innerHTML = "";
+      roles.forEach((role, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <span>${role}</span>
+          <button class="remove-btn" onclick="removeRole(${index})">Delete</button>
+        `;
+       li.querySelector("button").onclick = e=> removeRole(index);
+        roleList.appendChild(li);
+      });
+    }
+
+    function addRole() {
+      const newRole = roleInput.value.trim();
+      if (!newRole) {
+        alert("Role name cannot be empty!");
+        return;
+      }
+      if (roles.includes(newRole)) {
+        alert("This role already exists!");
+        return;
+      }
+      roles.push(newRole);
+      roleInput.value = "";
+      renderRoles();
+    }
+
+    function removeRole(index) {
+      roles.splice(index, 1);
+      renderRoles();
+    }
+
+    // Initialize display
+    renderRoles();
+  </script>
+</body>
+</html>

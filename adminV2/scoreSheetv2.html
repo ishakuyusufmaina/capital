@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SCORE SHEET</title>
+ 
+    <style>
+  * {
+    box-sizing: border-box;
+  }
+  h1 {
+    text-align: center;
+  }
+  
+  button {
+      margin-top: 1.5rem;
+     width: 100%;
+      padding: 0.7rem;
+      background-color: #3f51b5;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    display: inline-block;
+    margin: auto;
+    }
+
+    button:hover {
+      background-color: #5c6bc0;
+    }
+    
+    
+        input {
+      padding: 8px;
+      border: 1px solid #333;
+      border-radius: 5px;
+          width: 65px;
+     // background-color: inherit; //#1e1e1e;
+    //color: white;
+    }
+
+    
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+   th, td{
+      padding: 10px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+      body {
+     // background-color: #121212;
+      //color: #ffffff;
+      font-family: Arial, sans-serif;
+     // padding: 20px;
+    }
+  select {
+      font-family: Arial, sans-serif;
+      border: none;
+    font-size: 24px;
+    text-align: center;
+    width: 100%;
+    display: inline-block;
+  }
+    
+    .name {
+        width: fit-content;
+    }
+  
+  .select-container, .table-container {
+    text-align: center;
+    margin: auto;
+    padding: 10px;
+    //border: 1px solid white;
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  header, th {
+    text-transform: uppercase;
+  }
+  </style>
+</head>
+<body>
+  <h1>
+    Score Sheet
+  </h1>
+    <header>
+    <div id="date">Date: </div>
+    <div id="session">Session: </div>
+    <div id="clas">Class: </div>
+    <div id="subject">Subject: </div>
+  </header>
+
+  <div class="table-container">
+  <table id="table">
+    <tr>
+      <th>SN</th>
+      <th>Name</th>
+      <th>1st CA</th>
+      <th>2nd CA</th>
+      <th>3rd CA</th>
+      <th>Exam</th>
+      <th>Total</th>
+    </tr>
+    <tbody id="table-body"></tbody>
+  </table>
+  </div>
+  <button id="saveBtn">Save</button>
+  <script src="../../config.js"></script>
+ <script src="../../batch2.js"></script>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, doc, writeBatch, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+   /*   const firebaseConfig = {
+        apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+        authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};*/
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  const batch = writeBatch(db);
+  
+  const schoolId = "noble";
+  const terms = ["first term", "second term", "third term"];
+  
+  
+  let d = new Date();
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let day = d.getDate();
+  let sec = d.getSeconds()+1;
+  let min = d.getMinutes()+1;
+  let h = d.getHours()+1;
+  //time.innerHTML = `${h} : {}{
+  date.innerHTML = `${day}/${month}/${year}`;
+
+   
+  var students = {};
+  var sbs; //subject based students
+  let ses;
+  let cls = localStorage.getItem("class");;
+  console.log(cls);
+  clas.textContent = cls;
+  let subj = localStorage.getItem("subject");
+  subject.textContent = subj;
+  let sessionsRef = doc(db, schoolId, "sessions");
+  let sessionsDoc = await getDoc(sessionsRef);
+    if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+    ses= sessions.sort((a, b)=>b.no - a.no)[0];
+      session.textContent = ses.year + ", " + terms[ses.term];
+  }
+
+await  render();
+  
+
+ async function render(){
+   let sections = (await getDoc(doc(db, schoolId, "section"))).data();
+   let rsects = Object
+   .values(sections)
+   .filter(section=>{
+     let classes = section.classes;
+     return  classes.includes(cls)
+   });
+   let section = rsects[0];
+   if (!section){     
+     alert(cls + " does not belong to any section");
+     return
+   }
+   let scoreSheetConfig = section.scoreSheetConfig;
+   let srp = section.srp??{};
+   console.log(JSON.stringify(srp));
+   console.log(subj);
+   scoreSheetConfig??= {
+     total: 100,
+     assessments: [
+     {name: "1st CA", subtotal: 10},
+     {name: "2nd CA", subtotal: 10},
+     {name: "3rd CA", subtotal: 10},
+     {name: "exam", subtotal: 70}
+     ]
+   }
+    let clas = key(cls);   
+   let  subjK = key(subj);
+   let termIndex = ses.term;
+    let session = key(ses.year+terms[ses.term]);
+    
+   console.log(session);
+    if (!(clas && session)) return null;
+    let stdsRef = doc(db, schoolId, session, clas, "students");
+    let smRef = doc(db, schoolId, session, clas, "scoremeta");
+   let stdsDoc = await getDoc(stdsRef);
+   sbs = {};
+   console.log(clas, stdsDoc.exists());
+    if (stdsDoc.exists()){
+      table.innerHTML = "";
+      const {exam, assessments} = scoreSheetConfig;
+      table.innerHTML = "<tr><th>ID Num</th><th>Name</th></tr>";
+      let r = table.querySelector("tr");
+      assessments.forEach(asm=>{
+        //table.innerHTML +=`<th>${asm.name}(${asm.subtotal})</th>`;
+        let th = document.createElement("th");
+        th.innerHTML = asm.name + " ("+asm.subtotal+")";
+        r.append(th);
+      });
+      
+       r.innerHTML +=`<th>Exam</th><th>Total</th>`;
+ 
+  
+      students = stdsDoc.data();
+      let studentsArr = Object.values(students).sort((a, b)=>a.name.trim().localeCompare(b.name.trim()));
+      console.log(studentsArr.length);
+      studentsArr.forEach(student=>present(student, table.insertRow()));  
+      
+      saveBtn.onclick = async e=>{
+        console.log(srp);
+        console.log(subj);
+        const faiths = {
+          "Islam": "Muslim",
+          "Christian": "Christian"
+        }
+ 
+        let subjStdsArr = Object
+        .values(sbs);
+        assignPositions(subjStdsArr);
+        subjStdsArr.forEach(s=>{
+          delete s.next;
+          delete s.prev;
+        });
+        const scoremeta = {students: subjStdsArr };
+        scoremeta.max = subjStdsArr[0].score;
+        scoremeta.min = subjStdsArr[subjStdsArr.length-1].score;
+        
+        console.log(JSON.stringify(scoremeta));        
+        console.log(subjStdsArr.length);
+        let subjScoremeter = {};
+        subjScoremeter[subj] = scoremeta;
+        batch.set(smRef, subjScoremeter, {merge:true});
+        batch.set(stdsRef, students, {merge:true});
+        await batch.commit();
+        alert("saved!");
+        window.location.reload();
+      }      
+      function present(student, row){
+        row.innerHTML = "";
+        const faiths = {
+          "Islam": "Muslim",
+          "Christian": "Christian"
+        }
+        console.log(student.religion, student.name)
+        if (!!srp[subj] && (srp[subj]!==faiths[student.religion]))
+        return
+        let id = row.insertCell();
+        id.innerHTML = student.id;
+        let name = row.insertCell(); 
+        name.innerHTML = student.name.toUpperCase();
+        student.subjects??={};
+        student.subjects[subjK]??=[{}, {}, {}];
+        
+        student.subjects[subjK][termIndex]??={}
+        let scores = student.subjects[subjK][termIndex];
+        let sum = 0;
+        scores.exam??="-";
+        scores.exam = String(scores.exam);
+        scores.subject = subj;
+        sum +=Number(scores.exam.replace("-", 0))??0;
+        assessments.forEach((asm, i)=>{
+          let k = asm.name.toLowerCase().trim().replaceAll();
+          scores[k]??="-";
+          let subjScore = scores[k];
+          sum +=Number(subjScore.replace("-", 0))??0;
+          let score = row.insertCell();
+          score.innerHTML = `
+           <input
+            min="0" max="40"
+            type="text" 
+            pattern="^(-|[0-9]|[1-9][0-9]|${asm.subtotal})$" 
+            title="Enter a number between 0 and ${asm.subtotal}, or just '- to indicate absence'"
+            value="${subjScore}"
+            inputmode="numeric"
+            required
+            />`;
+          
+         // console.log(asm.subtotal);
+          let inp = score.querySelector("input");
+          inp.onchange = e=>{
+            let val = e.target.value;
+            let oldScore = scores[k];
+            if (!e.target.checkValidity() || asm.subtotal < Number(e.target.value)){
+              e.target.value = oldScore;
+              alert("Wrong input means no input!");
+              return;
+            }
+            scores[k] = val;
+            present(student, row);
+          }
+        });
+        let examCell = row.insertCell();
+        examCell.innerHTML = `
+        <input
+            min="0" max="40"
+            type="text" 
+            pattern="^(-|[0-9]|[1-9][0-9]|${exam})$" 
+            title="Enter a number between 0 and ${exam}, or just '- to indicate absence'"
+            value="${scores.exam}"
+            inputmode="numeric"
+            required
+            />`;
+          
+         // console.log(asm.subtotal);
+          let inp = examCell.querySelector("input");
+          inp.onchange = e=>{
+            let val = e.target.value;
+            let oldScore = scores.exam;
+            if (!e.target.checkValidity() || exam < Number(e.target.value)){
+              e.target.value = oldScore;
+              alert("Wrong input means no input!");
+              return;
+            }
+            scores.exam = val;
+            present(student, row);
+          }
+        
+        //total.innerHTML = sum 
+        let total = row.insertCell();
+        total.innerHTML = sum;    
+        sbs[student.id]={
+          score:sum,
+          id: student.id
+        }       
+      }
+      
+    }
+ }
+  
+    function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "").replaceAll(",", "").trim();
+    }
+  
+
+  function assignPositions(students){
+     students.sort((a, b)=>b.score - a.score);
+     students.forEach((student, i)=>{
+       student.position = i+1
+       if (students[i+1])
+       student.next = students[i+1];
+       if (students[i-1])
+       student.prev = students[i-1];
+       if ((!!student.prev) && (student.score == student.prev.score))
+       student.position = student.prev.position;
+       //console.log(student.position);
+     });
+   }
+  
+  
+  </script>
+</body>
+</html>

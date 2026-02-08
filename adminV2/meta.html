@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meter Input Demo</title>
+<style>
+  body {
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #e3f2fd, #fce4ec);
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    color: #00796b;
+  }
+
+  .card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    width: 320px;
+    text-align: center;
+  }
+
+  meter {
+    width: 100%;
+    height: 25px;
+    border-radius: 10px;
+  }
+
+  input[type=range] {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .value {
+    font-weight: bold;
+    color: #0288d1;
+  }
+</style>
+</head>
+<body>
+
+<h1>Psychometric Meter Demo</h1>
+
+<div class="card">
+  <h3>Attention Level</h3>
+  <meter id="attentionMeter" min="0" max="5" low="40" high="80" optimum="90" value="50"></meter>
+  <p>Current value: <span class="value" id="attentionValue">50</span>%</p>
+
+  <input type="range" id="attentionRange" min="0" max="5" value="50" step="1" oninput="updateMeter()">
+</div>
+
+<script>
+  const meter = document.getElementById("attentionMeter");
+  const range = document.getElementById("attentionRange");
+  const valueLabel = document.getElementById("attentionValue");
+
+  function updateMeter() {
+    const val = range.value;
+    meter.value = val;
+    valueLabel.textContent = val;
+  }
+</script>
+
+</body>
+</html>
