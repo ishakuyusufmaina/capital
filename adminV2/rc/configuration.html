@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="../../config.js"></script>
+<script src="../../batch2.js"></script>
+
+  <title>Score Interpretation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+  h1 {
+    text-align: center;
+  }
+
+    h1, h2 {
+      color: #2c3e50;
+    }
+
+    table, #rc {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    input[type="text"], input[type="number"] {
+      padding: 8px;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px 0 0;
+      background-color: #2ecc71;
+      border: none;
+      color: white;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #27ae60;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: none;
+      border-top: 1px solid #ccc;
+    }
+  
+  #rc {
+    overflow: auto;
+  
+  }
+  </style>
+</head>
+<body>
+  <h1>Report Card Configuration</h1>
+  <h2>
+    Grade and Remark by Score
+  </h2>
+  <select id="sectSelect">
+    <option  value="">- Section- </option>
+  </select>
+ 
+  <table id="table">
+    <tr id="head">      
+      <th>Score&lt;</th>
+      <th>Grade</th>
+      <th>Remark</th>      
+    </tr>
+    <tbody id="tbody"></tbody>
+  
+  </table>
+  <div>
+    <button id="add">New mapping</button>
+    
+    <!--button id="save">Reset</button-->
+  </div>
+  <hr>
+  
+  <h3>Test</h3>
+  <table id="table2">
+    <tr>
+      <th>Score</th>
+      <th>Grade</th>
+      <th>Remark</th>
+    </tr>
+    <tr>
+      <td>
+        <input type="number" id="scoreIn">
+      </td>
+      <td id="gradeOut"></td>
+      <td id="remarkOut"></td>
+    </tr>
+  </table>
+  <button id="test">Map</button>
+  
+  
+  <hr>
+  <h2>Comment by Average</h2>
+   <table id="ctable">
+    <tr id="chead">      
+      <th>Average&lt;</th>
+      <th>Comment</th>      
+    </tr>
+    <tbody id="ctbody"></tbody>  
+  </table>
+  <div>
+    <button id="cadd">New comment</button>
+    <!--button id="save">Reset</button-->
+  </div>
+  <hr>
+  
+  <h2>Test</h2>
+  <table id="ctable2">
+    <tr>
+      <th>Average</th>
+      <th>Comment</th>
+    </tr>
+    <tr>
+      <td>
+        <input type="number" id="averageIn">
+      </td>
+    
+      <td id="commentOut"></td>
+    </tr>
+  </table>
+  <button id="ctest">Map</button>
+  <hr>
+  <h2>Appearance of Assessments on Report Card</h2>
+  <label>
+   <input id="derivedAsm" type="checkbox"> Use derived assessments.
+  </label>
+  
+  <div id="rc">
+    <table>
+      <thead id="rcHead">
+        
+      </thead>
+    </table>
+  </div>
+  <hr>
+  <div>
+    <button id="save">Save</button>
+  </div>
+  <footer>
+    <a href="scoreSheetConfig.html">Score Sheet Setting</a>
+  </footer>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+    import {getFirestore, runTransaction, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+    import {getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     //import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+  /*  const firebaseConfig = {
+      apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+      authDomain: "school-in-the-box.firebaseapp.com",
+      projectId: "school-in-the-box",
+      storageBucket: "school-in-the-box.firebasestorage.app",
+      messagingSenderId: "596350496353",
+      appId: "1:596350496353:web:84c66c351700ddf0824420",
+      measurementId: "G-3MGCDH4FRF"
+    };*/
+  
+  
+  
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+  let teachersRef = doc(db, schoolId, "teachers");
+  let teachersDoc = await getDoc(teachersRef);
+  let sectionRef = doc(db, schoolId, "section");
+  let sectionDoc = await getDoc(sectionRef);
+  let sections = sectionDoc.exists()? sectionDoc.data() : {};
+  var classOptions = [];
+  var interpretations = [];
+  var aInterpretations =[];
+  let user = await new Promise(async resolve=> onAuthStateChanged(auth, user=> resolve(user)));
+  let id = user.email.replace(/@.*/, "");
+  let teachers = teachersDoc.exists()? teachersDoc.data() : {};
+  const teacher = teachers[id];
+  let sectKeys = teachers[id].adminFunctions.rcConfig.resources; //JSON.parse(localStorage.getItem("sections"));
+
+  sectKeys.forEach(k=>{
+    let opt = document.createElement("option");
+    opt.textContent = k;
+    opt.value = k;
+    sectSelect.appendChild(opt);
+  });
+
+  sectSelect.onchange = e=>{
+    if (!e.target.value) return;
+    update();
+  }
+  
+    
+  
+  function update(){
+    let sect = sectSelect.value;
+  //  const derivedAsm = document.getElementById("derivedAsm");
+    sections[sect].scoreInterpretations ??= [];
+    interpretations = sections[sect].scoreInterpretations;
+    sections[sect].averageInterpretations ??=[];
+    aInterpretations = sections[sect].averageInterpretations;
+    sections[sect].useDerivedAsm ??=false;
+    derivedAsm.checked = sections[sect].useDerivedAsm;
+    derivedAsm.onchange = e=>{
+      sections[sect].useDerivedAsm = derivedAsm.checked;
+      update();
+    }
+
+    sections[sect].scoreSheetConfig??={};
+    const scoreConf = sections[sect].scoreSheetConfig;
+    let asms = scoreConf.assessments??[];
+    let derivedAsms = scoreConf.derivedAsms??[];
+    presentRC(derivedAsm.checked? derivedAsms : asms)    
+    clearInterpTable();
+    interpretations.forEach(interp=>addInterp(interp));  
+    aInterpretations.forEach(interp=>addAInterp(interp));      
+  }
+  
+  head.ondblclick = e=>{
+    let sect = sectSelect.value;
+    if (!sect) return;
+    sections[sect].scoreInterpretations = [];
+    update();
+  }
+  
+  chead.ondblclick = e=>{
+    let sect = sectSelect.value;
+    if (!sect) return;
+    sections[sect].averageInterpretations = [];
+    update();
+  }
+  
+  function presentRC(asms){
+    let txt = `
+    <tr><th>Subject</th>
+    `;
+    asms.forEach(a=>{
+      txt += `<th>${a.name}</th>`;
+    })
+    txt +=`
+          <th>Exam</th>
+          <th>Total</th>
+          <th>Position</th>
+          <th>Grade</th>
+          <th>Remark</th>
+        </tr>`;
+    rcHead.innerHTML = txt;
+  }
+  function clearInterpTable(){
+    tbody.innerHTML = "";
+    ctbody.innerHTML = "";
+  }
+  function addInterp(interp){
+    let row = tbody.insertRow();
+    ["range", "grade", "remark"].forEach(k=>{
+      let cell = row.insertCell();
+      cell.textContent = interp[k] || '';
+      cell.setAttribute("contenteditable", "plaintext-only");
+      cell.oninput = _ =>{
+        interp[k] = cell.textContent;
+      }
+    })    
+  }
+  
+  function addAInterp(interp){
+    let row = ctbody.insertRow();
+    ["range", "comment"].forEach(k=>{
+      let cell = row.insertCell();
+      cell.textContent = interp[k] || '';
+      cell.setAttribute("contenteditable", "plaintext-only");
+      cell.oninput = _ =>{
+        interp[k] = cell.textContent;
+      }
+    })    
+  }
+  
+  function addNew(model){
+    model.push({});
+    addInterp(model[model.length-1]);
+  }
+  function newComment(model){
+    model.push({});
+    addAInterp(model[model.length-1]);
+  }
+  
+  
+  add.onclick = _=> addNew(interpretations);
+  cadd.onclick = _=> newComment(aInterpretations);
+  
+  function interpret(score, interpsModel){
+    for (const interp of interpsModel){
+      if (Number(score) < Number(interp.range))
+        return {grade:interp.grade, remark:interp.remark}
+    }
+    
+    let lastInterp = interpsModel[interpsModel.length-1];
+    return {grade:lastInterp?.grade || '', remark:lastInterp?.remark || ''};
+  }
+  
+  function comment(average, interpsModel){
+    for (const interp of interpsModel){
+      if (Number(average) < Number(interp.range))
+        return interp.comment;
+    }
+    
+    let lastInterp = interpsModel[interpsModel.length-1];
+    return lastInterp?.comment || '';
+  }
+  
+  test.onclick = _=>{
+    let score = Number(scoreIn.value);
+    let interp = interpret(score, interpretations);
+    gradeOut.textContent = interp.grade;
+    remarkOut.textContent = interp.remark;
+  }
+  ctest.onclick = _=>{
+    let average = Number(averageIn.value);
+    let com = comment(average, aInterpretations);
+    commentOut.textContent = com;
+  }
+  save.onclick = _=>{
+    //await setDoc(sectionRef, sections, {merge: true});
+    runTransaction(db, async transaction=>{
+      let sectsDoc = await transaction.get(sectionRef);
+      let sects = sectsDoc.exists()? sectsDoc.data() : {};
+      let sectKey = sectSelect.value;
+      if(sectKey){
+        sects[sectKey].scoreInterpretations = interpretations;
+        sects[sectKey].averageInterpretations = aInterpretations;
+        sects[sectKey].useDerivedAsm = derivedAsm.checked;    
+        transaction.set(sectionRef, sects);
+      }
+    })
+    .then(_ => alert("saved!"))
+    .catch(e=> alert("Failed! "+e.message));
+  }
+  </script>
+</body>
+</html>
