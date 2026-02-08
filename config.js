@@ -8,3 +8,7 @@ const studentsConfig = {
   measurementId: "G-X20R5GTYPG"
 };
 
+const schoolId= "capital";
+const schoolName = "Maiduguri Capital School";
+
+
