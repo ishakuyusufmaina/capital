@@ -558,15 +558,16 @@ function isEqual(a, b) {
 }
 
   function updateStudent(student, batch){
-          let info = {
+        let info = {
         name: student.name,
         classes: arrayUnion(classSelect.value),
         gender: student.gender,
         picURL: student.picURL || "",    
         id: student.id,
         sessions: arrayUnion(sessionSelect.value.toLowerCase()),
-        section
-      }
+        section,
+        religion: student.religion || none
+     }
      
       const stdRef = doc(stdDb, "students", student.id.replaceAll("/", "_"))
       const perfRef = doc(stdDb, "students", student.id.replaceAll("/", "_"), "performances", key(sessionSelect.value))
@@ -584,7 +585,8 @@ function isEqual(a, b) {
         id: student.id,
         sessions: arrayUnion(sessionSelect.value.toLowerCase()),
         section,
-        pin: generate4DigitInteger()
+        pin: generate4DigitInteger(),
+        religion: student.religion || "none"
       }
      
       const termPerformances = {};
