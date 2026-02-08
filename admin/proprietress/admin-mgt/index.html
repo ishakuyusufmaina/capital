@@ -236,6 +236,94 @@ const schoolId= "capital";
     quality: {
       action: "Inspect school",
       resources: sects
+    },
+    teachers: {
+      action: "Manage teachers",
+      resources: sects
+    },  
+    students: {
+      action: "Manage students",
+      resources: classes
+    },
+    rc: {
+      action: "Manage report cards",
+      resources: classes
+    },
+    admins: {
+      action: "Manage admins",
+      resources: sects
+    },
+    fm: {
+      action: "Assign form master",
+      resources: sects
+    },
+    ct: {
+      action: "Assign class teacher",
+      resources: sects
+    },
+    session: {
+      action: "Launch academic session",      
+    },
+    section: {
+      action: "Manage school sections",
+      resources: sects
+    },
+    subjects: {
+      action: "Manage school subjects",
+      resources: sects
+    },
+    auth: {
+      action: "Authorize teach and sign",
+      resources: classes
+    },
+    monTAS: {
+      action: "Monitor teach and sign",
+      resources: classes
+    },
+    monSA: {
+      action: "Monitor Student Attendance",
+      resources: classes
+    },
+    feesSet: {
+      action: "Fix School Fees"
+    },
+    feesRecord: {
+      action: "Record School Fees",
+      resources: sects
+    },
+    feesView: {
+      action: "View School Fees",
+       
+    },
+    feesDefaulter: {
+      action: "Check School Fees Defaulters",
+      resources: classes
+    },
+    scoresheetConfig: {
+      action: "Configure Scoresheet",
+      resources: sects
+    },
+    rcConfig: {
+      action: "Configure Report Card",
+      resources: sects
+    },
+    otherFees: {
+      action: "Set other fees"
+    },
+    managePsycho: {
+      action: "Manage psychometrics",
+      resources: sects
+    },
+    manageFeesRule: {
+      action: "Manage Fees Rule",
+      resources: sects
+    },
+    roles: {
+      action: "Manage Roles"
+      
+    },
+    cloudBill: {
+      action: "Manage Cloud and Storage Billing"      
     }
     
   };
@@ -266,7 +354,7 @@ const schoolId= "capital";
   function presentAdmin(admin){
     let teacher = admin;
     let name= teacher.name;
-    let adminFxns = Object.keys(teacher.adminFunctions);
+    let adminFxns = Object.keys(teacher.adminV2Functions);
     let details = document.createElement("details");
     let summary = document.createElement("summary");
     let tb = document.createElement("table");
