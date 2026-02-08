@@ -264,7 +264,8 @@
   
   let sectionRef = doc(db, schoolId, "section");
 let sectionDoc = await getDoc(sectionRef);
-/* if (sectionDoc.exists()){
+var section;
+  /* if (sectionDoc.exists()){
    let sections = sectionDoc.data();
      
    let keys = Object.keys(sections);
@@ -289,7 +290,16 @@ let sectionDoc = await getDoc(sectionRef);
            let sections = sectionDoc.data();
            let classes = teacher.role.fm;
          
-           classes.forEach(clas=>classSelect.innerHTML +=`<option>${clas}</option>`);
+           classes.forEach(clas=>{
+             classSelect.innerHTML +=`<option>${clas}</option>`
+             classSelect.addEventListener("change", _=>{
+               for (const key in sections){
+               if (!sections[key].classes.includes(classSelect.value)) return;
+               section = key;
+               console.log(section);
+               }
+             })
+           });
                
        }
        
