@@ -227,7 +227,7 @@ const terms = ["first term", "second term", "third term"];
   let sectionRef = doc(db, schoolId, "section");
   //let sections = (await getDoc(sectionRef)).data();
   const sections = (await getDoc(sectionRef))?.data?.() ?? {};
-  let sects = teacher.adminFunctions.manageFeesRule.resources;
+  let sects = teacher.adminV2Functions.manageFeesRule.resources;
   //Object.keys(sections)
   sects.forEach(sectK=>{
     let section = sections[sectK];

@@ -62,7 +62,7 @@
   
   
  // const schoolId="almadeenah";
-    
+   
       const app = initializeApp(firebaseConfig);
     const paybook = initializeApp(paybookConfig, "paybook");
   const analytics = getAnalytics(app);
@@ -112,7 +112,7 @@ const terms = ["first term", "second term", "third term"];
   const classSection = {};
   classSection.get = cls=>classSection[cls.toLowerCase()];
   
-  let sects = teacher.adminFunctions.feesRecord.resources;
+  let sects = teacher.adminV2Functions.feesRecord.resources;
   Object.keys(sections)
   .forEach(sectK=>{
     let section = sections[sectK];
