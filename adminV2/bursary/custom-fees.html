@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fee Management</title>
+<style>
+  body {
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #007bff, #00c6ff);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+  }
+
+  .container {
+    background: #fff;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    padding: 30px 25px;
+  }
+
+  h2 {
+    text-align: center;
+    color: #007bff;
+    margin-bottom: 20px;
+  }
+
+  form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+  }
+
+  input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 1rem;
+  }
+
+  button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  button:hover {
+    background: #0056b3;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  tr:hover {
+    background: #f9f9f9;
+  }
+
+  .actions button {
+    margin-right: 5px;
+    margin-top: 5px;
+    font-size: 0.9rem;
+    padding: 6px 10px;
+  }
+
+  .actions .edit {
+    background: #ffc107;
+  }
+  .actions .edit:hover {
+    background: #e0a800;
+  }
+
+  .actions .delete {
+    background: #dc3545;
+  }
+  .actions .delete:hover {
+    background: #b02a37;
+  }
+
+  .empty {
+    text-align: center;
+    color: #888;
+    padding: 20px 0;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h2>Fee Management System</h2>
+    <form id="feeForm">
+      <input type="text" id="feeName" placeholder="Fee name" required />
+      <input type="number" id="feeAmount" placeholder="Amount" required />
+      <button type="submit">Add Fee</button>
+    </form>
+
+    <table id="feeTable">
+      <thead>
+        <tr>
+          <th>Fee Name</th>
+          <th>Amount (₦)</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="feeBody"></tbody>
+    </table>
+    <hr>
+    <button id="save">Save</button>
+  </div>
+  
+<script src="../../config.js"></script>
+  <script src="../../batch2.js"></script>
+
+    <script type="module" defer>
+  
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, sum, getAggregateFromServer, query, limit, where, getDocs, collection, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+
+        const app = initializeApp(firebaseConfig);
+     const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  
+  const feesRef = doc(db, schoolId, "fees");
+  let feesDoc = await getDoc(feesRef);
+  
+  
+  let fees = {
+    "Registration": 2000,
+    "Library": 500,
+    "Sports": 300
+  };
+  
+  fees = feesDoc.exists()? feesDoc.data() : {};
+  save.onclick = async e=>{
+    save.innerHTML = "Saving..";
+    await setDoc(feesRef, fees);
+    save.innerHTML = "Saved!";
+    setTimeout(e=>save.innerHTML = "Save", 2000);
+  }
+  const feeBody = document.getElementById("feeBody");
+  const feeForm = document.getElementById("feeForm");
+  const feeName = document.getElementById("feeName");
+  const feeAmount = document.getElementById("feeAmount");
+
+  function renderFees() {
+    feeBody.innerHTML = "";
+    const keys = Object.keys(fees);
+    if (keys.length === 0) {
+      feeBody.innerHTML = `<tr><td colspan="3" class="empty">No fees added yet</td></tr>`;
+      return;
+    }
+    keys.forEach(name => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${name}</td>
+        <td>${fees[name]}</td>
+        <td class="actions">
+          <button class="edit" onclick="editFee('${name}')">Edit</button>
+          <button class="delete" onclick="deleteFee('${name}')">Delete</button>
+        </td>
+      `;
+      feeBody.appendChild(row);
+    });
+  }
+
+  feeForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const name = feeName.value.trim();
+    const amount = parseFloat(feeAmount.value);
+    if (!name || isNaN(amount)) return;
+
+    fees[name] = amount;
+    renderFees();
+    feeForm.reset();
+  });
+
+  function deleteFee(name) {
+    if (confirm(`Delete fee "${name}"?`)) {
+      delete fees[name];
+      renderFees();
+    }
+  }
+
+  function editFee(name) {
+    const newAmount = prompt(`Edit amount for "${name}"`, fees[name]);
+    if (newAmount !== null && !isNaN(newAmount)) {
+      fees[name] = parseFloat(newAmount);
+      renderFees();
+    }
+  }
+
+  renderFees();
+</script>
+</body>
+</html>

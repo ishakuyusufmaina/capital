@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="ward.css">
+  <title>Hello, Bursar!</title>
+</head>
+<body>
+
+  <h1>
+    SCHOOLS FEES RECORD
+  </h1>
+  <h2 id="stdName"></h2>
+  <div id="table-container">
+  <table>  
+    <caption>
+    <p>
+      <span>Student ID: <strong id="stdId">2024/2025/02/1</strong></span>
+      <span>Session: <strong id="feeTerm">Second</strong>,
+      <strong id="feeYear">2024/2025</strong> </span>
+    
+      <span>Class: <strong id="stdCls">SSS 2</strong></span>
+      <span>Due: <strong id="due"></strong></span>
+      <span>Paid: <strong id="paid"></strong></span>
+      <span>Outstanding: <strong id="bal"></strong></span>
+    </p>
+    </caption>
+      <thead>
+        <th>S/N</th>
+        <th>Amount Paid(₦)</th>
+        <th>Outstanding(₦)</th>
+        <th>TAPS</th>
+      </thead>
+      <tbody id="table">
+        
+      </tbody>
+  </table>
+      <button class="button" id="reciept">Issue reciept</button>
+
+  </div>
+  <form id="form">
+    <p>Extra Fees
+      <select id="extraFees" multiple>
+    </select>
+    </p>
+    
+    <p id="amountInWord"></p>
+    <input id="amount" 
+      inputmode="numeric"
+      pattern="^(?:0|[1-9]\d*)(?:\.\d+)?$"
+      required
+      placeholder="Enter digit only"
+      name="amount"
+    >
+    <label for="transfer">
+      
+      <input required type="radio" id="transfer" value="transfer" name="method">
+      Transfer
+    </label>
+    <label for="cash">
+      
+      <input required type="radio" id="cash" value="cash" name="method">
+      Cash
+    </label>
+    
+    <button type="submit" id="recBtn">Record</button>
+    </form>
+  <script src="utility.js"></script>
+  <script src="../../config.js"></script>
+  <script src="../../batch2.js"></script>
+  <script type="module">
+  /*
+    */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, serverTimestamp, query, limit, where, getDocs, collection, doc, setDoc, getDoc, onSnapshot} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+  /*    const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};*/
+  
+  
+//  const schoolId="almadeenah";
+    const terms = ["1st term", "2nd term", "3rd term"];
+
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+  const feesRef = doc(db, schoolId, "fees");
+  let feesDoc = await getDoc(feesRef);
+  let fees = feesDoc.exists()? feesDoc.data() : {};
+  
+  for (const fee in fees){
+    let a = fees[fee];
+    extraFees.innerHTML +=`<option value="${a}">${fee} (${a})</option>`;
+  }
+  
+  initialize();
+   
+  async function initialize(){
+    let userPromise = new Promise(resolve=>{
+      onAuthStateChanged(auth, (user)=>resolve(user));
+    });
+    let user = await userPromise;
+    if (!user) {
+      alert("Problem!");
+      throw "User no user!"
+    }
+    
+    const std = JSON.parse(localStorage.getItem("student"));
+    const session = JSON.parse(localStorage.getItem("session"));
+    const fixedFee = Number(localStorage.getItem("fee"));
+    
+    
+    console.log(std.amountPaid);
+  
+ 
+    let p = new URLSearchParams(window.location.search);
+    let id = std.id; //p.get("id");
+    let cls = std.class; //p.get("class");
+    let term = session.term//p.get("term");
+    let year = session.year//p.get("year");
+    let name = std.name //p.get("name");
+    let txt = (e, t)=>e.textContent = t;
+    let getSubtotal = ()=>{
+      let subtotal = 0;
+      Array.from(extraFees.selectedOptions).forEach(opt=>subtotal += Number(opt.value));
+      return subtotal;
+    }
+    txt(stdId, id); txt(stdCls, cls); 
+    feeTerm.innerHTML = terms[term]; txt(feeYear, year);
+    txt(stdName, name); txt(due, "₦"+fixedFee);
+    extraFees.onchange = e=>{
+      let subtotal = getSubtotal();
+      //alert(subtotal);
+       txt(due, "₦"+(fixedFee+subtotal));
+      listenAndUpdate(fixedFee+getSubtotal(), getQuery(sfCoord));
+
+    }
+    const sfCoord = {id, "class": cls, term, year}
+    listenAndUpdate(fixedFee+getSubtotal(), getQuery(sfCoord));
+    amount.oninput = e=>{
+      let amt = Number(amount.value);
+      let aiw = f2w(amt);
+      amountInWord.textContent = aiw.toUpperCase() +" NAIRA ONLY";
+      let balance = (fixedFee+ getSubtotal()) - std.amountPaid + amt;
+      if (balance < 0) 
+        amount.setCustomValidity("Amount paid cannot be greater than amount due");
+     else amount.setCustomValidity("");
+    }
+    form.onsubmit = async e=>{
+      e.preventDefault();
+      console.log(Number(fixedFee) - Number(amount.value));
+      console.log(fixedFee);
+      let cashier = user.displayName;
+      const fee = {
+        student: id,
+        amount: Number(amount.value),
+        due: fixedFee+getSubtotal(),
+        year,
+        term,
+        "class": cls,
+        cashier: {
+          name: cashier, 
+          id: user.email
+        },         
+        timestamp: serverTimestamp()
+      }
+      
+      let confirm = await promt(cashier, amount.value, name, year, terms[term]);
+      console.log(JSON.stringify(fee));
+      if (!confirm) return;
+      let formData = new FormData(form);
+      formData.forEach((val, name)=>{
+        if (!fee[name]) fee[name] = val;
+      })
+      
+      try{await record(fee);}
+      catch(e){
+        alert("Error: Something went wrong")
+        console.error(e.message)
+      }
+      form.reset();
+    }
+  }
+  
+  async function record(fee){
+    let newRef = doc(collection(db, schoolId, "db", "fees"));
+    await setDoc(newRef, fee);
+    alert("Done!");
+  }
+  
+  async function retrieveFees(fixed, sfCoord){
+    let q = getQuery(sfCoord);
+    let feesSnapshot = await getDocs(q);
+    return  feesSnapshot
+  }
+  
+  function listenAndUpdate(due, q){
+    onSnapshot(q, (snapshot)=>{
+      let sorted = snapshot.docs.sort((a, b)=>a.data().timestamp.toMillis() - b.data().timestamp.toMillis());
+      renderRecords(due, sorted)
+    })
+  }
+  
+  
+  
+  function renderRecords(due, snapshots){
+    table.innerHTML = "";
+    /*let row = table.insertRow();
+    row.innerHTML = `
+    
+    `*/
+    //console.log(snapshots.size);
+    let i=0;
+    let sum = 0;
+    let balance = due;
+    snapshots.forEach((feesDoc)=>{
+      i++;
+      let fee = feesDoc.data();
+      let {
+        student, 
+        timestamp, 
+        cashier, 
+        amount
+      } = fee;
+     let row = table.insertRow();
+      let ic = _=> row.insertCell();
+      let sn = ic();
+      sn.textContent = i;
+      let amt = ic();
+      amt.textContent = amount;
+      sum +=Number(amount);
+      let outst = ic();
+      balance = Number(due) - sum;
+      outst.textContent = balance;
+      let tps = ic();
+      const dateTime = timestamp.toDate();
+      const formattedDate = dateTime.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+      tps.innerHTML = `
+         ${cashier.name.trim()} &cap; ${formattedDate.replace(" at ", "@")}
+      `;   
+    });
+    let r = table.insertRow();
+    let t = document.createElement("th");
+    r.append(t);
+    t.textContent = "TOTAL";
+    let s = r.insertCell();
+    s.textContent = sum ; //+` (${f2w(sum)}) naira only`;
+    let b = r.insertCell();
+    b.textContent = balance;
+    //totalPaid = number(sum);
+    paid.textContent = "₦"+sum;
+    bal.textContent = "₦"+balance;
+    
+  }
+  
+  async function promt(cashier, amount, std, year, term){
+    let dial = document.createElement("div");
+    dial.classList.add("confirm-dialog");
+    dial.innerHTML = `
+    <h3>CONFIRMATION</h3>
+    ${cashier} <br>
+    Please confirm your action of 
+    recording a sum of ${amount} naira
+    recieved from ${std} being payment for 
+    ${term}, ${year} academic session school fee.
+   <button id="can">Cancel</button>
+   <button id="con">Confirm</button>
+    `;
+    document.body.append(dial);
+    let btns = Array.from(dial.querySelectorAll("button"));
+    //console.log(btns.length);
+    let con = await new Promise(resolve =>
+    btns.forEach(
+    btn=>btn.onclick = e=> resolve(e.target.id)
+    ));
+    dial.remove();
+    return con=="con";
+  }
+  
+  
+  
+  function getQuery(sfCoord){
+    console.log(JSON.stringify(sfCoord));
+    let ref = collection(db, schoolId, "db", "fees");
+    return query(ref, 
+    where("student", "==", sfCoord.id), 
+    where("class", "==", sfCoord.class), 
+    where("year", "==", sfCoord.year), 
+    where("term", "==", sfCoord.term)
+    
+    );
+  }
+  
+  </script>
+</body>
+</html>

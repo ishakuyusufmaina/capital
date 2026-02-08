@@ -1,0 +1,256 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payments Query</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="../../batch2.js"></script>
+   <script src="../../config.js"></script>
+  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      orderBy,
+      limit,
+      startAfter,
+      getDocs,
+      Timestamp,
+      doc,
+      getDoc,
+      getAggregateFromServer,
+      sum,
+      getCountFromServer
+    } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";// 🔹 Replace with your Firebase config
+//import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  //  import {getFirestore, onSnapshot, sum, getAggregateFromServer, query, limit, where, getDocs, collection, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+
+
+const app = initializeApp(firebaseConfig);
+    const paybook = initializeApp(paybookConfig, "paybook");
+ const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const sdb = getFirestore(app);
+  const db = getFirestore(paybook);
+  
+  
+    let sessionsRef = doc(sdb, schoolId, "sessions");
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions; //.map(s=>s.year);
+     sessions= Array.from(new Set(sessions.sort((a, b)=>b.no - a.no).map(s => s.year.trim().replaceAll(" ", ""))));
+     session.append(...sessions.map(s=> new Option(s)));
+    //session.children[1].selected = true;
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+  
+  let sectionRef = doc(sdb, schoolId, "section");
+  let sections = (await getDoc(sectionRef)).data();
+
+ // let sects = teacher.adminFunctions.feesRecord.resources;
+  Object.keys(sections)
+  .forEach(sectK=>{
+    let section = sections[sectK];
+    let classes = section.classes.map(c=>{
+      let opt = new Option(c.trim().toUpperCase());
+      opt.value = c.trim().toLowerCase();
+      return opt;
+    });
+    cls.append(...classes);    
+  })
+
+
+let lastDoc = null;
+const PAGE_SIZE = 20;
+let lastCounter = 0;
+  window.onerror = function(message){
+    window.body.innerHTML = message;
+    alert();
+  }
+window.runQuery = async function (loadMore = false) {
+  const filters = [];
+filters.push(where("schoolId", "==", schoolId));
+
+  const session = document.getElementById("session").value;
+  const classVal = document.getElementById("cls").value;
+  const term = document.getElementById("term").value;
+  const fromDate = document.getElementById("fromDate").value;
+  const toDate = document.getElementById("toDate").value;
+
+  
+  if (!loadMore) {
+    lastDoc = null;
+    document.getElementById("results").innerHTML = "";
+    document.getElementById("totalAmount").innerText = "0";
+  }
+
+  if (session) filters.push(where("session", "==", session));
+  if (classVal) filters.push(where("class", "==", classVal));
+  if (term) filters.push(where("term", "==", Number(term)));
+
+  if (fromDate)
+    filters.push(where("timestamp", ">=", Timestamp.fromDate(new Date(fromDate))));
+  if (toDate)
+    filters.push(where("timestamp", "<=", Timestamp.fromDate(new Date(toDate))));
+
+  
+  let q = query(
+    collection(db, "payments"),
+    ...filters,
+    orderBy("timestamp", "desc"),
+    limit(PAGE_SIZE)
+  );
+  
+    let tq = query(
+    collection(db, "payments"),
+    ...filters,
+    orderBy("timestamp"),
+  );
+
+  if (lastDoc) {
+    q = query(
+      collection(db, "payments"),
+      ...filters,
+      orderBy("timestamp", "desc"),
+      startAfter(lastDoc),
+      limit(PAGE_SIZE)
+    );
+  }
+
+    const terms = ["first term", "second term", "third term"];
+
+ // try {
+  const snap = await getDocs(q);
+ // } catch (e) {
+ //   document.body.innerHTML = e.message;
+ // }
+  
+   // try {
+  const cSnap = await getCountFromServer(tq);
+  
+console.log("Total payments:", cSnap.data().count);
+  let count = cSnap.data().count;
+ //  } catch (e) {
+ // document.body.innerHTML = e.message;
+ // }
+  const tbody = document.getElementById("results");
+  let total = 0; // Number(document.getElementById("totalAmount").innerText);
+
+ // try {
+  let tSnap = await getAggregateFromServer(tq, {
+          totalPaid: sum("amount")
+        }); 
+  document.getElementById("totalAmount").innerText = tSnap.data().totalPaid;
+// } catch(e) {
+  //  document.body.innerHTML = e.message;
+ // }
+  snap.forEach(doc => {
+    const p = doc.data();
+    let amount = Number(p.amount);
+   // amount = amount - Math.min(amount * 0.01, 300);
+    total += amount; //p.amount || 0;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${p.studentName}</td>
+      <td>${p.class}</td>
+      <td>${amount}</td>
+      <td>${terms[p.term]}</td>
+      <td>${-}</td>
+      <td>${p.timestamp?.toDate().toLocaleDateString()}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById("totalAmount").innerText = total;
+    lastDoc = snap.docs[snap.docs.length - 1];
+  lastCounter += PAGE_SIZE;
+  
+  current.innerHTML = lastCounter < count? lastCounter  : count;
+   
+last.innerHTML = count;
+   };
+
+  </script>  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f7f9fc; }
+    h2 { margin-bottom: 5px; }
+    .summary {
+      font-size: 18px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+    input, select, button {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #1e40af;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #fff;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+      text-transform: uppercase;
+    }
+    th { background: #e5e7eb; }
+    .actions { margin-top: 10px; }
+  </style></head>
+<body>
+  <h2>Records of Payments</h2>
+  <div class="summary">Total Amount: ₦<span id="totalAmount">0</span></div>  <div class="grid">
+   
+    <select id="session">
+      <option value=""> -session- </option>
+    </select>
+    <select id="cls">
+      <option value=""> -class- </option>
+    </select>    <!--input id="for" placeholder="For" />
+    <input id="reference" placeholder="Reference" />
+    <input id="schoolId" placeholder="School ID" /-->
+    
+    <select id="term">
+      <option value="">Select Term</option>
+      <option value="0">First</option>
+      <option value="1">Second</option>
+      <option value="2">Third</option>
+    </select>
+    <input id="fromDate" type="date" />
+    <input id="toDate" type="date" />
+  </div>  <div class="actions">
+    <button onclick="runQuery(false)">Retrieve</button>
+    <button onclick="runQuery(true)">Load More <span id="current"></span> of <span id="last"></span></button>
+  </div>  <table>
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Class</th>
+        <th>Amount</th>
+        <th>Term</th>
+        <th>Reference</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody id="results"></tbody>
+  </table>
+</body>
+</html>

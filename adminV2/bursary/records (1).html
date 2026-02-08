@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School Fees Records</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f3f6fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #004aad;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    main {
+      max-width: 1000px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      
+     // border: 5px solid black;
+    }
+    h2 {
+      margin-top: 0;
+      color: #004aad;
+    }
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 0.3rem;
+    }
+    input[type="text"], select, button {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    button {
+      background: #004aad;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0066ff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      
+      
+    }
+  .table-container{
+    overflow: auto;
+    width:100%;
+  }
+    th, td {
+      border: 1px solid #e0e0e0;
+      padding: 0.75rem;
+      text-align: center;
+    }
+    th {
+      background: #004aad;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+    .no-results {
+      text-align: center;
+      padding: 1rem;
+      color: #888;
+    }
+  .summary, .details {
+    display: none;
+  }
+  
+  
+  .add, #menu {
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.15); /* frosted overlay */
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
+ // border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.add:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+}
+
+  
+  .timestamp {
+    font-size: 8px;
+    font-weight: light;
+  }
+  </style>
+</head>
+<body>
+  <header>
+    School Fees Records
+   <button class="add" id="add">+</button>
+  </header>
+  <main>
+    <h2>Retrieve Records </h2>
+    <form id="filterForm">
+      <div class="summary details">
+        <label><input id="summary" type="checkbox" checked>Summary</label>
+        <label><input id="details" type="checkbox">Details</label>
+      </div>
+      <div>
+        <label for="student">Student ID</label>
+        <input type="text" id="student" placeholder="Enter Student ID">
+      </div>
+      <div>
+        <label for="term">Term</label>
+        <select id="term">
+          <option value="">All</option>
+          <option value="0">First Term</option>
+          <option value="1">Second Term</option>
+          <option value="2">Third Term</option>
+        </select>
+      </div>
+      <div>
+        <label for="year">Session</label>
+        <select id="year">
+          <option value="">All</option>
+          <!--option value="2024/2025">2024/2025</option>
+          <option value="2025/2026">2025/2026</option>
+          <option value="2026/2027">2026/2027</option-->
+        </select>
+      </div>
+      <div>
+        <label for="class">Class</label>
+        <select id="class">
+          <option value="">All</option>
+          <!--option value="JSS1">JSS1</option>
+          <option value="JSS2">JSS2</option>
+          <option value="JSS3">JSS3</option>
+          <option value="SS1">SS1</option>
+          <option value="SS2">SS2</option>
+          <option value="SS3">SS3</option-->
+        </select>
+      </div>
+      <div style="grid-column: span 2;">
+        <button type="submit">Retrieve</button>
+      </div>
+    </form>
+
+    <div class="table-container">
+    <table id="resultsTable">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Class</th>
+          <th>Session</th>
+          <th>Term</th>
+          <th>Cashier</th>
+          <th>Amount Paid</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="7" class="no-results">No records found</td></tr>
+      </tbody>
+    </table>      
+    </div>
+    <div id="total">
+      
+    </div>
+  </main>
+
+  <script src="../../config.js"></script>
+  <script src="../../batch2.js"></script>
+
+    <script type="module" defer>
+  /*
+    */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, sum, getAggregateFromServer, query, limit, where, getDocs, collection, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+  /*    const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};*/
+  
+  
+ // const schoolId="almadeenah";
+    
+      const app = initializeApp(firebaseConfig);
+     const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+    const db = getFirestore(app);
+
+const terms = ["first term", "second term", "third term"];
+
+  add.onclick = e=>{
+    window.location.href = "index.html";
+  }
+  var session;
+  let sessionsRef = doc(db, schoolId, "sessions");
+  //let studentsRef = doc(db, schoolId, "classes");
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sessions= sessions.sort((a, b)=>b.no - a.no);
+    //sessionLabel.innerText =terms[sessions[0].term] + ", "+ sessions[0].year;
+    sessions.forEach(session=>{
+      let opt = new Option(session.year);
+      //opt.value = sessionKey(session);
+      year.append(opt);
+    });
+          
+    
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+ 
+    let sectionRef = doc(db, schoolId, "section");
+  let sections = (await getDoc(sectionRef)).data();
+  
+  
+  //const classSection = {};
+ // classSection.get = cls=>classSection[cls.toLowerCase()];
+  let classSelect = document.getElementById("class");
+  Object.keys(sections)
+  .forEach(sectK=>{
+    let section = sections[sectK];
+    let classes = section.classes;
+    console.log(classes);
+    classes.forEach(cls=>{
+      const opt = new Option(cls);
+      classSelect.append(opt);
+    })
+  })   
+
+    const form = document.getElementById("filterForm");
+    const resultsTable = document.querySelector("#resultsTable tbody");
+
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const student = document.getElementById("student").value.trim();
+      const term = document.getElementById("term").value;
+      const year = document.getElementById("year").value;
+      const className = document.getElementById("class").value;
+      const summary = document.getElementById("summary").checked;
+      const details = document.getElementById("details").checked;
+      console.log(!!summary, !!details)
+
+      
+      resultsTable.innerHTML = "";
+      
+      const filtered = await getFees({student, term, year, className})
+      if (filtered.length === 0) {
+        resultsTable.innerHTML = `<tr><td colspan="7" class="no-results">No records found</td></tr>`;
+        return;
+      }
+      let sum = 0;
+      filtered.forEach(fee => {
+        const row = `
+          <tr>
+            <td>${fee.student}</td>
+            <td>${fee.class}</td>
+            <td>${fee.year}</td>
+            <td>${terms[fee.term]}</td>
+            <td>${fee.cashier.name}</td>
+            <td>${fee.amount}</td>
+            <td class="timestamp">${fee.timestamp.toDate()}</td>
+          </tr>
+        `;
+        resultsTable.innerHTML += row;
+        sum +=Number(fee.amount)??0;
+      });
+      total.innerHTML = "Total = ₦"+sum;
+    });
+  
+  async function getFees({ student, term, year, className }) {
+  let q = collection(db, schoolId, "db", "fees");
+  const conditions = [];
+  if (student) conditions.push(where("student", "==", student));
+  if (term) conditions.push(where("term", "==", term));
+  if (year) conditions.push(where("year", "==", year));
+  if (className) conditions.push(where("class", "==", className.toLowerCase()));
+  q = query(q, ...conditions);
+
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+  
+  function timestampTo12Hour(timestamp) {
+  if (!timestamp) return "";
+  
+  const date = timestamp.toDate(); // Convert Firestore Timestamp to JS Date
+  const options = {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  };
+  return date.toLocaleString("en-US", options);
+}
+  </script>
+</body>
+</html>

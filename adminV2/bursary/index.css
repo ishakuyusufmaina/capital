@@ -1,0 +1,428 @@
+   * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #34495e;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1.2rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+
+    .button, .link-button {
+      display: block;
+      text-align: center;
+      background-color: #3498db;
+      color: white;
+      text-decoration: none;
+      padding: 0.75rem;
+      border-radius: 10px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+
+    .button:hover, .link-button:hover {
+      background-color: #2980b9;
+    }
+
+    .results {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border: 1px dashed #ccc;
+      border-radius: 10px;
+      background: #fafafa;
+      display: none;
+    }
+
+    .results h3 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 1rem;
+      }
+    }
+  
+  
+  
+  .button {
+  position: relative;
+  padding-right: 2.5em; /* space for spinner */
+}
+
+/* Base spinner style (invisible by default) */
+.button .spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid transparent;
+  border-top-color: white;
+  border-radius: 50%;
+  animation: none;
+  position: absolute;
+  right: 0.75em;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* When button has .loading class, spinner spins and is visible */
+.button.loading .spinner {
+  opacity: 1;
+  animation: spin 0.6s linear infinite;
+}
+
+/* Spin keyframes */
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+  
+  
+  #resultsContent {
+  max-width: 600px;
+  margin: auto;
+  padding: 1rem;
+}
+  
+  .resultElm {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+  background: #fdfdfd;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: background 0.2s ease;
+  flex-wrap: wrap;
+    
+}
+
+.resultElm:hover {
+  background: #f0f8ff;
+}
+
+.studentPic {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  flex-shrink: 0;
+}
+
+.studentInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  flex-grow: 1;
+}
+
+.studentName {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #333;
+  word-wrap: break-word;
+}
+
+.studentClass {
+  font-size: 0.95rem;
+  color: #666;
+  word-wrap: break-word;
+}
+
+@media (max-width: 480px) {
+  .resultElm {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .studentPic {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0.5rem;
+  }
+
+  .studentName {
+    font-size: 1rem;
+  }
+
+  .studentClass {
+    font-size: 0.9rem;
+  }
+}
+  
+  img.logo {
+    height: 70px;
+    width: 70px;
+    display: inline-block;
+    border-radius: 50%;
+    position: absolute;
+    top: calc(-70px/2);
+    left: calc(50% - 70px/2);
+  }
+   * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #34495e;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1.2rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+
+    .button, .link-button {
+      display: block;
+      text-align: center;
+      background-color: #3498db;
+      color: white;
+      text-decoration: none;
+      padding: 0.75rem;
+      border-radius: 10px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+
+    .button:hover, .link-button:hover {
+      background-color: #2980b9;
+    }
+
+    .results {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border: 1px dashed #ccc;
+      border-radius: 10px;
+      background: #fafafa;
+      display: none;
+    }
+
+    .results h3 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 1rem;
+      }
+    }
+  
+  
+  
+  .button {
+  position: relative;
+  padding-right: 2.5em; /* space for spinner */
+}
+
+/* Base spinner style (invisible by default) */
+.button .spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid transparent;
+  border-top-color: white;
+  border-radius: 50%;
+  animation: none;
+  position: absolute;
+  right: 0.75em;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* When button has .loading class, spinner spins and is visible */
+.button.loading .spinner {
+  opacity: 1;
+  animation: spin 0.6s linear infinite;
+}
+
+/* Spin keyframes */
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+  
+  
+  #resultsContent {
+  max-width: 600px;
+  margin: auto;
+  padding: 1rem;
+}
+  
+  .resultElm {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+  background: #fdfdfd;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: background 0.2s ease;
+  flex-wrap: wrap;
+    
+}
+
+.resultElm:hover {
+  background: #f0f8ff;
+}
+
+.studentPic {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  flex-shrink: 0;
+}
+
+.studentInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  flex-grow: 1;
+}
+
+.studentName {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #333;
+  word-wrap: break-word;
+}
+
+.studentClass {
+  font-size: 0.95rem;
+  color: #666;
+  word-wrap: break-word;
+}
+
+@media (max-width: 480px) {
+  .resultElm {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .studentPic {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0.5rem;
+  }
+
+  .studentName {
+    font-size: 1rem;
+  }
+
+  .studentClass {
+    font-size: 0.9rem;
+  }
+}
+  
+  img.logo {
+    height: 70px;
+    width: 70px;
+    display: inline-block;
+    border-radius: 50%;
+    position: absolute;
+    top: calc(-70px/2);
+    left: calc(50% - 70px/2);
+  }
+  
+

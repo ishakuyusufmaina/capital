@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Defaulters Checker</title>
+  <script src="../../config.js"></script>
+  <script src="../../batch2.js"></script>
+  <script src="utility.js"></script>
+  <script src="feesrule.js"></script>
+
+  <script type="module" defer>
+  /*
+    */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, sum, getAggregateFromServer, query, limit, where, getDocs, collection, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+  //    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    // TODO: replace with your config
+  //  import { firebaseConfig } from "../config.js";
+
+     const app = initializeApp(firebaseConfig);
+    const paybook = initializeApp(paybookConfig, "paybook");
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const paydb = getFirestore(paybook);
+  
+  let sectionRef = doc(db, schoolId, "section");
+  let sections = (await getDoc(sectionRef)).data();
+
+  
+  const terms = ["first term", "second term", "third term"];
+  var session;
+  let sessionsRef = doc(db, schoolId, "sessions");
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sessions= sessions.sort((a, b)=>b.no - a.no);
+     sessions.forEach(session=>{
+      let opt = new Option(session.year +', '+ terms[session.term].toUpperCase());
+      opt.value = sessionKey(session);
+      sessionSelect.append(opt);
+    });
+    session = sessions[0];
+    sessionSelect.value = sessionKey(session);
+    sessionSelect.onchange = _=>{
+      let i = _.target.selectedIndex;
+      if (i) session = sessions[i-1];
+      
+    }
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+
+    async function checkDefaulters() {
+      const className = document.getElementById("classSelect").value.trim();
+      const threshold = parseFloat(document.getElementById("thresholdInput").value);
+
+      if (!className || isNaN(threshold)) {
+        alert("Please select a class and enter a valid threshold.");
+        return;
+      }
+      
+      
+      const feesRuleRef = doc(db, schoolId, "payments", "rules", sessionSelect.value);
+      const rulesDoc = await getDoc(feesRuleRef);
+    //  console.log(JSON.stringify(sessDoc.data()));
+    
+      if (!rulesDoc.exists()) {
+        alert("Fees rule not set");
+        return;
+      }
+      const rules = rulesDoc.data().rules;
+  
+
+      // Query students by class
+      const studentsSnap = await getDocs(query(collection(db, schoolId, "db", "students"), where("class", "==", className.toLowerCase())));
+      const students = studentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // Query fees by class
+      console.log(className.toLowerCase(), schoolId, session.term);
+      const feesSnap = await getDocs(query(collection(paydb, "payments"), where("schoolId", "==", schoolId), where("session", "==", session.year.replaceAll(" ", "")), where("term", "==", Number(session.term)), where("class", "==", className.toLowerCase().trim())));
+      const fees = {};
+      feesSnap.forEach(doc => {
+        const data = doc.data();
+        data.studentId = data.studentId.replaceAll("_", "/");
+        fees[data.studentId]??= []; // map by studentId
+        
+        fees[data.studentId].push(data);
+      //  fees[data.student].amount??= 0;
+        console.log(data.studentId, data.amount);
+        
+        //fees[data.student].amount +=data.amount;
+       // console.log(data.student, fees[data.student].amount);
+      });
+
+      // Build results
+      const results = [];
+      students.forEach(stu => {
+        let amount = 0;
+        let due = 0;
+      console.log(stu.id);
+        fees[stu.id]??=[{amount, due}];
+        
+        stu.section = getSectionByClass(stu.class, sections);
+       let stdRules = getApplicableRules(stu, rules);
+    evaluateRules(priorityRule, stdRules);
+    let rule = getAppliedRule(stdRules)??{amount: 0};
+    let dueFee = Number(rule.amount);
+        console.log(rule.amount, JSON.stringify(rule));
+        fees[stu.id].due = rule.amount - fees[stu.id].amount;
+        
+        fees[stu.id].forEach(data=> {
+          amount +=data.amount;
+          due = rule.amount;
+         // console.log(amount);
+        });
+        const feeObj = {amount, due} //fees[stu.id] || { amount: 0, due: 0 };
+        const amountDue = feeObj.due || 0;
+        const amountPaid = feeObj.amount || 0;
+
+        const percent = amountDue > 0 ? (amountPaid / dueFee) * 100 : 0;
+        const isDefaulter = percent < threshold;
+
+        results.push({
+          name: stu.name,
+          class: stu.class,
+          amountPaid,
+          amountDue,
+          percent: percent.toFixed(1),
+          defaulter: isDefaulter
+        });
+      });
+      results.sort((a, b)=> b.amountPaid - a.amountPaid);
+      renderResults(results);
+    }
+
+    function renderResults(results) {
+      const container = document.getElementById("results");
+      container.innerHTML = "";
+       
+
+      if (results.length === 0) {
+        container.innerHTML = "<p>No students found for this class.</p>";
+        return;
+      }
+
+      const table = document.createElement("table");
+      table.className = "result-table";
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Class</th>
+            <th>Amount Paid</th>
+            <th>Amount Due</th>
+            <th>Percent (%)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${results.map(r => `
+            <tr class="${r.defaulter ? 'defaulter' : 'ok'}">
+              <td>${r.name}</td>
+              <td>${r.class}</td>
+              <td>${r.amountPaid}</td>
+              <td>${r.amountDue}</td>
+              <td>${r.percent}</td>
+              <td>${r.defaulter ? 'Defaulter' : 'OK'}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      `;
+      container.appendChild(table);
+    }
+
+    window.checkDefaulters = checkDefaulters;
+//  let sections = (await getDoc(doc(db, schoolId, "section"))).data();
+  for (const sectId in sections){
+    let section = sections[sectId];
+    section.classes.forEach(cls=>{
+      let opt = new Option(cls);
+      classSelect.append(opt);
+    })
+  }
+  
+  window.getSectionByClass = getSectionByClass;
+    function getSectionByClass(cls, sections){
+     let section = null;
+     for (const sect in sections){    
+       let classes = sections[sect].classes.map(c=>key(c).toLowerCase())
+       console.log(classes, cls);
+       if (classes.includes(key(cls).toLowerCase())) {
+         section = sect;   
+       }
+     } 
+     return section
+  }
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 1rem;
+      background: #f8f9fa;
+    }
+    .card {
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 700px;
+      margin: auto;
+      overflow: auto;
+    }
+    label {
+      display: block;
+      margin: 0.5rem 0 0.25rem;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 1rem;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      
+    }
+    .result-table th, .result-table td {
+      border: 1px solid #ddd;
+      padding: 0.5rem;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .defaulter {
+      background: #ffe5e5;
+    }
+    .ok {
+      background: #e8fce8;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Defaulter Checker</h2>
+    <select id="sessionSelect">
+      <option value="">-session-</option>
+    </select>
+    <label for="classSelect">Class</label>
+    <select id="classSelect">
+      <option value="">-class select-</option>
+    </select>
+
+    <label for="thresholdInput">Threshold (%)</label>
+    <input id="thresholdInput" type="number" min="0" max="100" value="100" />
+
+    <button onclick="checkDefaulters()">Check Defaulters</button>
+    <div id="results"></div>
+  </div>
+  
+ 
+</body>
+</html>

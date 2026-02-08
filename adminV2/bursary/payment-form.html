@@ -1,0 +1,237 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Payment Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }.card {
+  background: #fff;
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.field {
+  margin-bottom: 14px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+pre {
+  margin-top: 16px;
+  background: #f1f5f9;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+  
+  #studentName {
+    text-transform: uppercase;
+  }
+
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Payment Submission</h2><form id="paymentForm">
+  <div class="field">
+    <label for="studentId">Student ID</label>
+    <input type="text" id="studentId" required />
+  </div>
+  
+  <div class="field">
+    <label for="studentName">Student Name</label>
+    <input type="text" disabled id="studentName" required />
+  </div>
+
+  <div class="field">
+    <label for="class">Class</label>
+    <select id="class" required>
+      <option value="">Select class</option>
+      <option value="Primary 1">Primary 1</option>
+      <option value="Primary 2">Primary 2</option>
+      <option value="Primary 3">Primary 3</option>
+      <option value="JSS 1">JSS 1</option>
+      <option value="JSS 2">JSS 2</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="session">Session</label>
+    <select id="session" required>
+      <option value="">Select session</option>
+      <option value="2023/2024">2023/2024</option>
+      <option value="2024/2025">2024/2025</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="term">Term</label>
+    <select id="term" required>
+      <option value="">Select term</option>
+      <option value="0">First Term</option>
+      <option value="1">Second Term</option>
+      <option value="2">Third Term</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="amount">Amount</label>
+    <input type="number" id="amount" min="0" required />
+  </div>
+
+  <button type="submit">Submit Payment</button>
+</form>
+
+<pre id="output"></pre>
+
+  </div>  
+  <script src="../../config.js"></script>
+  <script src="../../batch2.js"></script>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, serverTimestamp, collection, doc, addDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+   
+  const app = initializeApp(firebaseConfig);
+    const paybook = initializeApp(paybookConfig, "paybook");
+ const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const sdb = getFirestore(app);
+  const db = getFirestore(paybook);
+
+  
+  const classInp = document.getElementById('class');
+  classInp.innerHTML = "<option value=''>-class-</option>";
+  let sectDoc = await getDoc(doc(sdb, schoolId, "section"));
+  if (sectDoc.exists()){
+    let sections = sectDoc.data();
+    for (const sectId in sections){
+      let section = sections[sectId];
+      let classes = section.classes;
+      classes.forEach(cls=>{
+        let opt = new Option(cls);
+        opt.value = cls.toLowerCase();
+        classInp.append(opt);
+      })
+    }
+  }
+  
+  
+  const sessionInp = document.getElementById('session');
+  sessionInp.innerHTML = "";
+  let sessDoc = await getDoc(doc(sdb, schoolId, "sessions"));
+  if (sessDoc.exists()){
+    let sessions = sessDoc.data().sessions;
+    sessions.forEach(session=>{
+      let opt = new Option(session.year);
+      opt.value = session.year.trim().replaceAll(" ", "");
+      sessionInp.append(opt);
+    })
+  }
+  
+    const form = document.getElementById('paymentForm');
+    const output = document.getElementById('output');
+
+  var student;
+  const nameInp = document.getElementById('studentName');
+  const idInp = document.getElementById('studentId');
+  idInp.onchange = async e=>{
+    let id = e.target.value;
+    id = id.replaceAll("/", "_").trim().replaceAll(" ", "");
+    output.textContent = "";
+    if (!id) return;
+    let stdDoc = await getDoc(doc(sdb, schoolId, "db", "students", id));
+    if (stdDoc.exists()){
+      student = stdDoc.data();
+      nameInp.value = student.name;
+      classInp.value = student.class;
+    } else {
+      output.textContent = "No student found with the given id: "+id;
+    }
+  }
+  
+  const params = new URLSearchParams(window.location.search);
+  const stdId= params.get("id");
+  if (stdId){
+    idInp.value = stdId;
+    idInp.dispatchEvent(new Event("change"));
+  }
+  
+  
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payment = {
+        studentId: idInp.value.replaceAll("/", "_"),
+        studentName: nameInp.value.toLowerCase().trim(),
+        class: classInp.value,
+        session: sessionInp.value,
+        term: Number(document.getElementById('term').value),
+        amount: Number(document.getElementById('amount').value),
+        timestamp: serverTimestamp(),
+        schoolId,
+        recoder: auth.currentUser.email
+      };
+
+      //output.textContent = JSON.stringify(payment, null, 2);
+      output.textContent = "submitting..";
+      let payRef = collection(db, "payments");
+      await addDoc(payRef, payment);
+      form.reset();
+      output.textContent = "submitted";
+      // You can send `payment` to a backend or Firebase here
+      console.log(payment);
+    });
+  </script></body>
+</html>

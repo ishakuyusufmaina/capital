@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>School Payment Receipt</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      border: 1px solid black;
+      border-radius: 20px;
+      //background: teal; //url('../../logo.jpg') repeat center center;
+      background-size: contain;
+      //opacity: 9;
+      position: relative;
+
+    }
+
+    .receipt {
+      background-color: #fff;
+      width: 420px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      padding: 25px 30px;
+      position: relative;
+      overflow: hidden;
+      //opacity: 1;
+     // border: 1px solid black;
+      box-sizing: border-box;
+    }
+  
+
+
+    /* Watermark logo */
+    .receipt::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 300px;
+      height: 300px;
+      background: url('../../logo.jpg') repeat center center;
+      background-size: 50px; //contain;
+      opacity: 0.07;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    /* Decorative header */
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 12px;
+      background:#0B2950;// linear-gradient(90deg, #8B4513, #A0522D);
+      color: gold; //white;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      box-shadow: inset 0 -3px 6px rgba(0,0,0,0.15);
+      position: relative;
+      z-index: 2;
+    }
+  header{
+  color: white;
+  text-shadow: 2px 2px 0px red;// #ffcc00, 
+               4px 4px 0px green; //#00ff99, 
+               6px 6px 0px red; //#0066ff;
+}
+
+
+    h2 {
+      text-align: center;
+      margin: 15px 0;
+      font-size: 20px;
+      letter-spacing: 1px;
+      color: #4b2e20;
+      border-bottom: 2px dashed #c9b7a7;
+      padding-bottom: 5px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .details {
+      margin: 12px 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .details span {
+      display: block;
+      font-size: 13px;
+      color: #6b4a3a;
+    }
+
+    .details strong {
+      font-weight: 600;
+      color: #2c1c13;
+      font-size: 15px;
+    }
+
+    .highlight {
+      background: #0B2950;//linear-gradient(90deg, #A0522D, #8B4513);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      text-align: center;
+      margin: 15px 0;
+      font-size: 17px;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      position: relative;
+      z-index: 2;
+    }
+
+    .line {
+      border-top: 2px dashed #c9b7a7;
+      margin: 15px 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #5a3927;
+      font-style: italic;
+      position: relative;
+      z-index: 2;
+    }
+
+    .footer::before {
+      content: "✔ ";
+      color: #8B4513;
+      font-weight: bold;
+    }
+
+  image {
+     display: block;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 4000000;
+    
+  }
+    /* Print Styling */
+    @media print {
+      body {
+        background: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .receipt {
+        box-shadow: none;  
+        page-break-inside: avoid;
+      }
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      @page {
+        size: auto;
+        margin: 12mm;
+      }
+    }
+  /* Fix print margins */
+@page {
+  size: auto;
+  margin: 12mm;
+}
+
+/* Print Styling */
+@media print {
+  body {
+    background: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .receipt {
+    box-shadow: none;  
+    page-break-inside: avoid;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+  #logo {
+    height: 50px;
+    width: 50px;
+    display: inline-block;
+    position: absolute;
+    top: -40px;
+    left: calc(50% - 25px);
+    z-index: 10000000000;
+    border-radius: 50%;
+  }
+  hr {
+
+  margin: 10px 0;
+  border: 0;
+  height: 1px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(200, 0, 0, 0.75), rgba(0, 0, 0, 0));
+z-index: 102;
+}
+
+  
+  </style>
+</head>
+<body>
+  
+  <div id="receipt" class="receipt">
+
+    <hr>
+    
+    <div class="header">
+      <img id="logo" src="../../../logo.jpg">
+      Al-madinah Int'l Model Schools</div>
+    <h2>School Fee Receipt</h2>
+
+    <div class="details">
+      <span>Student Name:</span>
+      <strong id="name">Ahmad Isa</strong>
+    </div>
+    <div class="details">
+      <span>Student ID:</span>
+      <strong id="id">26/02/46</strong>
+    </div>
+    <div class="details">
+      <span>Class:</span>
+      <strong id="class">SS2</strong>
+    </div>
+    <div class="details">
+      <span>Term:</span>
+      <strong id="term">1st Term</strong>
+    </div>
+    <div class="details">
+      <span id="session">Session:</span>
+      <strong>2025/2026</strong>
+    </div>
+
+    <div id="amountPaid" class="highlight">
+      Amount Paid: ₦25,000
+    </div>
+    <div class="details">
+      <span>Outstanding Balance:</span>
+      <strong id="outstanding">₦5,000</strong>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="details">
+      <span>Date & Time:</span>
+      <strong id="datetime">29 Aug 2025, 10:30 AM</strong>
+    </div>
+    <div class="details">
+      <span>Burser:</span>
+      <strong id="burser">Fatima Mustapha</strong>
+    </div>
+    <div class="details">
+      <span>Payment Method:</span>
+      <strong id="method">Bank Transfer</strong>
+    </div>
+    <div class="details">
+      <span>RR Number:</span>
+      <strong>2025202602462017001</strong>
+    </div>
+
+    <div class="footer">
+      Thank you for your payment. Please keep this receipt safe.
+    </div>
+  </div>
+  
+  
+  
+  <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script>
+  //let rec = document.querySelector(".receipt");
+//  convertHtmlToImage("receipt");
+    async function convertHtmlToImage(elementId) {
+        const element = document.getElementById(elementId);
+        if (!element) {
+            console.error('Element not found:', elementId);
+            return;
+        }
+
+        try {
+            const canvas = await html2canvas(element, {
+                // Optional configurations, e.g., allowTaint for cross-origin images
+                // allowTaint: true,
+                // useCORS: true,
+            });
+
+            // Get the image data URL (e.g., PNG)
+            const imageDataUrl = canvas.toDataURL('image/png');
+
+           element.style.display = "none";
+            // You can now use imageDataUrl, for example, to display the image or download it
+            const img = new Image();
+            img.src = imageDataUrl;
+            document.body.appendChild(img); // Appends the image to the body
+
+            // To download the image:
+             const link = document.createElement('a');
+             link.href = imageDataUrl;
+             
+             //link.download = 'my-html-element.png';
+             //link.click();
+
+        } catch (error) {
+          alert(error.message);
+            console.error('Error converting HTML to image:', error);
+        }
+    }
+
+    // Example usage:
+    // Assuming you have an HTML element with id="myElementToCapture"
+    // convertHtmlToImage('myElementToCapture');
+  </script>
+</body>
+</html>

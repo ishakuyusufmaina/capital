@@ -1,0 +1,63 @@
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .rule {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    select, input {
+      padding: 6px;
+      flex: 1;
+    }
+
+    button {
+      padding: 6px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      border: none;
+    }
+
+    .add {
+      background: #1677ff;
+      color: white;
+    }
+
+    .remove {
+      background: #ff4d4f;
+      color: white;
+    }
+
+    .rule-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #dcdcdc;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+

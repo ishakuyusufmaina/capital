@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rules Builder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="rule.css">
+
+  <style>
+
+  </style>
+</head>
+<body>
+<select id="sessionSelect">
+      <option value="">-session-</option>
+</select>
+<div class="container">
+  <h2>Rules Builder</h2>
+
+  <div id="rules"></div>
+
+  <button class="add" id="addRuleBtn" onclick="addRule()">+ Add Rule</button>
+
+  <!--pre id="output"></pre -->
+  
+  <!--div class="container">
+    <h2>Rule Tester</h2>
+    <div id="rules">
+      <input id="stdId" placeholder="id">
+      <button class="add" id="testBtn">Test</button>
+    </div>
+    <pre id="testOutput"></pre >
+    
+  </div -->
+  <button class="add" id="saveBtn">Save</button>
+
+</div>
+
+  <script src="../../config.js"></script>
+  <script src="../../batch2.js"></script>
+  <script src="utility.js"></script>
+  <script type="module" defer>
+  /*
+    */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, onSnapshot, sum, getAggregateFromServer, query, limit, where, getDocs, collection, doc, setDoc, getDoc, runTransaction} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+       
+  
+  
+ // const schoolId="almadeenah";
+    
+      const app = initializeApp(firebaseConfig);
+   
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  
+  
+    let user = await new Promise(resolve=>
+  onAuthStateChanged(auth, u=> resolve(u))
+  );
+  let id = user.email.replace(/@.*/, "");
+  console.log(id);
+  
+  
+    var teachers;
+     let teachersRef = doc(db, schoolId, "teachers");
+    let teachersDoc = await getDoc(teachersRef);
+  teachers = teachersDoc.exists()? teachersDoc.data() : {}
+    let teacher = teachers[id];
+
+  
+  
+const terms = ["first term", "second term", "third term"];
+  var session;
+  let sessionsRef = doc(db, schoolId, "sessions");
+  let sessionsDoc = await getDoc(sessionsRef);
+  if (sessionsDoc.exists()){
+    let sessions =  sessionsDoc.data().sessions;
+     sessions= sessions.sort((a, b)=>b.no - a.no);
+     sessions.forEach(session=>{
+      let opt = new Option(session.year +', '+ terms[session.term].toUpperCase());
+      opt.value = sessionKey(session);
+      sessionSelect.append(opt);
+    });
+    session = sessions[0];
+    sessionSelect.value = sessionKey(session);
+    sessionSelect.onchange = _=>{
+      let i = _.target.selectedIndex;
+      if (i) session = sessions[i-1];
+      
+    }
+    sessionSelect.disabled = true;
+      //sessionSelect.firstChild.nextElementSibling.selected = true;
+  }
+  
+  
+  const feesRuleRef = doc(db, schoolId, "payments", "rules", sessionSelect.value);
+  var rulesDoc = await getDoc(feesRuleRef);
+  
+  const selectorOptions = {
+    section: [],
+    class: [],
+    regStatus: ['returning', 'new'],
+    id: null,
+    parent: null
+  };
+  
+  const priorityRule = {
+    section: [0,0,0,0,1],
+    class: [0,0,0,1,0],
+    regStatus: [0,0,1,0,0],
+    parent: [0,1,0,0,0],
+    id: [1,0,0,0,0]
+  }
+  
+  
+  let rulesObj = rulesDoc.exists()? rulesDoc.data() : {};
+  rulesObj.rules ??=[];
+  console.log(JSON.stringify(rulesObj.rules))
+  var gRules = rulesObj.rules;
+    const student = {
+    parent: "123",
+    id: "123",
+    section: "sss",
+    class: "sss 1a",
+    regStatus: "returning",
+  }
+  
+  /*testBtn.onclick = e=>{
+    if (!gRules) return;
+    let stdRules = getApplicableRules(student, gRules);
+    evaluateRules(priorityRule, stdRules);
+    let rule = getAppliedRule(stdRules);
+    testOutput.textContent = JSON.stringify(rule, null, 2);
+  }*/
+  
+  
+    saveBtn.onclick = async e=>{
+      if (!gRules) return;
+      await setDoc(feesRuleRef, {rules: gRules});
+      alert("Saved");
+    }
+  /*
+  const rules = [
+  {
+    ...
+    selectors: [
+    {class, section}
+    ]
+  },  
+  {
+    ...
+    selectors: [
+    {parent, section}
+    ]
+  },
+  
+  ] */
+  
+  
+  const flattenSum = arr =>
+  arr.reduce((acc, row) =>
+    row.map((v, i) => (acc[i] ?? 0) + v)
+  , []);
+
+//console.log(flattenSum(Object.values(priorityRule)));
+  
+//flattenSum([[a, b], [c, d]]); // [a + c, b + d]
+  
+  function compareSpecificity(A, B) {
+  const len = Math.max(A.length, B.length);
+
+  for (let i = 0; i < len; i++) {
+    const a = A[i] ?? 0;
+    const b = B[i] ?? 0;
+
+    if (a !== b) {
+      return a > b ? 1 : -1;
+    }
+  }
+
+  return 0; // same specificity
+}
+  
+  function sortRules(rules) {
+  rules.sort((a, b) => {
+    return compareSpecificity(b.value, a.value);
+  });
+}
+  
+  function getAppliedRule(rules){
+    sortRules(rules);
+    return rules[0];
+  }
+  function evaluateRules(priorityRule, rules){
+    rules.forEach(rule=>{
+      let {selectors, amount} = rule;
+      let subPriorityRule = [];
+      selectors.forEach(selector=>{
+        let prop = Object.keys(selector)[0];
+        subPriorityRule.push(priorityRule[prop]);        
+      });
+      rule.priorityRule = subPriorityRule;
+      rule.value = flattenSum(Object.values(subPriorityRule));
+    })
+  }
+  function getApplicableRules(student, rules){
+    const appliedRules = rules
+    .filter(rule=>{
+      return (ruleApplies(rule))
+    });
+    return appliedRules;
+    function ruleApplies(rule){
+      let matchedList = rule.selectors
+      .filter(selector=>{
+        let [prop, value] = [Object.keys(selector)[0], Object.values(selector)[0]]
+        return student[prop] == value;        
+      });
+      return matchedList.length == rule.selectors.length;
+    }
+  }
+  
+  let sectionRef = doc(db, schoolId, "section");
+  //let sections = (await getDoc(sectionRef)).data();
+  const sections = (await getDoc(sectionRef))?.data?.() ?? {};
+  let sects = teacher.adminFunctions.manageFeesRule.resources;
+  //Object.keys(sections)
+  sects.forEach(sectK=>{
+    let section = sections[sectK];
+    let classes = section.classes;
+   selectorOptions.class = selectorOptions.class.concat(classes);
+    selectorOptions.section.push(sectK);
+   // console.log(classes);
+    
+  })
+
+  const rulesContainer = document.getElementById('rules');
+//  const output = document.getElementById('output');
+
+  function addRule(ruleData = null) {
+  const ruleEl = document.createElement('div');
+  ruleEl.className = 'rule';
+
+  ruleEl.innerHTML = `
+    <div class="rule-header">
+      <strong>Rule</strong>
+      <button class="remove">Remove Rule</button>
+    </div>
+    
+    <div class="row">
+      <label style="flex:0.4;">Name</label>
+      <input type="text" class="name" placeholder="Enter name">
+    </div>
+    <div class="row">
+      <label style="flex:0.4;">Amount</label>
+      <input type="number" class="amount" placeholder="Enter amount">
+    </div>
+
+    <div class="selectors"></div>
+
+    <button class="add add-selector">+ Add Selector</button>
+  `;
+
+  const selectorsContainer = ruleEl.querySelector('.selectors');
+  const amountInput = ruleEl.querySelector('.amount');
+  const nameInput = ruleEl.querySelector('.name');
+
+  // Remove rule
+  ruleEl.querySelector('.remove').onclick = () => {
+    ruleEl.remove();
+    updateOutput();
+  };
+
+  // Amount change
+  amountInput.oninput = updateOutput;
+  nameInput.oninput = updateOutput;
+  
+  // Add selector button
+  ruleEl.querySelector('.add-selector').onclick = () => {
+    addSelector(selectorsContainer);
+  };
+
+  // 🔹 Hydrate from model
+  if (ruleData) {
+    amountInput.value = ruleData.amount ?? 0;
+    nameInput.value = ruleData.name ?? "";
+
+    (ruleData.selectors || []).forEach(sel => {
+      addSelector(selectorsContainer, sel);
+    });
+  }
+
+  rulesContainer.appendChild(ruleEl);
+  updateOutput();
+}
+
+  function addSelector(container, selectorData = null) {
+  const row = document.createElement('div');
+  row.className = 'row';
+
+  const propSelect = document.createElement('select');
+  Object.keys(selectorOptions).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    propSelect.appendChild(opt);
+  });
+
+  const valueContainer = document.createElement('div');
+  valueContainer.style.flex = 1;
+
+  const removeBtn = document.createElement('button');
+  removeBtn.textContent = '✕';
+  removeBtn.className = 'remove';
+  removeBtn.onclick = () => {
+    row.remove();
+    updateOutput();
+  };
+
+  propSelect.onchange = () => {
+    renderValueInput(propSelect.value, valueContainer);
+    updateOutput();
+  };
+
+  row.appendChild(propSelect);
+  row.appendChild(valueContainer);
+  row.appendChild(removeBtn);
+
+  container.appendChild(row);
+
+  // 🔹 Hydrate selector
+  if (selectorData) {
+    const prop = Object.keys(selectorData)[0];
+    const value = selectorData[prop];
+
+    propSelect.value = prop;
+    renderValueInput(prop, valueContainer);
+
+    const input = valueContainer.querySelector('input, select');
+    if (input) input.value = value;
+  } else {
+    renderValueInput(propSelect.value, valueContainer);
+  }
+
+  updateOutput();
+}
+
+  function renderValueInput(prop, container) {
+    container.innerHTML = '';
+
+    if (selectorOptions[prop]) {
+      const select = document.createElement('select');
+      selectorOptions[prop].forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+      });
+      select.onchange = updateOutput;
+      container.appendChild(select);
+    } else {
+      const input = document.createElement('input');
+      input.placeholder = `Enter ${prop}`;
+      input.oninput = updateOutput;
+      container.appendChild(input);
+    }
+  }
+
+  function updateOutput() {
+    const rules = [];
+
+    [...rulesContainer.children].forEach(ruleEl => {
+      const amount = Number(ruleEl.querySelector('.amount').value || 0);
+      const name = ruleEl.querySelector('.name').value || "";
+      const selectors = [];
+
+      ruleEl.querySelectorAll('.selectors .row').forEach(row => {
+        const prop = row.children[0].value;
+        const value = row.children[1].querySelector('input, select').value;
+        if (!selectors.find(r=>r[prop]==value))
+        selectors.push({ [prop]: value.trim().toLowerCase() });
+       
+      });
+
+      rules.push({ name, amount, selectors });
+    });
+    
+    gRules = rules;
+    //output.textContent = JSON.stringify(rules, null, 2);
+  }
+  
+    function key(token){
+      return token.replaceAll(" ","").replaceAll("/", "_").replaceAll(",", "").trim();
+    }
+  function sessionKey(session){
+      return key(session.year+"term"+session.term);
+    }
+  
+  addRuleBtn.onclick = addRule;
+  
+  
+  gRules.forEach(rule=> addRule(rule));
+
+</script>
+
+</body>
+</html>
