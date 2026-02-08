@@ -97,7 +97,7 @@
     <div id="date">Date: </div>
     <div id="session">Session: </div>
     <div id="clas">Class: </div>
-    <div id="subject">Subject: </div>
+    <div> <span id="subject">Subject:</span>  <input id="statusInp" disabled type="checkbox"> </div>
   </header>
 
   <div class="table-container">
@@ -114,7 +114,7 @@
     <tbody id="table-body"></tbody>
   </table>
   </div>
-  <button id="saveBtn">Save</button>
+  
   <script src="../../config.js"></script>
 
   <script type="module">
@@ -231,45 +231,9 @@ await  render();
       let studentsArr = Object.values(students).sort((a, b)=>a.name.trim().localeCompare(b.name.trim()));
       studentsArr.forEach(student=>present(student, table.insertRow()));  
       
-      
-      async function saveScores() {
-        const subjK = key(subj);
-        if (!subjK) return;
-        const clas = key(cls);
-        const session = key(ses.year + terms[ses.term]);
-        if (!(clas && session)) return null;
-        if (!Object.values(students).length) return;
-
-  const stdsRef = doc(db, schoolId, session, clas, "students");
-
-  await runTransaction(db, async (transaction) => {
-    // Optionally read existing data (if needed)
-    // const existing = await transaction.get(stdsRef);
-    let stdsDoc = await transaction.get(stdsRef);
-    let stds = stdsDoc.exists()? stdsDoc.data() : {};
-    // Write new data atomically
-    for (const stu in students){
-      console.log(stu, students[stu].id, subjK);
-      stds[stu].subjects??={};
-      stds[stu].subjects[subjK] = students[stu].subjects[subjK];
-    }
-     transaction.set(stdsRef, stds);
-  });
-
-   alert("Saved!");
-}
-  saveBtn.onclick= async e=>{
-    if (!students) return;
-    if (Object.values(students).length){
-    e.target.textContent = "Saving..";
-    await saveScores();
-    e.target.textContent = "Saved!";
-    setTimeout(_=>e.target.textContent = "Save", 1500);
-    }
-
-  }
-      
+           
       function present(student, row){
+        
         row.innerHTML = "";
         let id = row.insertCell();
         id.innerHTML = student.id;
@@ -279,6 +243,8 @@ await  render();
         student.subjects[subjK]??=[{}, {}, {}];
         student.subjects[subjK][termIndex]??={}
         let scores = student.subjects[subjK][termIndex];
+        statusInp.checked = !student.subjects[subjK][termIndex].inactive;
+
         let sum = 0;
         scores.exam??="-";
         scores.exam = String(scores.exam);
@@ -299,6 +265,7 @@ await  render();
             value="${subjScore}"
             inputmode="numeric"
             required
+            disabled
             />`;
           
          // console.log(asm.subtotal);
@@ -325,6 +292,7 @@ await  render();
             value="${scores.exam}"
             inputmode="numeric"
             required
+            disabled
             />`;
           
          // console.log(asm.subtotal);

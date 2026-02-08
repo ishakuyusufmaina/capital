@@ -343,9 +343,7 @@ let teachersRef = doc(db, schoolId, "teachers");
             loadElm.onclick = e=>{
               localStorage.setItem("class", cls);
               localStorage.setItem("subject", subj);
-              if (cls[0].toLowerCase().trim() == "s" || cls[0].toLowerCase().trim() == "j")
-              window.location.href = "scoreSheetSec.html";
-              else window.location.href = "scoreSheetv2.html";
+              window.location.href = "scoreSheetV2.html";
               
             }
             loadCont.append(loadElm);
