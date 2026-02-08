@@ -109,6 +109,11 @@
       <!--img id="studentPhoto" alt="Student Photo"-->
       <div class="student-details">
         <h2 id="studentName"></h2>
+        <hr>
+          <h3>
+          Section:
+          <span id="sectionElm"></span>
+        </h3>
         <label>
           Class:
           <select id="classSelect"></select>
@@ -127,14 +132,36 @@
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
   import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
- 
+ const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+}; 
+  
+  
+  const schoolId = "capital";
+  
   const app = initializeApp(studentsConfig);
+  const schApp = initializeApp(firebaseConfig, "school");
+  
   const analytics = getAnalytics(app);
   let id= window.localStorage.getItem("id") || "";
   id = id.replaceAll("/", "_");
   const db = getFirestore(app);
+  const schDb = getFirestore(schApp);
   const stdRef = doc(db, "students", id);
   let stdDoc = await getDoc(stdRef);
+  const student = stdDoc.data()
+  if (!student.religion){
+    let schStdDoc = await getDoc(doc(schDb, schoolId, "db", "students", id));
+    student.religion = schStdDoc.data().religion || "none";
+    await setDoc(stdRef, {religion: student.religion}, {merge: true});
+    console.log("Religion updated", student.religion);
+  }
   
   logout.onclick = e=>{
     window.localStorage.removeItem("id");
@@ -144,14 +171,18 @@
     // ---------------------------
     // Sample Data  25/26/1/261
     // ---------------------------
-    const student = stdDoc.data(); /*{
+ /*{
       name: "Aisha Bello",
       classes: ["JSS 1", "JSS 2", "JSS 3"],
       photoUrl: "https://via.placeholder.com/150"
     };*/
 
-    
-
+ let section = student.section;
+console.log(section);  
+  sectionElm.textContent = section.toUpperCase();
+let sectDoc = await getDoc(doc(db, "sections", section));
+section = sectDoc.exists()?  sectDoc.data() : {};
+  
     // ---------------------------
     // Render Student Info
     // ---------------------------
@@ -165,14 +196,16 @@
       option.textContent = cls;
       classSelect.appendChild(option);
     });
-
+  
+  const relDict = {"muslim": "islam", "christian": "christianity"};
+  
     // ---------------------------
     // Build Performance Table
     // ---------------------------
     function renderPerformanceTable(data) {
       if (!data.length) return;
 
-      const scoreHeaders = data[0].scores.map(s => s.name + `(${s.subtotal | "-"})`);
+      const scoreHeaders = data[0].scores.map(s => s.name + ` (${s.subtotal | "-"})`);
 
       let table = `<table>
         <thead>
@@ -182,23 +215,41 @@
       scoreHeaders.forEach(h => {
         table += `<th>${h}</th>`;
       });
+      
+      table += `<th>Exam</th>`;
 
       table += `<th>Total</th></tr>
         </thead>
         <tbody>`;
-
+      section.subjects ??=[];
+      let subjects = {};
+      
+      section.subjects.forEach(subj=>{
+        subjects[subj.name] = subj;
+        console.log(subj.name);
+      })
       data.forEach(subject => {
+        
+       if (!subjects[subject.name]) return;
+        let relMatching = relDict[subjects[subject.name].for.toLowerCase()];
+        console.log(relMatching, student.religion)
+        if (relMatching && relMatching!==student.religion.toLowerCase()) return;
+        if (!subjects[subject.name].active) return;
+        
         let total = 0;
-
+        
         table += `<tr>
           <td class="subject-name">${subject.name}</td>`;
+        total += Number(subject.exam.replace("-", 0));
 
         subject.scores.forEach(score => {
           total += Number(score.value.replace("-", 0));
+
+          total += Number(score.value.replace("-", 0));
           table += `<td>${score.value}</td>`;
         });
-
-        table += `<td><strong>${total}</strong></td>
+        table += `<td><strong>${subject.exam}</strong></td>
+        <td><strong>${total}</strong></td>
         </tr>`;
       });
 
@@ -247,12 +298,13 @@
     let name = perm.subject;    
     delete perm.subject;    
     console.log(JSON.stringify(perm));
-    console.log(JSON.stringify(standard));
+    let exam = perm.exam;
+    console.log(JSON.stringify(standard), exam);
     let scores;
     if (standard) 
     scores = standard.map(s=> ({name: s.name, value: perm[s.name.toLowerCase()], subtotal: s.subtotal}))
     else scores = Object.keys(perm).map(s=> ({name: s, value: perm[s]}))
-    performances.push({name, scores})
+    performances.push({name, scores, exam})
   }
    renderPerformanceTable(performances);
   
