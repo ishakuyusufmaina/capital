@@ -101,7 +101,7 @@
   
   let sectionRef = doc(db, schoolId, "section");
 let sectionDoc = await getDoc(sectionRef);
-
+var section;
   
  onAuthStateChanged(auth, async user=>{ 
        if (!user) return;
@@ -118,6 +118,11 @@ let sectionDoc = await getDoc(sectionRef);
                let classes = sections[key].classes;
                classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
                classSelect.append(optG);
+               classSelect.addEventListener("change", _=>{
+               if (!classes.includes(classSelect.value)) return;
+               section = key;
+               console.log(section);
+             })
            });
        }
        
