@@ -1,0 +1,164 @@
+    :root {
+      --primary: #4f8cff;
+      --primary-hover: #3b6fd9;
+      --bg: #121212;
+      --card: #1e1e1e;
+      --text: #ffffff;
+      --muted: #aaaaaa;
+      --border: #2a2a2a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+      position: relative;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* Form controls */
+    select, input[type="text"] {
+      padding: 0.6rem 0.8rem;
+      margin: 0.5rem 0.4rem 1rem 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--primary);
+    }
+
+    /* Buttons */
+    button, .scores {
+      display: inline-block;
+      margin: 1rem 0.4rem 0;
+      padding: 0.7rem 1.5rem;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:hover, .scores {
+      background: var(--primary-hover);
+    }
+    button:active, .scores {
+      transform: scale(0.97);
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background: var(--card);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    th {
+      background: #1a1a1a;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Passport image */
+    .passport img {
+      width: 90px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: #222;
+      padding: 2px;
+      transition: transform 0.2s;
+    }
+
+    .passport img:hover {
+      transform: scale(1.05);
+    }
+
+    /* Responsive table */
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead {
+        display: none;
+      }
+      tr {
+        margin-bottom: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--card);
+      }
+      td {
+        text-align: left;
+        border: none;
+        padding: 0.8rem;
+        position: relative;
+      }
+      td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 0.3rem;
+        font-size: 0.8rem;
+      }
+    }
+    
+    input[type='file']{
+        display: inline: block;
+        height:0;
+        width: 0;
+    }
+  .name {
+    border: 1px solid white;
+  }
+  
+  iframe {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    display: none;
+    left: 0;
+    top: 0;
+  }
+  iframe.show {
+    display: block;
+  }
+
