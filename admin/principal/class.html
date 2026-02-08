@@ -4,174 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>STUDENT</title>
-  <style>
-    :root {
-      --primary: #4f8cff;
-      --primary-hover: #3b6fd9;
-      --bg: #121212;
-      --card: #1e1e1e;
-      --text: #ffffff;
-      --muted: #aaaaaa;
-      --border: #2a2a2a;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      line-height: 1.6;
-      position: relative;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      font-size: 2rem;
-      font-weight: 600;
-      color: var(--primary);
-    }
-
-    /* Form controls */
-    select, input[type="text"] {
-      padding: 0.6rem 0.8rem;
-      margin: 0.5rem 0.4rem 1rem 0;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--card);
-      color: var(--text);
-      font-size: 0.95rem;
-      outline: none;
-      transition: border 0.2s;
-    }
-
-    select:focus, input[type="text"]:focus {
-      border-color: var(--primary);
-    }
-
-    /* Buttons */
-    button, .scores {
-      display: inline-block;
-      margin: 1rem 0.4rem 0;
-      padding: 0.7rem 1.5rem;
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-
-    button:hover, .scores {
-      background: var(--primary-hover);
-    }
-    button:active, .scores {
-      transform: scale(0.97);
-    }
-
-    /* Table */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-      background: var(--card);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    th, td {
-      padding: 12px 10px;
-      border-bottom: 1px solid var(--border);
-      text-align: center;
-      font-size: 0.95rem;
-    }
-
-    th {
-      background: #1a1a1a;
-      font-weight: 600;
-      color: var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    tr:hover td {
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    /* Passport image */
-    .passport img {
-      width: 90px;
-      height: 110px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 2px solid var(--border);
-      background: #222;
-      padding: 2px;
-      transition: transform 0.2s;
-    }
-
-    .passport img:hover {
-      transform: scale(1.05);
-    }
-
-    /* Responsive table */
-    @media (max-width: 768px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-      thead {
-        display: none;
-      }
-      tr {
-        margin-bottom: 1rem;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        overflow: hidden;
-        background: var(--card);
-      }
-      td {
-        text-align: left;
-        border: none;
-        padding: 0.8rem;
-        position: relative;
-      }
-      td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        text-transform: uppercase;
-        color: var(--muted);
-        display: block;
-        margin-bottom: 0.3rem;
-        font-size: 0.8rem;
-      }
-    }
-    
-    input[type='file']{
-        display: inline: block;
-        height:0;
-        width: 0;
-    }
-  .name {
-    border: 1px solid white;
-  }
-  
-  iframe {
-    position: fixed;
-    height: 100%;
-    width: 100%;
-    display: none;
-    left: 0;
-    top: 0;
-  }
-  iframe.show {
-    display: block;
-  }
-  </style>
+  <link rel="stylesheet" href="../styles/students.css">
 </head>
 <body>
-  <h1>Students</h1>
+  <h1 id="head">Students</h1>
   <div>
     <select id="sessionSelect">
       <option> -select session- </option>
@@ -197,8 +33,10 @@
 
   <button id="add">Add</button>
   <button id="saveBtn">Save</button>
-
+  <!--button id="init">Initilize Students</button-->
+  
   <iframe id="iframe"></iframe>
+  <script src="../../config.js"></script>
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
@@ -227,6 +65,11 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   const batch = writeBatch(db);
+  
+  const stdApp = initializeApp(studentsConfig, "std"); 
+  const stdDb = getFirestore(stdApp);
+  var stdBatch; 
+  
   let currentStudents = null;
     
     const terms = ["first term", "second term", "third term"];
@@ -247,22 +90,27 @@
       sessionSelect.appendChild(opt);
         opt.dataset.index = i;
         if (i==0){
-            opt.selected = true;           
+            opt.selected = true; 
+          
+            sessionIndex = session.term; 
         }
        
     });
-      sessionIndex = 0;
+      
       //sessionSelect.firstChild.nextElementSibling.selected = true;
   }
   
   
   let sectionRef = doc(db, schoolId, "section");
 let sectionDoc = await getDoc(sectionRef);
-
-  
+var section;
+  /*head.ondblclick = e=>{
+    stdBatch = writeBatch(stdDb);
+    init.click();
+  }*/
  onAuthStateChanged(auth, async user=>{ 
        if (!user) return;
-       let id = user.email.replace(/@.*/, "");
+      let id = user.email.replace(/@.*/, "");
       let teachers = (await getDoc(doc(db, schoolId, "teachers"))).data()
        let teacher = teachers[id];
        if (sectionDoc.exists()){
@@ -275,6 +123,11 @@ let sectionDoc = await getDoc(sectionRef);
                let classes = sections[key].classes;
                classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
                classSelect.append(optG);
+             classSelect.addEventListener("change", _=>{
+               if (!classes.includes(classSelect.value)) return;
+               section = key;
+               console.log(section);
+             })
            });
        }
        
@@ -317,17 +170,20 @@ let sectionDoc = await getDoc(sectionRef);
     </select>
     </td>
     <td class="scores">
-    Scores
+    PIN: ****
     </td> 
       `;
 
 
-     row.querySelector(".scores").ondblclick = async e=>{
+    let pinElm = row.querySelector(".scores");
+    pinElm.ondblclick = async e=>{
        if (!result.id) return;
-       result.class = classSelect.value;
-      // window.localStorage.setItem("student", JSON.stringify(result));
-    //   window.location.href = "results.html";
-     }
+       const stdRef = doc(stdDb, "students", result.id.replaceAll("/", "_"))
+       pinElm.innerHTML = "PIN: retrieving..";
+       let stdDoc = await getDoc(stdRef);
+       let std = stdDoc.data();       
+       pinElm.innerHTML = "PIN: "+ std.pin;
+      }
       container.appendChild(row);
       let psp = row.querySelector(".passport");
       let imgIn = psp.querySelector("input");
@@ -388,8 +244,8 @@ add.onclick = e=>{
     sn: table.children.length,
     name: "",
     gender: "",
-    religion: ""
-    
+    religion: "",
+    pin: generate4DigitInteger()
   }
   addRow(result);
     let lastN = Number(result.sn);
@@ -412,20 +268,27 @@ add.onclick = e=>{
     saveBtn.innerHTML = "saving..";
     saveBtn.disabled = true;
     await batch.commit();
+    stdBatch = writeBatch(stdDb);
     await runTransaction(db, async transaction=>{
       let stdsDoc = await transaction.get(stdsRef);
       let stds = stdsDoc.exists()? stdsDoc.data() : {};
+      
       for (const stdId in currentStudents){
         const localStd = currentStudents[stdId];
+        
         if (stds[stdId] && !isEqual(localStd, stds[stdId]) && stds[stdId].id){
           //alert();
          // return;
+         
          await transaction.update(doc(db, schoolId, "db", "students", stds[stdId].id.replaceAll("/", "_")), localStd);
+         updateStudent(localStd, stdBatch);
         }
       }
       await transaction.set(stdsRef, currentStudents);
+      await stdBatch.commit();
    });
-      await loadStudents();
+    await loadStudents();
+    
     saveBtn.innerHTML = "saved!";
     saveBtn.disabled = false;
     setTimeout(_=>saveBtn.innerHTML = "Save", 2000);
@@ -532,7 +395,7 @@ add.onclick = e=>{
           let student = currentStudents[id];
           if (!student.id/*!upgrade.upscaledClasses.includes(clas)*/){
          if (student.id) throw "Alread ided!";
-              let session = sessionsDoc.data().sessions.sort((a, b)=>b.no - a.no)[sessionIndex];
+              let session = sessionsDoc.data().sessions.sort((a, b)=>b.no - a.no)[0];
                let [y1, y2] = session.year.replaceAll(" ", "").split("/");
               let t = Number(session.term)+1;              
             await runTransaction(db, async transaction=>{
@@ -567,7 +430,8 @@ add.onclick = e=>{
                 await transaction.set(doc(db, schoolId, "db", "students", upStd.id.replaceAll("/", "_")), upStd);
                 await transaction.set(stdsRef, stds);
                 await transaction.set(doc(db, schoolId, key(session.year+terms[session.term])), {lastStudentId: lastId}, {merge:true});
-                //console.log(lastStdId);
+                await createStudent(upStd);
+              //console.log(lastStdId);
              }) 
           }
           addRow(student)
@@ -639,6 +503,93 @@ function isEqual(a, b) {
 //const data = await searchAndMatch("child.html");
 //console.log("Got:", data);
   
+ /* init.onclick = async e=>{
+    //console.log(sessionIndex);
+    let cls = classSelect.value;
+    let sections = sectionDoc.data();
+    let scoreSheetConfig = sections[section].scoreSheetConfig;
+    //assessment scale = asms
+    let asms = scoreSheetConfig.assessments; //??[{name: "CA", subtotal: 30}];
+    
+    for(const std in currentStudents){
+      let student = currentStudents[std];
+      student.subjects ??={};
+      let subjects = student.subjects;
+      let termPerformances = {};
+      for (const s in subjects){
+        let subj = subjects[s][sessionIndex];
+        //console.log(sessionIndex);
+        termPerformances[s] = subj;
+        console.log(JSON.stringify(subj))
+      }
+      termPerformances.asms = asms;
+      let info = {
+        name: student.name,
+        classes: arrayUnion(classSelect.value),
+        gender: student.gender,
+        picURL: student.picURL || "",    
+        id: student.id,
+        sessions: arrayUnion(sessionSelect.value.toLowerCase()),
+        section,
+        pin: generate4DigitInteger()
+      }
+      const stdRef = doc(stdDb, "students", student.id.replaceAll("/", "_"))
+      const perfRef = doc(stdDb, "students", student.id.replaceAll("/", "_"), "performances", key(sessionSelect.value))
+      stdBatch.set(stdRef, info,  {merge: true})
+      console.log(key(sessionSelect.value));
+      stdBatch.set(perfRef, termPerformances,  {merge: true});
+    }
+    await stdBatch.commit();
+    alert("Done");
+    
+    
+  }*/
+  
+  function generate4DigitInteger() {
+  return Math.floor(1000 + Math.random() * 9000);
+}
+
+  function updateStudent(student, batch){
+          let info = {
+        name: student.name,
+        classes: arrayUnion(classSelect.value),
+        gender: student.gender,
+        picURL: student.picURL || "",    
+        id: student.id,
+        sessions: arrayUnion(sessionSelect.value.toLowerCase()),
+        section
+      }
+     
+      const stdRef = doc(stdDb, "students", student.id.replaceAll("/", "_"))
+      const perfRef = doc(stdDb, "students", student.id.replaceAll("/", "_"), "performances", key(sessionSelect.value))
+      batch.set(stdRef, info,  {merge: true})
+      console.log(key(sessionSelect.value));
+      //stdBatch.set(perfRef, termPerformances,  {merge: true});
+    }
+  
+  async function createStudent(student){
+      let info = {
+        name: student.name,
+        classes: arrayUnion(classSelect.value),
+        gender: student.gender,
+        picURL: student.picURL || "",    
+        id: student.id,
+        sessions: arrayUnion(sessionSelect.value.toLowerCase()),
+        section,
+        pin: generate4DigitInteger()
+      }
+     
+      const termPerformances = {};
+      const stdRef = doc(stdDb, "students", student.id.replaceAll("/", "_"))
+      const perfRef = doc(stdDb, "students", student.id.replaceAll("/", "_"), "performances", key(sessionSelect.value))
+      await setDoc(stdRef, info,  {merge: true})
+      console.log(key(sessionSelect.value));
+      await setDoc(perfRef, termPerformances,  {merge: true});
+    }
+   // await stdBatch.commit()
+  
+// Example
+console.log(generate4DigitInteger()); // e.g. 4837
   </script>
 </body>
 </html>
