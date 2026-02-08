@@ -142,7 +142,8 @@ var section;
     //console.log(result.picURL);
     let picURL = optimizeCloudinaryUrl(result.picURL);
       row.innerHTML = `
-      <td class="passport">
+      <td class="passport std">
+      <img src="${picURL}">
       <!-- Pict -->
       <input type="file" accept="image/*" capture="environment" id="cameraInput">
       </td>
