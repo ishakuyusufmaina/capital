@@ -622,8 +622,14 @@ const adminFunctions = [
 
   
     teacher.adminV2Functions??={};
-   if (teacher.adminV2Functions.quality)
+   if (teacher.adminV2Functions.quality){
     window.location.href = "quality/index.html";
+     return;
+   }
+    
+  if (teacher.adminV2Functions){
+        window.location.href = "../adminV2/admin.html";
+  }
 
     //alert(teacher.role.fm
     return;
