@@ -44,7 +44,7 @@
     }
 
     /* Buttons */
-    button, .scores {
+    button, .scores, .pin {
       display: inline-block;
       margin: 1rem 0.4rem 0;
       padding: 0.7rem 1.5rem;
