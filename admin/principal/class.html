@@ -169,13 +169,16 @@ var section;
          <option value="Christian">Christian</option>
     </select>
     </td>
-    <td class="scores">
+    <td class="pin">
     PIN: ****
+    </td> 
+    <td class="scores">
+    Scores
     </td> 
       `;
 
 
-    let pinElm = row.querySelector(".scores");
+    let pinElm = row.querySelector(".pin");
     pinElm.ondblclick = async e=>{
        if (!result.id) return;
        const stdRef = doc(stdDb, "students", result.id.replaceAll("/", "_"))
@@ -184,6 +187,18 @@ var section;
        let std = stdDoc.data();       
        pinElm.innerHTML = "PIN: "+ std.pin;
       }
+    let scoreElm = row.querySelector(".score");
+    scoreElm.ondblclick = async e=>{
+       if (!result.id) return;
+      // const stdRef = doc(stdDb, "students", result.id.replaceAll("/", "_"))
+     //  pinElm.innerHTML = "PIN: retrieving..";
+       //let stdDoc = await getDoc(stdRef);
+     //  let std = stdDoc.data();       
+       //pinElm.innerHTML = "PIN: "+ std.pin;
+      
+      window.localStorage.setItem("student", JSON.stringify(result));
+      window.location.href = "results.html";
+    }
       container.appendChild(row);
       let psp = row.querySelector(".passport");
       let imgIn = psp.querySelector("input");
