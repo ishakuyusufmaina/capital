@@ -196,7 +196,7 @@ var section;
        //let stdDoc = await getDoc(stdRef);
      //  let std = stdDoc.data();       
        //pinElm.innerHTML = "PIN: "+ std.pin;
-      
+      result.class = classSelect.value;
       window.localStorage.setItem("student", JSON.stringify(result));
       window.location.href = "results.html";
     }
