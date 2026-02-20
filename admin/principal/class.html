@@ -188,7 +188,7 @@ var section;
        let std = stdDoc.data();       
        pinElm.innerHTML = "PIN: "+ std.pin;
       }
-    let scoreElm = row.querySelector(".score");
+    let scoreElm = row.querySelector(".scores");
     scoreElm.ondblclick = async e=>{
        if (!result.id) return;
       // const stdRef = doc(stdDb, "students", result.id.replaceAll("/", "_"))
