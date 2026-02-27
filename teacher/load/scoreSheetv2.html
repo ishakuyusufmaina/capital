@@ -429,7 +429,7 @@ await  render();
       const perfRef = doc(stdDb, "students", student.id.replaceAll("/", "_"), "performances", session)
       //stdBatch.set(stdRef, info,  {merge: true})
       console.log(session);
-      stdBatch.update(perfRef, termPerformances,  {merge: true});
+      stdBatch.set(perfRef, termPerformances,  {merge: true});
     }
     await stdBatch.commit();
     //alert("Done");
