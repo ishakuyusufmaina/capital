@@ -733,8 +733,7 @@ function isEqual(a, b) {
         picURL: student.picURL || "",    
         id: student.id,
         sessions: arrayUnion(sessionSelect.value.toLowerCase()),
-        section,
-        religion: student.religion || "none"
+        section
       }
      
       const stdRef = doc(stdDb, "students", student.id.replaceAll("/", "_"))
@@ -753,8 +752,7 @@ function isEqual(a, b) {
         id: student.id,
         sessions: arrayUnion(sessionSelect.value.toLowerCase()),
         section,
-        pin: generate4DigitInteger(),
-        religion: student.religion || "none"
+        pin: generate4DigitInteger()
       }
      
       const termPerformances = {};
