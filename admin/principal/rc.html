@@ -244,7 +244,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
   sessionSelect.onchange =async  e=>{
     let v = sessionSelect.value;
     if (!v) return;
-    if (v.replaceAll(" ", "").trim()=="2025/2026,firstterm") await loadPositionsV0()
+    if (v.split("/")[0].trim()=="2024") await loadPositionsV0()
     else await loadPositions();
   }
   
@@ -279,7 +279,10 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       let faith = stdReg == "Islam"? "Muslim" : "Christian";
       for (const subj in subjects) {     
         //console.log(subjects[subj]);        
-        let sN = subjects[subj][termIndex].subject;    
+        let sN = subjects[subj][termIndex].subject;  
+        if (subjects[subj][termIndex].inactive){
+          delete subjects[subj];
+        }        
       //  console.log(sN);        
         if (!sectSubjs.includes(sN)){//subj not in the section subjects
           delete subjects[subj];
@@ -586,10 +589,10 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         }
        // console.log(JSON.stringify(subjects[subj]))
         try {
-          let test1 = Number(subjects[subj][termIndex].test1 ?? 0) || 0;
-          let test2 = Number(subjects[subj][termIndex].test2 ?? 0) || 0;
-          let t3 = Number(subjects[subj][termIndex].test3 ?? 0) || 0;
-          student.score += test1 + test2 +t3 + Number(subjects[subj][termIndex].exam) || 0;
+          let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
+          let test2 = Number(subjects[subj][termIndex].test2 ?? 0);
+          let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
+          student.score += test1 + test2 +t3 + Number(subjects[subj][termIndex].exam);
           subHeads.add(subjects[subj][termIndex].name);
           student.sc++;
         } catch(e) {
@@ -632,7 +635,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       <h3>TERMINAL REPORT</h3>
       <table class="student-info-table">
       <tr class="std-name">      
-        <td>NAME: ${std.name.toUpperCase()}</td>
+        <td>NAME OF PUPIL: ${std.name.toUpperCase()}</td>
         <td>GENDER: ${std.gender}</td>
       </tr>
       <tr>
@@ -641,7 +644,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </tr>
       <tr>    
       <td>SESSION: ${sessionSelect.value.split(",")[0]}</td>
-      <td>RESUMPTION: <strong><time>5<sup>th</sup> JANUARY, 2026</time></strong></td>
+      <td>RESUMPTION: <strong><time>8<sup>th</sup> SEPTEMBER, 2025</time></strong></td>
       </tr>
       <tr>
       <td>NO: IN CLASS: ${students.length}</td>      
@@ -668,9 +671,9 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
  
       for (const subj in subjects) {
         
-      let t1= Number(subjects[subj][termIndex].test1 ?? 0) || 0;
-      let t2 = Number(subjects[subj][termIndex].test2 ?? 0) || 0;
-        let t3 = Number(subjects[subj][termIndex].test3 ?? 0) || 0;
+      let t1= Number(subjects[subj][termIndex].test1 ?? 0);
+      let t2 = Number(subjects[subj][termIndex].test2 ?? 0);
+        let t3 = Number(subjects[subj][termIndex].test3 ?? 0);
 
  //     subjects.forEach(subj=>{
         let row =document.createElement("tr");
@@ -678,9 +681,9 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         <td>${subjects[subj][termIndex].name}</td>
         <td>${t1 + t2 + t3}</td>
         <td>${subjects[subj][termIndex].exam}</td>
-        <td>${t1 + t2 +t3 + Number(subjects[subj][termIndex].exam) || 0}</td>
-        <td>${grade(t1+t2+t3, Number(subjects[subj][termIndex].exam) || 0)}</td>
-        <td>${remark(t1+t2+t3, Number(subjects[subj][termIndex].exam) || 0)}</td>
+        <td>${t1 + t2 +t3 + Number(subjects[subj][termIndex].exam)}</td>
+        <td>${grade(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
+        <td>${remark(t1+t2+t3, Number(subjects[subj][termIndex].exam))}</td>
         `;
         reportCard.appendChild(row);
       }//);
@@ -697,7 +700,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       AVERAGE SCORE: ${tosf(std.score/std.sc, 4)}
       <br>
       
-      V. PRINCIPAL'S COMMENT: <strong class="comment">${comnt}</strong>
+      HEAD MASTER COMMENT: <strong class="comment">${comnt}</strong>
     <img id="stamp" src="stamp.png">
       `;
       wrapper.append(p);
