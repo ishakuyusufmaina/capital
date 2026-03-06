@@ -390,6 +390,8 @@ await  render();
     if (!window.confirm("Are you sure you want to change activation status of this score sheet?")) return;
       Object.values(students).forEach((student, i)=>{
        //let student = students[key];
+        const subjK = key(subj);
+        const termIndex = ses.term;
         student.subjects ??={};
         student.subjects[subjK] ??= [{}, {}, {}];
         student.subjects[subjK][termIndex].inactive = !!student.subjects[subjK][termIndex].inactive
