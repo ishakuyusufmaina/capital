@@ -294,7 +294,7 @@ var section;
              classSelect.innerHTML +=`<option>${clas}</option>`
              classSelect.addEventListener("change", _=>{
                for (const key in sections){
-               if (!sections[key].classes.includes(classSelect.value)) return;
+               if (!sections[key].classes.includes(classSelect.value)) continue;
                section = key;
                console.log(section);
                }
@@ -451,6 +451,7 @@ var section;
       let nameIn = row.querySelector(".name");
       nameIn.oninput = e=>{
           result.name = nameIn.textContent.toLowerCase().trim();
+        console.log(result.name);
         result.names = result.name.split(" ");
       }
       let genderIn = row.querySelector(".gender");
@@ -515,9 +516,9 @@ add.onclick = e=>{
      
   }
   
-  classSelect.onchange = async e=>{
+  classSelect.addEventListener("change", async e=>{
     loadStudents();
-  }
+  });
     sessionSelect.onchange = async e=>{
         if (!e.target.value) return;
       //console.log(e.target.value); return;
@@ -735,6 +736,7 @@ function isEqual(a, b) {
         sessions: arrayUnion(sessionSelect.value.toLowerCase()),
         section
       }
+    console.log(JSON.stringify(section));
      
       const stdRef = doc(stdDb, "students", student.id.replaceAll("/", "_"))
       const perfRef = doc(stdDb, "students", student.id.replaceAll("/", "_"), "performances", key(sessionSelect.value))
