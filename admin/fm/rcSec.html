@@ -300,6 +300,10 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         /*if (!classSubjects.includes(sN)){
           delete subjects[subj];
         }*/
+        let s = subjects[subj] || [{}, {}, {}];
+        if (s[termIndex].inactive){
+          delete subjects[subj];
+        }  
         try {
           let termScores = subjects[subj][termIndex];
           let score = 0;
