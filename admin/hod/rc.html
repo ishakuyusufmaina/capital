@@ -276,6 +276,9 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
           if (!(srp[sN]==faith))
           delete subjects[subj]
         }
+        if (subjects[subj][termIndex].inactive){
+          delete subjects[subj];
+        }  
        // console.log(JSON.stringify(subjects[subj]))
         try {
           let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
