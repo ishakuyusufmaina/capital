@@ -433,9 +433,11 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         let interp = interpret(total, scoreInterpretations);
        // console.log(interp);
         //subjects.forEach(subj=>{
+        let subjName = subjects[subj][termIndex].subject.toUpperCase().trim();
+        subjName = (subjName == "ISLAMIC AND RELIGIOUS STUDIES/ CHRISTIAN RELIGION STUDIES")? "IRS/CRS" : subjName;
         let row =document.createElement("tr");
         row.innerHTML = `
-        <td>${subjects[subj][termIndex].subject.toUpperCase()}</td>
+        <td>${subjName}</td>
         ${
         getScores(scores)
         }
