@@ -281,10 +281,16 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
         //console.log(subjects[subj]);        
         let sN = subjects[subj][termIndex].subject;    
       //  console.log(sN);     
-        
+         if (isUpperPrimary(stdCls)){
+          if (faith=="Muslim") {
+            ("Islamic and Religious Studies/ Christian Religion Studies" == subjects[subj][termIndex].name)
+            subjects[subj][termIndex].inactive = true;
+          }
+        }
         if (subjects[subj][termIndex].inactive){
           delete subjects[subj];
-        }         
+        }   
+        
         if (!sectSubjs.includes(sN)){//subj not in the section subjects
           delete subjects[subj];
          // console.log(subj, "deleted out");
