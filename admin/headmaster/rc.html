@@ -283,7 +283,8 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       //  console.log(sN);     
          if (isUpperPrimary(classSelect.value)){
           if (faith=="Muslim") {
-            ("Islamic and Religious Studies/ Christian Religion Studies" == subjects[subj][termIndex].name)
+            console.log(subjects[subj][termIndex].name);
+           if ("Islamic and Religious Studies/ Christian Religion Studies" == subjects[subj][termIndex].name)
             subjects[subj][termIndex].inactive = true;
           }
         }
