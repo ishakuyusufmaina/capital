@@ -590,6 +590,13 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
           if (!(srp[sN]==faith))
           delete subjects[subj]
         }
+        const stdCls = classSelect.value;
+        if (isUpperPrimary(stdCls)){
+          if (faith=="Muslim") {
+            ("Islamic and Religious Studies/ Christian Religion Studies" == subjects[subj][termIndex].name)
+            delete subjects[subj];
+          }
+        }
        // console.log(JSON.stringify(subjects[subj]))
         try {
           let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
@@ -910,6 +917,17 @@ const email = auth.currentUser.email;
   function optimizeCloudinaryUrl(url, params = "f_auto,q_auto") {
     if (!url || !url.length) return "../../std-pic.jpg";
     return url.replace("/upload/", `/upload/${params}/`);
+}
+
+
+     function isUpperPrimary(clas) {
+  if (typeof clas !== "string") return false;
+
+  const match = clas.trim().match(/^primary\s+(\d+)/i);
+  if (!match) return false;
+
+  const level = parseInt(match[1], 10);
+  return level > 3;
 }
   </script>
   
