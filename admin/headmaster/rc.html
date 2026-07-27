@@ -5,7 +5,9 @@
   <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Include this in the <head> of your HTML -->
-<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="rc.css" rel="stylesheet">
 
   <script src="rc/rc.js"></script>
@@ -15,7 +17,7 @@
 <body>
   <h1 class="no-print">
     Report Cards <br>
-    <a href="#print">Down &darr;</a>
+    <a href="#print">Jump to results &darr;</a>
   </h1>
      <div class="select-container no-print">
    <select id="sessionSelect">
@@ -35,7 +37,7 @@
   
 
   <div class="no-print">
-    <button id="print" onclick="window.print()">Download</button>
+    <button id="print" onclick="window.print()">⬇ Download</button>
     <button id="publish">Publish</button>
   </div>
    <script type="module">
@@ -280,14 +282,22 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       for (const subj in subjects) {     
         //console.log(subjects[subj]);        
         let sN = subjects[subj][termIndex].subject;    
-      //  console.log(sN);     
-         if (isUpperPrimary(classSelect.value)){
+      //  console.log(sN);    
+	  const stdCls = classSelect.value;  
+         if (isUpperPrimary(stdCls)){
+		  console.log("Upper Primary");
           if (faith=="Muslim") {
-            console.log(subjects[subj][termIndex].name);
-           if ("Islamic and Religious Studies/ Christian Religion Studies" == subjects[subj][termIndex].name)
-            subjects[subj][termIndex].inactive = true;
+			console.log("Is Muslim");
+            if ("Islamic and Religious Studies/ Christian Religion Studies" == subjects[subj][termIndex].subject){
+				subjects[subj][termIndex].inactive = true;
+				console.log("Is IRS/CRS");
+				
+			}
           }
         }
+		
+		 
+        
         if (subjects[subj][termIndex].inactive){
           delete subjects[subj];
         }   
@@ -597,13 +607,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
           if (!(srp[sN]==faith))
           delete subjects[subj]
         }
-        const stdCls = classSelect.value;
-        if (isUpperPrimary(stdCls)){
-          if (faith=="Muslim") {
-            ("Islamic and Religious Studies/ Christian Religion Studies" == subjects[subj][termIndex].name)
-            delete subjects[subj];
-          }
-        }
+      
        // console.log(JSON.stringify(subjects[subj]))
         try {
           let test1 = Number(subjects[subj][termIndex].test1 ?? 0);
@@ -939,41 +943,14 @@ const email = auth.currentUser.email;
   </script>
   
 <style>
+  /* Fine-tuning layered on top of rc.css for this page instance */
+  .student-info-table {
+    text-transform: uppercase;
+  }
 
-
- .student-info-table {
-   text-transform: uppercase;
- }
-  
-h2 {
-  font-size: 30px;
-}
-  
-  header {
-    position: relative;
-  } 
   header > img {
-    position: absolute;
-    
-    left: 0;
-    top: 0;
+    border: 2px solid #e5e7eb;
   }
-header > img {
-    display: block;
-  visibility: hidden;
-    
-    max-width: 100px;
-    max-height: 120px;
-  border: 2px solid #e5e7eb; /* light gray */
-  border-radius: 12px;
-  padding: 4px;
-}
-  
-  @media print {
-      header > img {
-    visibility: visible;
-  }
-  }
-  </style>
+</style>
 </body>
 </html>
