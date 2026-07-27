@@ -1,312 +1,518 @@
-  /* Apply handwriting font to a class or the body */
+/* ============================================================
+   Maiduguri Capital School — Report Card Portal
+   Palette
+     --navy-900  #0a2f52  deep header navy
+     --blue-700  #0d5c94  primary brand blue
+     --blue-500  #007dbb  original accent (kept for continuity)
+     --gold-500  #b9922f  seal / ceremonial accent
+     --paper     #fffdf6  certificate paper background
+     --ink       #1c2b3a  body text
+     --line      #d9e1e8  hairline borders
+   Type
+     Display / school name : 'Playfair Display' (serif, ceremonial)
+     Body / UI              : 'Inter' (clean, legible)
+     Comment / handwritten  : 'Patrick Hand' (kept, unchanged)
+   ============================================================ */
+
+:root {
+  --navy-900: #0a2f52;
+  --navy-800: #123a63;
+  --blue-700: #0d5c94;
+  --blue-500: #007dbb;
+  --gold-500: #b9922f;
+  --gold-100: #f6ecd2;
+  --paper: #fffdf6;
+  --ink: #1c2b3a;
+  --ink-soft: #4a5b6b;
+  --line: #d9e1e8;
+  --line-strong: #b9c6d1;
+  --danger: #cd5c5c;
+  --radius: 10px;
+  --shadow-sm: 0 1px 2px rgba(10, 47, 82, 0.06), 0 1px 1px rgba(10, 47, 82, 0.04);
+  --shadow-md: 0 8px 24px rgba(10, 47, 82, 0.10), 0 2px 6px rgba(10, 47, 82, 0.06);
+  --shadow-lg: 0 20px 50px rgba(10, 47, 82, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ---------- Base ---------- */
+
+body {
+  background: linear-gradient(180deg, #eef3f7 0%, #e6edf3 100%);
+  color: var(--ink);
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 28px 16px 64px;
+  min-height: 100vh;
+}
+
+/* Handwriting font for the head-teacher's remark */
 .comment {
   font-family: 'Patrick Hand', cursive;
-  font-size: 1.5rem; /* adjust as needed */
+  font-size: 1.55rem;
   line-height: 1.5;
-}
-     .student-info-table * {
-     border: none;
-     }
-  .student-info-table {
-  width: 100%;
-  border-collapse: collapse;
-  
+  color: var(--navy-900);
 }
 
-  
-.student-info-table th {
-//  background-color: #f9f9f9;
-  width: 20%;
+hr {
+  border: 0;
+  height: 2px;
+  margin: 40px auto;
+  max-width: 900px;
+  background-image: linear-gradient(to right, rgba(10, 47, 82, 0), rgba(10, 47, 82, 0.35), rgba(10, 47, 82, 0));
 }
 
-.student-info-table td {
-  width: 30%;
-  text-align: left;
-}
+/* ---------- App chrome (toolbar, selectors) ---------- */
 
-     .student-info-table.std-name {
-    
-      border-top: 1px solid black;
-       border-top-radius: 25px;
-   }
-.std-name,  .std-name > th{
-    background: white;
-    color: black;
-    
-  }
-
-  .std-name>td {
-    border-bottom: 1px solid black;
-    background-color: white;
-    color:black;
-    font-weight: bolder;
-    text-align: center;
-        
-  }
-    
-
-
-
-  
-  .rfooter {
-     border-bottom: 1px solid black;
-  }
-  .powered {
-    postion: absolute;
-    bottom: 0px;
-    color: indianred;
-    text-align: right;
-    font-size: 12px;
-    right: 0;
-    font-style: italic;
-  }
-  *{
-    box-sizing: border-box;
-  }
- table {
-  border-collapse: collapse;
-  width: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  //box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-   
-}
-
-th,
-td {
-  border: 1px solid #ddd;
-  padding: 6px;
+h1, .save-container {
   text-align: center;
 }
 
-  table td:first-child,
+h1.no-print {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  font-size: 2.1rem;
+  color: var(--navy-900);
+  letter-spacing: 0.01em;
+  margin: 6px 0 22px;
+}
+
+h1.no-print a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--blue-700);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+h1.no-print a:hover {
+  color: var(--navy-900);
+  border-color: currentColor;
+}
+
+.select-container {
+  text-align: center;
+  margin: 0 auto 20px;
+  padding: 14px;
+  width: 100%;
+  max-width: 640px;
+  overflow-x: auto;
+  position: relative;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.table-container {
+  text-align: center;
+  margin: auto;
+  padding: 3px;
+  width: 100%;
+  overflow-x: auto;
+  position: relative;
+}
+
+select {
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--navy-900);
+  background: #fbfcfe;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 10px 14px;
+  flex: 1 1 220px;
+  min-width: 180px;
+  display: inline-block;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  appearance: auto;
+}
+
+select:hover {
+  border-color: var(--blue-500);
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--blue-700);
+  box-shadow: 0 0 0 3px rgba(13, 92, 148, 0.15);
+}
+
+/* ---------- Buttons ---------- */
+
+button {
+  padding: 10px 22px;
+  background: var(--navy-900);
+  background-image: linear-gradient(180deg, var(--blue-700), var(--navy-900));
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.1s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+button:hover {
+  filter: brightness(1.08);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+  filter: brightness(0.97);
+}
+
+button#publish {
+  background-image: linear-gradient(180deg, var(--gold-500), #93731f);
+}
+
+div.no-print:has(#print) {
+  text-align: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+/* ---------- Report card table (generated per student) ---------- */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+th, td {
+  border: 1px solid var(--line);
+  padding: 8px 6px;
+  text-align: center;
+}
+
+table td:first-child,
 table th:first-child {
- 
+  text-align: left;
+}
+
+/* header row of the score table (SUBJECT, CA, EXAM, TOTAL...) */
+tr:nth-child(1) {
+  border: none;
+  border-radius: 5px;
+  font-size: 0.95rem;
+}
+
+table caption ~ tr:first-of-type th,
+.table-container table > tr:first-child th {
+  background: var(--navy-900);
+  background-image: linear-gradient(180deg, var(--blue-700), var(--navy-900));
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  padding: 10px 6px;
+  border-color: var(--navy-900);
+}
+
+tbody tr:nth-child(even) {
+  background-color: rgba(13, 92, 148, 0.035);
+}
+
+tbody tr:hover {
+  background-color: #eaf3fa;
+  color: var(--ink);
 }
 
 .vertical-header-table .thead th.subject {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  background: #004080;
+  background: var(--navy-900);
   color: white;
   height: 150px;
   vertical-align: center;
   text-transform: uppercase;
   text-align: left;
-  border: 1px solid grey;
+  border: 1px solid var(--navy-800);
 }
-  #gtotal, #position {
-    writing-mode: vertical-rl;
+
+#gtotal, #position {
+  writing-mode: vertical-rl;
   transform: rotate(180deg);
-  
   height: 150px;
   vertical-align: center;
-    text-transform: uppercase;
+  text-transform: uppercase;
   text-align: left;
-  }
-
- tbody tr:nth-child(even) {
-//  background-color: #f9f9f9;
 }
 
- tbody tr:hover {
-  background-color: #eef;
-   color: black;
+/* ---------- Student info block ---------- */
+
+.student-info-table * {
+  border: none;
 }
 
-  body {
-    //  background-color: #121212;
-  //    color: #ffffff;
-      font-family: Arial, sans-serif;
-      padding: 10px;
-    }
-  select {
- //   background-color: #121212;
-   //   color: #ffffff;
-      font-family: Arial, sans-serif;
-  }
-  
-  
-      button {
-      padding: 6px 12px;
-      background-color: #333;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #555;
-    }
-
-    table {
-      width: fit-content;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    th, td{
-      padding: 2px;
-      border: 1px solid #007dbb;
-      text-align: center;
-    }
- h1, .save-container {
- //   display: inline-block;
-text-align: center;
-    
-  }
- 
- 
-   .select-container, .table-container {
-    text-align: center;
-    margin: auto;
-    padding: 3px;
-    //border: 1px solid white;
-    width: 100%;
-    overflow-x: auto;
-     position: relative;
-  }
- 
- 
- select {
-  //  background-color: #121212;
- //     color: #ffffff;
-      font-family: Arial, sans-serif;
-   //   border: none;
-    font-size: 24px;
-    text-align: center;
-    width: 100%;
-    display: inline-block;
-  }
-    
-  hr {
-    border: 0;
-    height: 4px;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(200, 200, 200, 0.75), rgba(0, 0, 0, 0));
+.student-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-transform: uppercase;
+  margin: 14px 0 10px;
+  font-size: 0.92rem;
 }
 
+.student-info-table th {
+  width: 20%;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.student-info-table td {
+  width: 30%;
+  text-align: left;
+  padding: 5px 4px;
+  color: var(--ink);
+}
+
+.student-info-table.std-name {
+  border-top: 1px solid var(--gold-500);
+}
+
+.std-name, .std-name > th {
+  background: var(--gold-100);
+  color: var(--navy-900);
+}
+
+.std-name > td {
+  border-bottom: 1.5px solid var(--gold-500);
+  background-color: var(--gold-100);
+  color: var(--navy-900);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  text-align: center;
+  padding: 8px 4px;
+}
+
+/* ---------- Footer notes on each report card ---------- */
+
+.rfooter {
+  border-bottom: 1px solid var(--line-strong);
+  padding: 10px 4px 16px;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.powered {
+  position: relative;
+  color: var(--danger);
+  text-align: right;
+  font-size: 11px;
+  font-style: italic;
+  padding-top: 4px;
+}
+
+/* ---------- Certificate wrapper for each printed card ---------- */
+
+.table-container {
+  background: var(--paper);
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  padding: 22px 24px 16px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  max-width: 900px;
+}
+
+.table-container::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1.5px solid var(--gold-500);
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+/* ---------- Header / branding block inside each card ---------- */
+
+header {
+  position: relative;
+  padding-bottom: 6px;
+}
+
+header > img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  visibility: hidden;
+  max-width: 100px;
+  max-height: 120px;
+  border: 2px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 4px;
+  background: #fff;
+}
+
+h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--navy-900);
+  letter-spacing: 0.02em;
+  margin: 4px 0 2px;
+}
+
+address {
+  font-style: normal;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+address i {
+  color: var(--blue-700);
+}
+
+h3 {
+  display: inline-block;
+  margin: 14px 0 4px;
+  padding: 4px 22px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #fff;
+  background: var(--navy-900);
+  border-radius: 999px;
+}
 
 .logo {
-   // border-radius: 50%;
-    height: 100px;
-    width:100px;
+  height: 100px;
+  width: 100px;
   position: relative;
-   
-    z-index: 100;
-    
-  }
-  
-    #stamp {
-    border-radius: 50%;
-    height: 100px;
-    width: 100px;
+  z-index: 100;
+  border-radius: 4px;
+}
+
+#stamp {
+  border-radius: 50%;
+  height: 100px;
+  width: 100px;
   position: absolute;
-   bottom: 10px;
-   right:100px;
-    z-index: 100;
-    
-    
-  }
-  #logo-container {
-   // height: 120px;
- //   width: 100%;
-   // border-bottom: 1px solid black;
-    position: relative;
-  }
-  
-  #top-hl, #bottom-hl {
-    border: 8px solid #007dbb;
-    position: absolute;
-    width: calc(100%);
-    left: 0;
-    bottom: 40px;
-    z-index: 1;
-    height: 0;
-  }
-  #p{
-    position: absolute;
-    bottom: 60px;
-    right: 30px;
-    text-align: left;
-    font-size: 10px;
-    
-  }
-  
-  #bottom-hl {
- 
-    position: absolute;
-    width: calc(100% );
-    left: 0;
-    bottom: 20px;
-  }
-  
-  tr:nth-child(1) {
-   // padding: 0.7rem;
-     // background-color: #007dbb;
-    //  color: #fff;
-      border: none;
-      border-radius: 5px;
-      font-size: 1rem;
-  }
-.table-container {
-  border: 2px solid #007dbb;
-}
-  @media print {
-    hr {
-      page-break-after: always;
-    }
-    .no-print {
-      display: none;
-    }
-   table, .table-container, .table-container > *{
-      margin: auto;
-    }
-    
-    .table-container > * {
-    //  color: black;
-      //text-transform: uppercase;
-    }
-
-    .logo {
-      border-radius: 0%;
-    }
-     
-    .stamp {
-    
-  
-      
-    
-    
-  }
-
-    
-    
-    table {
-  border-collapse: collapse;
-  width: 100%;
+  bottom: 10px;
+  right: 100px;
+  z-index: 100;
+  opacity: 0.92;
 }
 
-table th, table td {
-  padding: 2px;
+#logo-container {
+  position: relative;
+  padding-bottom: 10px;
+}
+
+#top-hl, #bottom-hl {
+  border: 4px solid var(--gold-500);
+  position: absolute;
+  width: calc(100%);
+  left: 0;
+  bottom: 40px;
+  z-index: 1;
+  height: 0;
+}
+
+#bottom-hl {
+  position: absolute;
+  width: calc(100%);
+  left: 0;
+  bottom: 20px;
+  border-color: var(--blue-700);
+}
+
+#p {
+  position: absolute;
+  bottom: 60px;
+  right: 30px;
   text-align: left;
-  
-//border: 1px solid #ccc;
+  font-size: 10px;
+  color: var(--ink-soft);
+  line-height: 1.5;
 }
 
-table tr:nth-child(even) {
-  //background-color: #f2f2f2;
-}
+/* ---------- Print ---------- */
 
-table tr:nth-child(odd) {
- // background-color: #ffffff;
-}
-    table td {
-  white-space: nowrap;
-      word-break: keep-all;
-    }
-
+@media print {
+  body {
+    background: #fff;
+    padding: 0;
   }
 
-  .n, .c {
+  hr {
+    page-break-after: always;
+    background: none;
+    height: 0;
+    margin: 0;
+  }
+
+  .no-print, .no-print * {
     display: none;
   }
+  
+
+  table, .table-container, .table-container > * {
+    margin: auto;
+  }
+
+  .table-container {
+    box-shadow: none;
+    border: 1px solid #999;
+  }
+
+  .table-container::before {
+    border-color: var(--gold-500);
+    opacity: 0.7;
+  }
+
+  .logo {
+    border-radius: 0%;
+  }
+
+  header > img {
+    visibility: visible;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  table th, table td {
+    padding: 3px 4px;
+    text-align: left;
+  }
+
+  table td {
+    white-space: nowrap;
+    word-break: keep-all;
+  }
+}
+
+.n, .c {
+  display: none;
+}
