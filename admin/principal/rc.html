@@ -365,7 +365,7 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </tr>
       <tr>
       <td>NO: IN CLASS: ${students.length>50? 50 : students.length}</td>      
-      <td>POSITION: ${toSuperscriptOrdinal(Number(std.position)>50 50 : Number(std.position))}</td>
+      <td>POSITION: ${toSuperscriptOrdinal(Number(std.position)>50? 50 : Number(std.position))}</td>
       </tr>
       </table>   
       </caption>
