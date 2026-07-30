@@ -361,11 +361,11 @@ let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
       </tr>
       <tr>    
       <td>SESSION: ${sessionSelect.value.split(",")[0]}</td>
-      <td>RESUMPTION: <strong><time>20<sup>th</sup> APRIL, 2026</time></strong></td>
+      <td>RESUMPTION: <strong><time>7<sup>th</sup> SEPTEMBER, 2026</time></strong></td>
       </tr>
       <tr>
-      <td>NO: IN CLASS: ${students.length}</td>      
-      <td>POSITION: ${toSuperscriptOrdinal(Number(std.position))}</td>
+      <td>NO: IN CLASS: ${students.length>50? 50 : students.length}</td>      
+      <td>POSITION: ${toSuperscriptOrdinal(Number(std.position)>50 50 : Number(std.position))}</td>
       </tr>
       </table>   
       </caption>
