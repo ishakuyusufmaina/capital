@@ -1,490 +1,313 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 <head>
   <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
   <title>School Directorate</title>
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  :root {
+    --primary: #3f51b5; --primary-deep: #303f9f; --primary-ink: #1a237e; --primary-night: #283593;
+    --green: #4caf50; --green-dark: #388e3c; --red: #d32f2f; --mint: #80cbc4; --mint-dark: #4db6ac;
+    --bg: #f4f6f9; --text: #333; --card: #fff; --muted: #6b7280;
+    --line: rgba(63, 81, 181, .12); --tint: rgba(63, 81, 181, .09);
+    --shadow: 0 1px 2px rgba(26, 35, 126, .06), 0 8px 24px rgba(26, 35, 126, .08);
+    --shadow-hover: 0 2px 4px rgba(26, 35, 126, .08), 0 18px 40px rgba(26, 35, 126, .16);
   }
-
+  * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f4f6f9;
-    color: #333;
-    //padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: var(--text); min-height: 100vh;
+    background: radial-gradient(900px 340px at 85% -80px, rgba(63, 81, 181, .12), transparent 70%), var(--bg);
+    -webkit-font-smoothing: antialiased;
   }
-  main {
-    padding: 20px;
-  }
+  .i { width: 1.25em; height: 1.25em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
+  /* Header */
   header {
-  //  display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #3f51b5;
-    color: #fff;
-    padding: 15px 20px;
-    //border-radius: 10px;
-    margin-bottom: 30px;
-  
-    position: sticky;
-    top:0;
-    z-index: 99;
-    min-height: 80px;
-    line-height: 24px;
+    position: sticky; top: 0; z-index: 99; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    min-height: 80px; padding: 14px clamp(70px, 8vw, 90px) 14px clamp(16px, 4vw, 40px); color: #fff; line-height: 24px;
+    background: linear-gradient(120deg, var(--primary-ink) 0%, var(--primary-deep) 45%, var(--primary) 100%);
+    box-shadow: 0 6px 24px rgba(26, 35, 126, .28);
   }
+  header::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,255,255,.45), transparent); }
+  #signout1 {
+    display: flex; align-items: center; gap: 12px; margin: 0 auto 0 0; padding: 4px 14px 4px 4px; text-align: left;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.25); border-radius: 999px;
+    color: #fff; font-weight: 700; user-select: none; box-shadow: none; line-height: 1.25;
+  }
+  #signout1:hover { background: rgba(255,255,255,.16); }
+  #signout1 .mark { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: #fff; overflow: hidden; color: var(--primary); }
+  #signout1 .mark img { width: 100%; height: 100%; object-fit: contain; }
+  #signout1 .txt { display: flex; flex-direction: column; font-size: .88rem; letter-spacing: .3px; }
+  #dir { color: gold; font-size: .78rem; letter-spacing: 1px; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; font-size: .88rem; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); }
+  .chip .i { width: 1.1em; height: 1.1em; opacity: .9; }
 
-  h1 {
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 2rem;
-    color: #3f51b5;
+  #menu {
+    position: absolute; right: clamp(12px, 3vw, 28px); top: 18px; z-index: 101; width: 44px; height: 44px; display: grid; place-items: center; margin: 0;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); border-radius: 12px; color: #fff; box-shadow: none;
   }
+  #menu:hover { background: rgba(255,255,255,.22); }
+  #menu .i, #close .i { pointer-events: none; width: 22px; height: 22px; }
 
-  #code {
-    font-weight: bold;
-    font-size: 1.3rem;
-    color: #d32f2f;
+  .menu-container {
+    position: fixed; top: 0; right: 0; z-index: 110; width: 270px; max-width: 86vw; height: 100vh; overflow: auto; padding: 20px; text-align: left; color: #fff;
+    background: linear-gradient(170deg, var(--primary-night), var(--primary-ink)); border-radius: 16px 0 0 16px; box-shadow: -10px 0 40px rgba(0,0,0,.45);
+    transform: translateX(110%); visibility: hidden; transition: transform .28s cubic-bezier(.2,.8,.2,1), visibility 0s .28s;
   }
+  .menu-container.show { transform: translateX(0); visibility: visible; transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+  .menu-head { display: flex; align-items: center; justify-content: space-between; font-weight: 700; font-size: 1.05rem; }
+  .menu-container button#close { display: grid; place-items: center; width: 36px; height: 36px; margin: 0; background: rgba(255,255,255,.1); border-radius: 10px; box-shadow: none; }
+  .menu-container button#close:hover { background: rgba(255,255,255,.22); }
+  hr { margin: 14px 0; border: 0; height: 2px; background-image: linear-gradient(to right, rgba(0,0,0,0), rgba(200,200,200,.6), rgba(0,0,0,0)); }
+  .menu-container ul { list-style: none; }
+  .menu-container li { margin: 10px 0; }
+  .menu-container a, #switch, #signout {
+    display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 14px; margin: 0; border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer; transition: background .2s, transform .2s, color .2s;
+  }
+  .menu-container a { color: var(--mint); background: rgba(255,255,255,.06); }
+  .menu-container a:hover { color: var(--mint-dark); background: rgba(255,255,255,.12); }
+  #switch, #signout { color: #fff; background: var(--green); }
+  #switch:hover { background: var(--green-dark); }
+  #signout:hover { background: var(--red); transform: scale(1.03); }
+  #signout:active, #switch:active { transform: scale(.98); }
+  #username { opacity: .85; font-weight: 500; }
+
+  /* Page */
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 8px clamp(16px, 4vw, 40px) 56px; }
+  .page-title { display: flex; align-items: center; gap: 14px; margin: 18px 0 28px; }
+  .page-title .badge { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--primary), var(--primary-ink)); box-shadow: 0 8px 20px rgba(63,81,181,.35); }
+  .page-title .badge .i { width: 26px; height: 26px; }
+  .greeting { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 6px; padding: 5px 14px 5px 10px; border-radius: 999px; font-size: .92rem; font-weight: 600; color: var(--primary-deep); background: var(--tint); border: 1px solid var(--line); }
+  .greeting .i { width: 1.2em; height: 1.2em; color: var(--primary); }
+  h1 { font-size: 2rem; line-height: 1.1; color: var(--primary); letter-spacing: -.3px; text-align: left; margin: 0; }
+  .page-title p { margin-top: 4px; font-size: .95rem; color: var(--muted); }
+  h2 { color: var(--primary-deep); margin-bottom: 10px; font-size: 1.12rem; line-height: 1.3; }
+
+  .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; margin-bottom: 22px; }
+  .card {
+    position: relative; padding: 24px; overflow: auto; background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow);
+    font-family: 'Poppins', 'Segoe UI', sans-serif; transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
 
   button {
-    padding: 10px 20px;
-    background-color: #4caf50;
-    border: none;
-    color: white;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: background 0.3s ease;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; margin-top: 10px;
+    background-color: var(--green); border: none; color: #fff; font-weight: bold; border-radius: 8px; cursor: pointer; font-family: inherit;
+    box-shadow: 0 4px 12px rgba(76,175,80,.3); transition: background .3s ease, transform .15s ease;
   }
+  button:hover { background-color: var(--green-dark); }
+  button:active { transform: scale(.98); }
 
-  button:hover {
-    background-color: #388e3c;
+  .card.auth { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; color: #fff; border: none; background: linear-gradient(120deg, var(--primary-ink), var(--primary-deep) 55%, var(--primary)); }
+  .card.auth .ico { margin: 0; background: rgba(255,255,255,.16); color: #fff; }
+  .auth-info { display: flex; flex-direction: column; gap: 2px; margin-right: auto; font-size: .95rem; }
+  #code { display: inline-block; min-width: 120px; padding: 6px 18px; margin-top: 4px; text-align: center; font-family: Consolas, 'Courier New', monospace; font-weight: bold; font-size: 1.6rem; letter-spacing: 6px; color: var(--red); background: #fff; border-radius: 10px; }
+  .auth-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .auth-actions button { margin-top: 0; }
+
+  .ico { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; margin-bottom: 12px; color: var(--primary); background: var(--tint); }
+  .ico .i { width: 24px; height: 24px; }
+
+  /* TPPP card */
+  .card.tppp { grid-column: 1 / -1; text-align: left; }
+  .tppp-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
+  .tppp-head .ico { margin: 0; }
+  .tppp-head h2 { margin: 0; margin-right: auto; }
+  select { padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; font-size: 15px; font-family: inherit; }
+  .table-scroll { overflow-x: auto; margin: 10px 0 6px; border: 1px solid var(--line); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; margin: auto; }
+  th, td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--line); font-size: .9rem; }
+  th { background: var(--tint); color: var(--primary-deep); font-weight: 600; font-size: .78rem; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(63,81,181,.04); }
+  summary { cursor: pointer; }
+  .tppp a { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 12px; border-radius: 10px; color: var(--primary-ink); font-weight: 500; text-decoration: none; }
+  .tppp a:hover { background: var(--tint); color: var(--primary); }
+  .tppp a .i { width: 1.1em; height: 1.1em; }
+
+  /* Role grid */
+  .grid-container { display: grid; gap: 22px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  .grid-container .card { --a: var(--primary); --ai: #fff; text-align: left; border-top: 4px solid var(--a); font-weight: 600; font-size: 1rem; }
+  .grid-container .card .ico { background: var(--a); color: var(--ai); box-shadow: 0 6px 14px rgba(0,0,0,.12); }
+  .grid-container .card[onclick] { cursor: pointer; }
+  .grid-container .card p { margin-top: 8px; font-size: .78rem; font-weight: 400; color: var(--muted); line-height: 1.6; }
+  .grid-container .link { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; padding: 10px 12px; border-radius: 10px; font-weight: 500; font-size: .92rem; cursor: pointer; transition: background .2s; }
+  .grid-container .link:hover { background: var(--tint); }
+  .grid-container .link .i { width: 1.1em; height: 1.1em; opacity: .55; }
+  .grid-container .card-1  { --a: #6D83F2; }
+  .grid-container .card-2  { --a: #F26D8F; }
+  .grid-container .card-3  { --a: #4BC0C8; }
+  .grid-container .card-4  { --a: #FFD166; --ai: #333; }
+  .grid-container .card-5  { --a: #70C1B3; }
+  .grid-container .card-6  { --a: #FF6B6B; }
+  .grid-container .card-7  { --a: #B388EB; }
+  .grid-container .card-8  { --a: #FF9F1C; }
+  .grid-container .card-9  { --a: #3DA5D9; }
+  .grid-container .card-10 { --a: #9EE493; --ai: #1a1a1a; }
+  .grid-container .card-11 { --a: #FFCAD4; --ai: #333; }
+  .grid-container .card-12 { --a: #A2D2FF; --ai: #1a1a1a; }
+  .grid-container .card-13 { --a: #CDB4DB; --ai: #1a1a1a; }
+
+  .waiting { display: inline-block; width: 1em; height: 1em; border: 2px solid #ccc; border-top: 2px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; margin-left: .5rem; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  :focus-visible { outline: 3px solid var(--mint); outline-offset: 2px; }
+  @media (max-width: 560px) { h1 { font-size: 1.6rem; } #signout1 .txt span:first-child { font-size: .72rem; } .card.auth { flex-direction: column; align-items: flex-start; } .auth-info { margin-right: 0; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121212; --text: #f0f0f0; --card: #1c1d2b; --muted: #9aa0b4; --line: rgba(255,255,255,.08); --tint: rgba(128,203,196,.12); --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); --shadow-hover: 0 2px 4px rgba(0,0,0,.5), 0 18px 40px rgba(0,0,0,.55); }
+    body { background: radial-gradient(900px 340px at 85% -80px, rgba(63,81,181,.28), transparent 70%), #121212; }
+    h1 { color: #9fa8da; } h2 { color: #c5cae9; } .greeting { color: #c5cae9; } th { color: #c5cae9; } .tppp a { color: #c5cae9; }
+    .card.auth h2, .card.auth { color: #fff; }
   }
-
-  a {
-    text-decoration: none;
-    color: #1a237e;
-    font-weight: 500;
-    display: block;
-    margin-top: 10px;
-  }
-
-  .card-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-  }
-
-  .card {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    transition: transform 0.2s;
-    //display: none;
-    overflow: auto;
-    padding: 1rem;
-   text-align: center;
-  }
-
-  .card:hover {
-    transform: translateY(-5px);
-  }
-
-  h2 {
-    color: #303f9f;
-    margin-bottom: 10px;
-    font-size: 1.2rem;
-  }
-  
-  
-  p {
-  //  text-align: right;
-   // color: teal;
-  }
-  hr {
-    border: 0;
-    height: 2px;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(200, 200, 200, 0.75), rgba(0, 0, 0, 0));
-}
- 
-
- 
-
-  #signout:hover {
-    background-color: #d32f2f;
-    transform: scale(1.05);
-  }
-
-  #signout:active, #switch:active {
-    transform:scale(0.98);
-  }
-  
-
-
-   
-    .menu-container.show {
-        transition: transform 0.2s ease-out;
-        transform: scaleX(100%);
-        
-    }
-
-#menu {
-        position: absolute;
-        right:0;
-        top: 0;
-        background: none; // inherit;
-        color: inherit;
-        border: none;
-        font-size: 40px;
-    font-weight: bold;
-  z-index: 101;
-    }
-  
-  
-  
-  .menu-container {
-    max-height: 100vh;
-        position: absolute;
-        right: 0;
-        z-index: 110;
-        transform: scaleX(0);
-        text-align: left;
-        top: 0:
-    overflow: auto;
-  background-color: inherit; // #1e1e1e;
-  color: #ffffff;
-  padding: 20px;
-  width: 220px;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow: auto;
-  }
-
-.menu-container button#close {
-  background: transparent;
-  color: #ffffff;
-  border: none;
-  font-size: 18px;
-  float: right;
-  cursor: pointer;
-}
-
-.menu-container hr {
-
-  margin: 10px 0;
-  border: 0;
-  height: 4px;
-  background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(200, 200, 200, 0.75), rgba(0, 0, 0, 0));
-
-}
-
-.menu-container ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.menu-container li {
-  overflow: auto;
-  transition: background 0.3s, transform 0.2s;
-  margin: 12px 0;
-  
-}
-
-.menu-container a {
-  color: #80cbc4;
-  text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s ease;
-}
-
-.menu-container a:hover {
-  color: #4db6ac;
-}
-
-#signout, #switch {
-  color: white;
-    border: none;
-    padding: 14px 20px;
-    font-size: 16px;
-    top:0;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-
-  cursor: pointer;
-  padding: 10px 20px;
-    background-color: #4caf50;
-    border: none;
-    color: white;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: background 0.3s ease;
-
-}
-  
-  #signout1 {
-    background: none;
-    border: 0.5px solid white;
-    border-radius: 4px;
-    border-bottom: none;
-    border-top: none;
-   // color: red;
-    user-select: none;
-  }
-  
-  #dir {
-    color: gold;
-  }
-  
-
-
-  
-  /* Dark theme */
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #121212;
-    color: #f0f0f0;
-  }
-  #table, table>tr, table *{
-    color: black;
-    background: white;
-  }
-  
-}
-  
-  
-  
-  caption {
-  background-color: #2980b9;
-  color: #fff;
-  font-weight: bold;
-  padding: 10px;
- text-align: center;
-}
-
-th, td {
-  padding: 7px 10px;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
-}
-
-th {
-  background-color: #f1f1f1;
-  font-weight: 600;
-}
-
-tr:hover {
-  background-color: #f9f9f9;
-}
-
-
-.card th {
-  font-size: 0.75rem;
-}  
-
-
-  /* Select Dropdowns */
-select {
-  padding: 10px;
-  margin: 10px 5px 20px 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: #fff;
-  font-size: 16px;
-}
-  
-  
-  
-  .grid-container {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  padding: 1.5rem;
-}
-
-.grid-container {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  padding: 1.5rem;
-}
-
-.grid-container .card {
-  border-radius: 12px;
-  padding: 1rem;
-  text-align: center;
-  font-weight: 600;
-  color: #fff;
-  text-transform: uppercase;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.grid-container .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Color Variants */
-.grid-container .card-1  { background: #6D83F2; }
-.grid-container .card-2  { background: #F26D8F; }
-.grid-container .card-3  { background: #4BC0C8; }
-.grid-container .card-4  { background: #FFD166; color: #333; }
-.grid-container .card-5  { background: #70C1B3; }
-.grid-container .card-6  { background: #FF6B6B; }
-.grid-container .card-7  { background: #B388EB; }
-.grid-container .card-8  { background: #FF9F1C; }
-.grid-container .card-9  { background: #3DA5D9; }
-.grid-container .card-10 { background: #9EE493; color: #1a1a1a; }
-.grid-container .card-11 { background: #FFCAD4; color: #333; }
-.grid-container .card-12 { background: #A2D2FF; color: #1a1a1a; }
-.grid-container .card-13 { background: #CDB4DB; color: #1a1a1a;}
-
-.card {
-  font-family: 'Poppins', sans-serif;
-}
-table {
-  margin: auto;
-}
-  
-  
-  
-  .waiting {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  border: 2px solid #ccc;
-  border-top: 2px solid #3498db; /* blue spinner top */
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-left: 0.5rem;
-  vertical-align: middle;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-
-  #switch{
-    display: none;
-  }
+  #princ, #hm, #ygl, #hod, #fm, #ct, #st, #session, #hos { cursor: pointer; }
+  #switch { display: none; }
 </style>
-
-
 </head>
 <body>
-      
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-school" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/><path d="M22 10v6"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+    <symbol id="i-switch" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-sunset" viewBox="0 0 24 24"><path d="M12 10V2"/><path d="m4.9 10.9 1.4 1.4"/><path d="M2 18h2M20 18h2"/><path d="m19.1 10.9-1.4 1.4"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+    <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></symbol>
+    <symbol id="i-usercheck" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></symbol>
+    <symbol id="i-idcard" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M15 9h3M15 13h3M6 17c.5-2 5.5-2 6 0"/></symbol>
+    <symbol id="i-board" viewBox="0 0 24 24"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></symbol>
+    <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16V9M12 16V5M17 16v-4"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 24 24"><path d="m2 4 3 12h14l3-12-6 5-4-7-4 7z"/><path d="M5 20h14"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></symbol>
+  </defs>
+</svg>
+
   <header>
-    <hr>
     <button id="signout1">
-      <span>MAIDUGURI CAPITAL SCHOOL</span> <br>
-      <span id="dir">PROPRIETRESS</span>
+      <span class="mark"><img src="maiduguri-capital-school-logo.svg" alt="" onerror="this.outerHTML='&lt;svg class=&quot;i&quot; style=&quot;width:24px;height:24px&quot;&gt;&lt;use href=&quot;#i-school&quot;/&gt;&lt;/svg&gt;'"></span>
+      <span class="txt"><span>MAIDUGURI CAPITAL SCHOOL</span><span id="dir">PROPRIETRESS</span></span>
     </button>
-    <button id="menu">&#9776;</button>
-     <div class="menu-container">
-            <button id="close">X</button> Menu
-            <hr>
-            <ul>
-              <li></li>
-             <li id="switch">Switch <span>Account</span></li>
-              <li id="signout">Logout <span id="username"></span></li>
-              <li><a href="../../changePsw.html">Change password </a></li>
-            </ul>
-     </div>
-    <div id="sess">session/term not initialized</div>
-    <div id="date"></div>
-    <hr>
-  </header>
- 
-  <h1>ADMIN  </h1>
-    
-    <div class="card-container">
-    <div class="card auth">
-      Authorization code: <span id="code"></span>
-      <button id="generate">Generate new</button>
-      <button id="save" style="display:none">Save</button>
-      
+    <div class="chip"><svg class="i"><use href="#i-book"/></svg><span id="sess">session/term not initialized</span></div>
+    <div class="chip"><svg class="i"><use href="#i-calendar"/></svg><span id="date"></span></div>
+    <button id="menu" aria-label="Open menu"><svg class="i"><use href="#i-menu"/></svg></button>
+    <div class="menu-container">
+      <div class="menu-head"><span>Menu</span><button id="close" aria-label="Close menu"><svg class="i"><use href="#i-x"/></svg></button></div>
+      <hr>
+      <ul>
+        <li id="switch"><svg class="i"><use href="#i-switch"/></svg><span>Switch <span>Account</span></span></li>
+        <li id="signout"><svg class="i"><use href="#i-logout"/></svg><span>Logout <span id="username"></span></span></li>
+        <li><a href="../../changePsw.html"><svg class="i"><use href="#i-lock"/></svg>Change password</a></li>
+      </ul>
     </div>
-      <div class="card">
-        <h2>Teachers Performance Per Period (TPPP)</h2>
-        <select id="datesSelect">
-          <option value=""> -date- </option>
-        </select>
-          <table>
-           
-            <tr>
-              <th>Period</th>
-              <th>Status</th>
-              <th>MECIP</th>
-              <th>CHIP</th>
-              <th>TPPP</th>
-            </tr>
-             <tbody id="table">
-            </tbody>
-          </table>
-        
-        <a href="periodLessonHx.html">
-          Periodic Lesson Histories
-        </a>
+  </header>
+
+  <div class="wrap">
+    <div class="page-title">
+      <div class="badge"><svg class="i"><use href="#i-school"/></svg></div>
+      <div>
+        <div class="greeting"><svg class="i" id="greetIcon"><use href="#i-sun"/></svg><span id="greet">Welcome, Proprietress</span></div>
+        <h1>Admin</h1>
+        <p>Monitor staff, sections and academic performance.</p>
       </div>
-      
-   
+    </div>
 
- 
-<main class="grid-container">
-  <div class="card card-1" onclick = "window.location.href = 'directorate.html' ">Directorate</div>
-  <div class="card card-2" id="princ">Principal <p id="princSects"><span class="waiting"</p></div>
-  <div class="card card-3" id="hm">Head Master <p id="hmSects"><span class="waiting"></span></p></div>
-  <div class="card card-4" id="ygl">Year Group Leaders (Secondary School Sections)</div>
-  <div class="card card-5" id="hod">HODs (Nursery & Primary School Sections)</div>
-  <div class="card card-6" id="fm">Form Masters</div>
-  <div class="card card-7" id="ct">Class Teachers</div>
-  <div class="card card-8" id="st">Subject Teachers</div>
-  <div class="card card-9" onclick="window.location.href='teachers.html'">Teachers</div>
-  <div class="card card-10">
-    <h2>Students</h2>
-    <div onclick="window.location.href='stdAttendance.html'">Attendance</div>  
+    <div class="card-container">
+      <div class="card auth">
+        <div class="ico"><svg class="i"><use href="#i-key"/></svg></div>
+        <div class="auth-info"><span>Authorization code</span><span id="code"></span></div>
+        <div class="auth-actions">
+          <button id="generate"><svg class="i"><use href="#i-refresh"/></svg>Generate new</button>
+          <button id="save" style="display:none">Save</button>
+        </div>
+      </div>
+
+      <div class="card tppp">
+        <div class="tppp-head">
+          <div class="ico"><svg class="i"><use href="#i-activity"/></svg></div>
+          <h2>Teachers Performance Per Period (TPPP)</h2>
+          <select id="datesSelect"><option value=""> -date- </option></select>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <tr><th>Period</th><th>Status</th><th>MECIP</th><th>CHIP</th><th>TPPP</th></tr>
+            <tbody id="table"></tbody>
+          </table>
+        </div>
+        <a href="periodLessonHx.html"><svg class="i"><use href="#i-clipboard"/></svg>Periodic Lesson Histories</a>
+      </div>
+    </div>
+
+    <main class="grid-container">
+      <div class="card card-1" onclick="window.location.href = 'directorate.html'"><div class="ico"><svg class="i"><use href="#i-crown"/></svg></div>Directorate</div>
+      <div class="card card-2" id="princ"><div class="ico"><svg class="i"><use href="#i-award"/></svg></div>Principal <p id="princSects"><span class="waiting"></span></p></div>
+      <div class="card card-3" id="hm"><div class="ico"><svg class="i"><use href="#i-usercheck"/></svg></div>Head Master <p id="hmSects"><span class="waiting"></span></p></div>
+      <div class="card card-4" id="ygl"><div class="ico"><svg class="i"><use href="#i-users"/></svg></div>Year Group Leaders (Secondary School Sections)</div>
+      <div class="card card-5" id="hod"><div class="ico"><svg class="i"><use href="#i-layers"/></svg></div>HODs (Nursery &amp; Primary School Sections)</div>
+      <div class="card card-6" id="fm"><div class="ico"><svg class="i"><use href="#i-idcard"/></svg></div>Form Masters</div>
+      <div class="card card-7" id="ct"><div class="ico"><svg class="i"><use href="#i-board"/></svg></div>Class Teachers</div>
+      <div class="card card-8" id="st"><div class="ico"><svg class="i"><use href="#i-book"/></svg></div>Subject Teachers</div>
+      <div class="card card-9" onclick="window.location.href='teachers.html'"><div class="ico"><svg class="i"><use href="#i-briefcase"/></svg></div>Teachers</div>
+      <div class="card card-10">
+        <div class="ico"><svg class="i"><use href="#i-school"/></svg></div>
+        <h2>Students</h2>
+        <div class="link" onclick="window.location.href='stdAttendance.html'">Attendance<svg class="i"><use href="#i-arrow"/></svg></div>
+      </div>
+      <div class="card card-11" id="session" onclick="window.location.href='session.html'"><div class="ico"><svg class="i"><use href="#i-calendar"/></svg></div>Session</div>
+      <div class="card card-12" onclick="window.location.href='section.html'"><div class="ico"><svg class="i"><use href="#i-grid"/></svg></div>Sections</div>
+      <div class="card card-13">
+        <div class="ico"><svg class="i"><use href="#i-chart"/></svg></div>
+        <h2>Academic Performance</h2>
+        <div class="link" onclick="window.location.href='rc (1).html'">Report Cards<svg class="i"><use href="#i-arrow"/></svg></div>
+        <div class="link" onclick="window.location.href='reportOverview1.html'">Overview<svg class="i"><use href="#i-arrow"/></svg></div>
+      </div>
+      <div class="card card-2" id="hos" onclick="window.location.href='assignHOS.html'"><div class="ico"><svg class="i"><use href="#i-shield"/></svg></div>Heads of Sections</div>
+      <div class="card card-6" onclick="window.location.href='admin-mgt/index.html'"><div class="ico"><svg class="i"><use href="#i-sliders"/></svg></div>Admin Management</div>
+      <div class="card card-5" onclick="window.location.href='../bill.html'"><div class="ico"><svg class="i"><use href="#i-cloud"/></svg></div>Cloud Storage, Usage and Billing</div>
+    </main>
   </div>
-  <div class="card card-11" id="session" onclick="window.location.href='session.html'">Session</div>
-  <div class="card card-12" onclick="window.location.href='section.html'">Sections</div>
-  <div class="card card-13">
-    <h2>Academic Performance</h2>
-    <div onclick="window.location.href='rc (1).html'">Report Cards</div>
-    <div onclick="window.location.href='reportOverview1.html'">Overview</div>
-    
-  </div>
+
+  <!-- Time-aware greeter -->
+  <script>
+    (function () {
+      function updateGreeting() {
+        var hr = new Date().getHours(), text, icon;
+        if (hr >= 5 && hr < 12)       { text = "Good morning";   icon = "i-sun"; }
+        else if (hr >= 12 && hr < 17) { text = "Good afternoon"; icon = "i-sun"; }
+        else if (hr >= 17 && hr < 21) { text = "Good evening";   icon = "i-sunset"; }
+        else                          { text = "Good night";     icon = "i-moon"; }
+        document.getElementById("greet").textContent = text + ", Proprietress";
+        document.getElementById("greetIcon").firstElementChild.setAttribute("href", "#" + icon);
+      }
+      updateGreeting();
+      setInterval(updateGreeting, 60000);
+    })();
+  </script>
+
+  <!-- PASTE YOUR ORIGINAL <script type="module"> BLOCK HERE, UNCHANGED -->
+  <!-- Tip: the original menu code `document.body.onclick` still works with the new header. -->
   
-  <div class="card card-2" id="hos" onclick="window.location.href='assignHOS.html'">Heads of Sections</div>
-    <div class="card card-6" onclick="window.location.href='admin-mgt/index.html'">Admin Management</div>
-
-  <div class="card card-5"  onclick="window.location.href='../bill.html'">Cloud Storage, Usage and Billing</div>
- 
-</main>
-
-
-
-
-    
-    
-
-  
-   <script type="module">
+     <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
   import {getFirestore, onSnapshot, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
@@ -652,8 +475,8 @@ function updateTPPP(){
   
   presentTPPP(stdPeriods, datesSelect.value);
  }  
-
-   
+  
+  
   function presentTPPP(stdPeriods, date){
    // let heading = table.children[0];
     table.innerHTML = "";
@@ -814,7 +637,6 @@ function updateTPPP(){
     let teacher = teachers[id]; 
     
     
-  
       if (sectionDoc.exists()){
         let sections = sectionDoc.data();
         hmSects.innerHTML = "";
@@ -950,3 +772,4 @@ function key(token){
   </script>
 </body>
 </html>
+  
