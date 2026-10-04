@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intra-Class Students Transfer</title>
+  <link rel="stylesheet" href="../styles/students.css">
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; max-width: 760px; margin-inline: auto; }
+    .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+    select, button { padding: 8px 10px; font-size: 1rem; }
+    .list { border: 1px solid #ccc; border-radius: 8px; overflow: hidden; }
+    .row { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+    .row:last-child { border-bottom: 0; }
+    .row.sel { background: #eef6ff; }
+    .row img { width: 40px; height: 40px; object-fit: cover; border-radius: 50%; }
+    .row .id { color: #666; font-size: .85rem; }
+    .row input, .all input { width: 20px; height: 20px; }
+    .all { display: flex; gap: 12px; align-items: center; padding: 8px 12px; background: #f6f6f6; font-weight: 600; }
+    .empty { padding: 24px; text-align: center; color: #666; }
+    #msg { min-height: 1.4em; margin-top: 10px; }
+    #msg.err { color: #b00020; } #msg.ok { color: #0a7a2f; }
+    button:disabled { opacity: .5; }
+  h1 {text-align: center}
+  </style>
+</head>
+<body>
+  <h1>Intra-Class Students Transfer</h1>
+
+  <div class="bar">
+    <select id="sessionSelect"></select>
+    <select id="fromSelect"><option value=""> -transfer from- </option></select>
+  </div>
+
+  <div class="list">
+    <label class="all"><input type="checkbox" id="selAll"> <span id="count">Select all</span></label>
+    <div id="list"><div class="empty">Choose a session and a class to see its pupils.</div></div>
+  </div>
+
+  <div class="bar">
+    <select id="toSelect" disabled><option value=""> -transfer to- </option></select>
+    <button id="transferBtn" disabled>Transfer</button>
+  </div>
+  <div id="msg"></div>
+
+  <script src="../../../config.js"></script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getFirestore, writeBatch, arrayUnion, doc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+    authDomain: "school-in-the-box.firebaseapp.com",
+    projectId: "school-in-the-box",
+    storageBucket: "school-in-the-box.firebasestorage.app",
+    messagingSenderId: "596350496353",
+    appId: "1:596350496353:web:84c66c351700ddf0824420",
+    measurementId: "G-3MGCDH4FRF"
+  };
+  const schoolId = "capital";
+  const terms = ["first term", "second term", "third term"];
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const stdDb = getFirestore(initializeApp(studentsConfig, "std"));
+
+  let students = {};          // id -> student, for the loaded class
+  const selected = new Set(); // ids ticked in the list
+  let allClasses = [];        // every class in every section
+
+  const key = t => t.replaceAll(" ", "").replaceAll("/", "").replaceAll(",", "");
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const say = (t, cls = "") => { msg.textContent = t; msg.className = cls; };
+  const optimize = url => (!url ? "../../std-pic.jpg" : url.replace("/upload/", "/upload/f_auto,q_auto/"));
+
+  // ---- sessions ----
+  const sessions = ((await getDoc(doc(db, schoolId, "sessions"))).data()?.sessions ?? []).sort((a, b) => b.no - a.no);
+  sessions.forEach((s, i) => {
+    const o = document.createElement("option");
+    o.textContent = s.year + ", " + terms[s.term];
+    o.dataset.index = i;
+    sessionSelect.appendChild(o);
+  });
+  const isLatest = () => sessionSelect.selectedOptions[0]?.dataset.index === "0";
+
+  // ---- classes ----
+  const sectionDoc = await getDoc(doc(db, schoolId, "section"));
+  const sections = sectionDoc.exists() ? sectionDoc.data() : {};
+  allClasses = Object.values(sections).flatMap(s => s.classes ?? []);
+
+  onAuthStateChanged(auth, async user => {
+    if (!user) return;
+    const id = user.email.replace(/@.*/, "");
+    const teacher = (await getDoc(doc(db, schoolId, "teachers"))).data()?.[id];
+    const hosSects = teacher?.role?.hos?.sections ?? [];
+    fromSelect.length = 1;
+    hosSects.forEach(k => {
+      const g = document.createElement("optgroup");
+      g.label = k;
+      (sections[k]?.classes ?? []).forEach(c => g.insertAdjacentHTML("beforeend", `<option>${esc(c)}</option>`));
+      fromSelect.append(g);
+    });
+  });
+
+  // Same level = identical name except the final character (Primary 1A -> Primary 1B, 1C ...)
+  function siblings(cls) {
+    const stem = cls.slice(0, -1).toLowerCase();
+    return allClasses.filter(c => c !== cls && c.length === cls.length && c.slice(0, -1).toLowerCase() === stem);
+  }
+
+  function fillTargets() {
+    toSelect.length = 1;
+    const opts = fromSelect.value ? siblings(fromSelect.value) : [];
+    opts.forEach(c => toSelect.insertAdjacentHTML("beforeend", `<option>${esc(c)}</option>`));
+    toSelect.disabled = !opts.length;
+    if (fromSelect.value && !opts.length) say("This class has no sibling class at the same level.", "err");
+  }
+
+  // ---- load pupils from schoolId/{session}{term}/{class}/students ----
+  const srcRef = () => doc(db, schoolId, key(sessionSelect.value), key(fromSelect.value), "students");
+
+  async function loadStudents() {
+    selected.clear(); students = {}; say("");
+    fillTargets(); refresh();
+    if (!sessionSelect.value || !fromSelect.value) {
+      list.innerHTML = '<div class="empty">Choose a session and a class to see its pupils.</div>';
+      return;
+    }
+    list.innerHTML = '<div class="empty">Loading…</div>';
+    const snap = await getDoc(srcRef());
+    const all = snap.exists() ? snap.data() : {};
+    // Only pupils that already have an ID can be moved (they have a record in db/students)
+    Object.values(all).filter(s => s.id).forEach(s => students[s.id] = s);
+    const sorted = Object.values(students).sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+    if (!sorted.length) { list.innerHTML = '<div class="empty">No pupils in this class for the selected term.</div>'; return; }
+    list.innerHTML = "";
+    sorted.forEach(s => {
+      const row = document.createElement("label");
+      row.className = "row";
+      row.innerHTML = `<input type="checkbox"><img src="${esc(optimize(s.picURL))}" alt="">
+        <div><div>${esc((s.name ?? "").toUpperCase())}</div><div class="id">${esc(s.id)}</div></div>`;
+      row.querySelector("input").onchange = e => {
+        e.target.checked ? selected.add(s.id) : selected.delete(s.id);
+        row.classList.toggle("sel", e.target.checked);
+        refresh();
+      };
+      list.appendChild(row);
+    });
+  }
+
+  function refresh() {
+    const total = Object.keys(students).length;
+    count.textContent = selected.size ? `${selected.size} of ${total} selected` : "Select all";
+    selAll.checked = total > 0 && selected.size === total;
+    transferBtn.disabled = !(selected.size && toSelect.value);
+  }
+
+  selAll.onchange = () => {
+    list.querySelectorAll(".row").forEach(r => {
+      const cb = r.querySelector("input");
+      cb.checked = selAll.checked;
+      r.classList.toggle("sel", selAll.checked);
+    });
+    selected.clear();
+    if (selAll.checked) Object.keys(students).forEach(id => selected.add(id));
+    refresh();
+  };
+  sessionSelect.onchange = loadStudents;
+  fromSelect.onchange = loadStudents;
+  toSelect.onchange = refresh;
+
+  // ---- transfer ----
+  transferBtn.onclick = async () => {
+    const from = fromSelect.value, to = toSelect.value;
+    const ids = [...selected];
+    if (!(from && to && ids.length)) return;
+    if (!confirm(`Transfer ${ids.length} pupil(s) from ${from} to ${to}?`)) return;
+
+    const latest = isLatest();
+    const fromRef = srcRef();
+    const toRef = doc(db, schoolId, key(sessionSelect.value), key(to), "students");
+    transferBtn.disabled = true; transferBtn.textContent = "Transferring…"; say("");
+
+    try {
+      await runTransaction(db, async tx => {
+        // 1. all reads first
+        const [fromSnap, toSnap] = await Promise.all([tx.get(fromRef), tx.get(toRef)]);
+        const src = fromSnap.exists() ? fromSnap.data() : {};
+        const dst = toSnap.exists() ? toSnap.data() : {};
+
+        const pRefs = new Map();
+        if (latest) ids.forEach(id => {
+          const pin = src[id]?.parent?.pin;
+          if (pin) pRefs.set(pin, doc(db, schoolId, "db", "parents", "pin" + String(pin).replace(/^0+/, "")));
+        });
+        const pSnaps = await Promise.all([...pRefs.values()].map(r => tx.get(r)));
+
+        // 2. move pupils between the two class documents
+        ids.forEach(id => {
+          if (!src[id]) throw new Error(`${id} is no longer in ${from}. Reload and try again.`);
+          dst[id] = src[id];
+          delete src[id];
+        });
+        tx.set(fromRef, src);
+        tx.set(toRef, dst);
+
+        // 3. current-class records (latest term only, so past terms never rewrite today's class)
+        if (latest) {
+          ids.forEach(id => tx.update(doc(db, schoolId, "db", "students", id.replaceAll("/", "_")), { class: to.toLowerCase() }));
+          pSnaps.forEach(ps => {
+            if (!ps.exists()) return;
+            const wards = (ps.data().wards ?? []).map(w => ids.includes(w.id) ? { ...w, class: to } : w);
+            tx.update(ps.ref, { wards });
+          });
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      say("Transfer failed, nothing was changed: " + err.message, "err");
+      transferBtn.textContent = "Transfer"; refresh();
+      return;
+    }
+
+    // Best effort: the profile database is a separate Firebase app, so it cannot join the transaction
+    let note = "";
+    try {
+      const b = writeBatch(stdDb);
+      ids.forEach(id => b.set(doc(stdDb, "students", id.replaceAll("/", "_")), { classes: arrayUnion(to) }, { merge: true }));
+      await b.commit();
+    } catch (e) {
+      console.error(e);
+      note = " Profile classes could not be updated; retry or fix manually.";
+    }
+
+    say(`Transferred ${ids.length} pupil(s) to ${to}.` + (latest ? "" : " Past term: current class records were left unchanged.") + note, note ? "err" : "ok");
+    transferBtn.textContent = "Transfer";
+    await loadStudents();
+  };
+
+  await loadStudents();
+  </script>
+</body>
+</html>
