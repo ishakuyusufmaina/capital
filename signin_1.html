@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="asset/favicon-180x180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="asset/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="asset/favicon-16x16.png">
+  <link rel="manifest" href="asset/site.webmanifest">
+  <link rel="mask-icon" href="asset/favicon-512x512.png" color="#ffffff">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="asset/mstile-150x150.png">
+<!-- Light theme -->
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+
+<!-- Dark theme -->
+  <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+
+  <title>Capital - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+ 
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    main {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #004080, #0066cc);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    header {
+      width: 100%;
+      background-color: #002f5e;
+      color: white;
+      padding: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    header img {
+      height: 50px;
+      border-radius:50%;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 40px 30px;
+      margin-top: 60px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .card h2 {
+      margin-bottom: 25px;
+      color: #004080;
+    }
+
+    .card input {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    .card button {
+      width: 100%;
+      padding: 12px;
+      background-color: #004080;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background-color 0.3s ease;
+    }
+
+    .card button:hover {
+      background-color: #003060;
+    }
+
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 1.2rem;
+      }
+
+      .card {
+        padding: 25px 20px;
+      }
+    }
+  
+  
+  header img {
+  height: auto;
+  width: 60px; /* or 100%, max-width for responsiveness */
+  max-width: 100%;
+  border-radius: 8px; /* rounded corners */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* soft shadow */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid #fff;
+
+  }
+
+header img:hover {
+  transform: scale(1.05); /* slight zoom on hover */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); /* stronger shadow */
+}
+
+  
+  
+  footer {
+  //margin-top: 50px;
+  background-color: #002f5e;
+  color: #ffffff;
+  text-align: center;
+  padding: 15px 0;
+  font-size: 0.9rem;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
+  position: sticky;
+ top: 100%;
+  width: 100%;
+}
+
+footer small {
+  opacity: 0.8;
+}
+  
+  
+
+  </style>
+</head>
+<body>
+ 
+  <header>
+    <img src="logo.jpg" alt="School Logo" />
+    <h1>Maiduguri Capital School</h1>
+  </header>
+   <main>
+  <div class="card">
+    <h2>Sign In</h2>
+    <input type="email" id="email" placeholder="Username or ID" required />
+    <input type="password" id="password" placeholder="Password or PIN" required />
+    <button id="loginBtn" >Login</button>
+        
+  </div>
+  </main>
+ <footer>
+    <small>©Mainafly 2026</small>
+  </footer>
+    
+  <script src="config.js"></script>
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import {getFirestore, query, getDocs, where, collection, doc, enableIndexedDbPersistence, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getAuth, createUserWithEmailAndPassword, updateProfile, deleteUser, onAuthStateChanged, signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+        const firebaseConfig = {
+  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+  authDomain: "school-in-the-box.firebaseapp.com",
+  projectId: "school-in-the-box",
+  storageBucket: "school-in-the-box.firebasestorage.app",
+  messagingSenderId: "596350496353",
+  appId: "1:596350496353:web:84c66c351700ddf0824420",
+  measurementId: "G-3MGCDH4FRF"
+};
+  
+  const stdApp = initializeApp(studentsConfig, "std"); 
+  const stdDb = getFirestore(stdApp);
+
+
+   
+  const schoolId = "capital";
+    const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const auth = getAuth(app);
+  const db = getFirestore(app);
+  enableIndexedDbPersistence(db)
+  .catch((err) => {
+    if (err.code === 'failed-precondition') {
+      console.log("Multiple tabs open");
+    } else if (err.code === 'unimplemented') {
+      console.log("Browser not supported");
+    }
+  });
+  
+  let teachersRef;
+  let teacherDoc;
+   let teachers;
+
+      
+  var schoolGeneratedUsername;
+  
+ async function onLoginSuccess(user, role) {
+  
+   
+   if (!teachers[schoolGeneratedUsername]){
+     if (!(user.email=="dev@teacher."+schoolId)){
+    // await deleteUser(user);
+     alert("Not on staff list, talk to admin if you think this is a mistake");
+     return;
+     }
+   }
+ 
+   
+   
+    
+   
+   if (role=="admin"){
+        window.location.href = "admin/admin.html";
+        return
+      }
+      if (role=="teacher"){
+        window.location.href = "teacher/index.html";
+        return
+      }
+      if (role=="student"){
+        window.location.href = "student/index.html";
+        return
+      }
+      if (role=="guardian"){
+        window.location.href = "guardian/index.html";
+        return
+      }
+      if (role=="alumni"){
+        window.location.href = "alumni/index.html";
+        return
+      }
+      
+      // redirect or load user-specific content here
+    }
+  //261, pin-> 6193
+  const logBtn = document.getElementById("loginBtn");
+  const logBtnS = document.getElementById("loginBtnS");
+  logBtn.onclick = signIn;
+ 
+  let reg = /.*@/;
+  
+ 
+  async function signInAsStd(){
+    //logBtnS.textContent = "Logging..";
+      const id = document.getElementById("email").value;
+      const pin = document.getElementById("password").value;
+
+    let q = query(
+    collection(stdDb, "students"),
+    where("pin", "==", Number(pin)),
+    where("id", "==", id)
+    );
+    let docs = await getDocs(q);
+    let std;
+    docs.forEach(doc=>{
+      std = doc.data()
+    });
+    if (std) {
+      window.localStorage.setItem("id", std.id);
+      window.location.href = "student.html";
+    } else {
+      alert("Wrong login credential. Meet your form master/class teacher for your ID and login PIN");
+    }
+  }
+  
+  async function signIn() {
+    
+      logBtn.textContent = "Logging..";
+      const username = document.getElementById("email").value;
+    if (isStudent(username)){
+      await signInAsStd();
+      logBtn.textContent = "Login"
+      return;
+    }
+    teachersRef = doc(db, schoolId, "teachers");
+   teacherDoc = await getDoc(teachersRef);
+   teachers = teacherDoc.exists()? teacherDoc.data() : {};
+
+      const email = username.replace(/@.*/, "")+`@teacher.${schoolId}`;
+    
+     schoolGeneratedUsername = username.replace(/@.*/, "");
+      const role = username.replace(reg, "");
+      const password = document.getElementById("password").value;
+
+
+    if (role=="capital"){
+      console.log("cap");
+        
+        signInWithEmailAndPassword(auth, email, password)
+        .then( async (userCredential) => {
+          let dRef = doc(db, schoolId, "directors");
+  let dDoc = await getDoc(dRef);
+   let dirs = dDoc.exists()? dDoc.data() : {};
+          let username = dirs[schoolGeneratedUsername].username;
+          
+          if (username=="mcs001"){
+                window.location.href = "admin/proprietress/index.html";
+                 console.log("proprietress");
+                return;
+              }
+            if (username=="mcs002"){
+                window.location.href = "admin/director/index.html";
+              return;
+              }
+            if (username=="mcs003"){
+                window.location.href = "admin/director2/index.html";
+              return;
+              }
+              return;
+      
+          
+         // onLoginSuccess(userCredential.user, role);
+        })
+        .catch( async (error) => {
+          let dRef = doc(db, schoolId, "directors");
+  let dDoc = await getDoc(dRef);
+   let dirs = dDoc.exists()? dDoc.data() : {};
+    
+          let user = dirs[schoolGeneratedUsername];
+          console.log(user.psw) 
+          //return;
+          if (user && user.psw==password){
+              await createUserWithEmailAndPassword(auth, email, password);
+             let createdUser = auth.currentUser;
+            
+              await updateProfile(createdUser, {displayName: user.name});
+            alert(user.name);
+              if (username=="mcs001"){
+                window.location.href = "admin/proprietress/index.html";
+                return;
+              }
+            if (username=="mcs002"){
+                window.location.href = "admin/director/index.html";
+              return;
+              }
+            if (username=="mcs003"){
+                window.location.href = "admin/director2/index.html";
+              return;
+              }
+              return;
+      
+          }
+          alert("Login failed: " + error.code);
+        });
+      return;
+      }
+
+      
+   
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          onLoginSuccess(userCredential.user, role);
+          logBtn.textContent = "Login";
+        })
+        .catch( async (error) => {
+          let user = teachers[schoolGeneratedUsername];
+          
+          if (user && user.psw==password){
+              await createUserWithEmailAndPassword(auth, email, password);
+             let createdUser = auth.currentUser;
+            
+              await updateProfile(createdUser, {displayName: user.name});
+            alert(user.name);
+              onLoginSuccess(createdUser, role);
+              return;
+      
+          }
+          alert("Login failed: " + error.code);
+          logBtn.textContent = "Login";
+        });
+    }
+
+      
+  function isStudent(id){
+    return id.includes("/");
+  }    
+  </script>
+  
+</body>
+</html>

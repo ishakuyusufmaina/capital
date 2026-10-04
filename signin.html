@@ -10,390 +10,287 @@
   <link rel="mask-icon" href="asset/favicon-512x512.png" color="#ffffff">
   <meta name="msapplication-TileColor" content="#ffffff">
   <meta name="msapplication-TileImage" content="asset/mstile-150x150.png">
-<!-- Light theme -->
+  <!-- Light theme -->
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-
-<!-- Dark theme -->
+  <!-- Dark theme -->
   <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
 
   <title>Capital - Login</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
- 
+
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --blue: #004080; --blue-deep: #002f5e; --blue-dark: #003060; --blue-light: #0066cc;
+      --card: #fff; --text: #1f2a37; --muted: #6b7280; --line: #d5dbe5; --field: #f6f8fb;
+      --ease: cubic-bezier(.2, .8, .2, 1);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { height: 100%; }
+    body {
+      font-family: 'Poppins', sans-serif; min-height: 100vh; display: flex; flex-direction: column;
+      color: var(--text); -webkit-font-smoothing: antialiased; position: relative; overflow-x: hidden;
+      background: linear-gradient(120deg, #004080, #0066cc 55%, #003a75);
     }
 
-    main {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to right, #004080, #0066cc);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-    }
+    .i { width: 1.2em; height: 1.2em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 
+    /* ---------- Animated backdrop ---------- */
+    .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .glow { position: absolute; border-radius: 50%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.2), rgba(255,255,255,0) 70%); animation: drift 14s ease-in-out infinite alternate; }
+    .glow.a { width: 520px; height: 520px; top: -160px; right: -120px; }
+    .glow.b { width: 420px; height: 420px; bottom: -140px; left: -100px; animation-duration: 18s; animation-delay: -6s; }
+    @keyframes drift { to { transform: translate(-40px, 50px) scale(1.12); } }
+    .bg .mark {
+      position: absolute; right: -90px; bottom: -70px; width: min(560px, 80vw); opacity: .07;
+      filter: brightness(0) invert(1); transform: rotate(-4deg);
+    }
+    .bub {
+      position: absolute; bottom: -60px; left: var(--x); width: var(--s); height: var(--s); border-radius: 50%;
+      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+      animation: float-up var(--d) linear infinite; animation-delay: var(--dl);
+    }
+    @keyframes float-up { 0% { transform: translateY(0) scale(.8); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-110vh) scale(1.1); opacity: 0; } }
+
+    /* ---------- Header / footer ---------- */
     header {
-      width: 100%;
-      background-color: #002f5e;
-      color: white;
-      padding: 20px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      position: relative; z-index: 3; width: 100%; padding: 14px 20px; color: #fff;
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      background: #002f5e; box-shadow: 0 2px 8px rgba(0,0,0,.2);
+      animation: drop .6s var(--ease) both;
     }
-
-    header img {
-      height: 50px;
-      border-radius:50%;
+    @keyframes drop { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: none; } }
+    header::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(to right, transparent, rgba(255,255,255,.45), transparent); }
+    .logo-badge {
+      width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center; background: #fff; padding: 5px;
+      border: 2px solid rgba(255,255,255,.9); box-shadow: 0 4px 14px rgba(0,0,0,.28);
+      transition: transform .4s var(--ease), box-shadow .3s;
     }
+    .logo-badge:hover { transform: rotate(-6deg) scale(1.08); box-shadow: 0 8px 20px rgba(0,0,0,.35); }
+    .logo-badge img { width: 100%; height: 100%; object-fit: contain; }
+    header h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: .2px; }
+    header h1 span { color: #fff; }
 
-    header h1 {
-      font-size: 1.8rem;
+    main { position: relative; z-index: 2; flex: 1; display: flex; align-items: center; justify-content: center; padding: 56px 16px 36px; }
+
+    footer {
+      position: relative; z-index: 3; width: 100%; padding: 15px 0; text-align: center; color: #fff; font-size: .9rem;
+      background: #002f5e; box-shadow: 0 -2px 8px rgba(0,0,0,.2);
     }
+    footer small { opacity: .8; }
 
+    /* ---------- Card ---------- */
+    .card-wrap { width: 100%; max-width: 420px; perspective: 900px; }
+    .tilt { transition: transform .25s ease-out; }
     .card {
-      background: white;
-      border-radius: 12px;
-      padding: 40px 30px;
-      margin-top: 60px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-      text-align: center;
+      position: relative; padding: 38px 32px 30px; text-align: center; background: var(--card); border-radius: 20px;
+      box-shadow: 0 28px 70px rgba(0,20,60,.4), 0 2px 6px rgba(0,0,0,.08);
+      animation: pop .7s var(--ease) both;
     }
+    @keyframes pop { from { opacity: 0; transform: translateY(30px) scale(.96); } to { opacity: 1; transform: none; } }
 
-    .card h2 {
-      margin-bottom: 25px;
-      color: #004080;
+    .stag { animation: rise .6s var(--ease) both; animation-delay: calc(var(--i) * 80ms + 250ms); }
+    @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+
+    .lock {
+      position: relative; width: 66px; height: 66px; margin: -72px auto 16px; border-radius: 20px; display: grid; place-items: center; color: #fff;
+      background: linear-gradient(135deg, var(--blue-light), var(--blue-deep)); border: 4px solid var(--card);
+      box-shadow: 0 10px 24px rgba(0,64,128,.4); animation: bob 4s ease-in-out infinite;
     }
+    .lock::after { content: ""; position: absolute; inset: -4px; border-radius: 22px; border: 2px solid rgba(0,102,204,.55); animation: ring 2.4s ease-out infinite; }
+    @keyframes bob { 50% { transform: translateY(-6px); } }
+    @keyframes ring { from { transform: scale(1); opacity: .9; } to { transform: scale(1.5); opacity: 0; } }
+    .lock .i { width: 30px; height: 30px; }
 
+    .card h2 { margin-bottom: 4px; color: var(--blue); font-size: 1.5rem; }
+    .greet { font-size: .88rem; font-weight: 600; color: var(--blue-light); margin-bottom: 4px; }
+    .hint { margin-bottom: 20px; font-size: .8rem; line-height: 1.5; color: var(--muted); }
+
+    /* Floating-label fields */
+    .field { position: relative; margin: 14px 0; text-align: left; }
+    .field > .i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; transition: color .2s, transform .3s var(--ease); z-index: 1; }
     .card input {
-      width: 100%;
-      padding: 12px 15px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
+      width: 100%; padding: 20px 46px 8px 44px; border-radius: 12px; border: 1.5px solid var(--line);
+      background: var(--field); color: var(--text); font-family: inherit; font-size: .98rem;
+      transition: border-color .2s, box-shadow .2s, background .2s;
     }
-
-    .card button {
-      width: 100%;
-      padding: 12px;
-      background-color: #004080;
-      color: white;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 15px;
-      transition: background-color 0.3s ease;
+    .field label {
+      position: absolute; left: 44px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: .95rem; pointer-events: none;
+      transition: top .2s var(--ease), font-size .2s var(--ease), color .2s; transform-origin: left;
     }
+    .card input:focus + label, .card input:not(:placeholder-shown) + label { top: 13px; font-size: .68rem; font-weight: 600; letter-spacing: .3px; color: var(--blue-light); }
+    .card input:focus { outline: none; border-color: var(--blue-light); background: #fff; box-shadow: 0 0 0 4px rgba(0,102,204,.15); }
+    .field:focus-within > .i { color: var(--blue-light); transform: translateY(-50%) scale(1.15); }
 
-    .card button:hover {
-      background-color: #003060;
+    .toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); z-index: 2; }
+    .card .toggle { width: 36px; height: 36px; display: grid; place-items: center; margin: 0; padding: 0; background: transparent; color: var(--muted); border: none; border-radius: 9px; cursor: pointer; }
+    .card .toggle:hover { background: rgba(0,64,128,.08); color: var(--blue); }
+    .toggle .off { display: none; }
+    .toggle.on .off { display: block; }
+    .toggle.on .eye { display: none; }
+
+    .caps { display: none; align-items: center; gap: 6px; margin: -4px 0 4px; font-size: .76rem; font-weight: 600; color: #b45309; text-align: left; animation: rise .3s var(--ease) both; }
+    .caps.show { display: flex; }
+    .caps .i { width: 1em; height: 1em; }
+
+    .card button#loginBtn {
+      position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 14px; margin-top: 16px; color: #fff; font-family: inherit; font-size: 1rem; font-weight: 600;
+      background: linear-gradient(135deg, var(--blue-light), var(--blue)); border: none; border-radius: 12px; cursor: pointer;
+      box-shadow: 0 10px 24px rgba(0,64,128,.38); transition: transform .15s ease, box-shadow .3s ease;
     }
+    .card button#loginBtn::after {
+      content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
+      background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent); transform: skewX(-20deg); transition: left .6s var(--ease);
+    }
+    .card button#loginBtn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0,64,128,.5); }
+    .card button#loginBtn:hover::after { left: 130%; }
+    .card button#loginBtn:active { transform: scale(.98); }
+    .card button#loginBtn.loading { pointer-events: none; filter: saturate(.8); }
+    .card button#loginBtn.loading::before {
+      content: ""; width: 1em; height: 1em; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
+    .secure { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 18px; font-size: .74rem; color: var(--muted); }
+    .secure .i { width: 1em; height: 1em; color: #2e9d62; }
+
+    .bg { transform: translateZ(0); }
+    .glow, .bub { will-change: transform; }
+    body.typing .bg *, body.typing .lock, body.typing .lock::after { animation-play-state: paused !important; }
+
+    :focus-visible { outline: 3px solid #80cbc4; outline-offset: 2px; }
     @media (max-width: 480px) {
-      header h1 {
-        font-size: 1.2rem;
-      }
-
-      .card {
-        padding: 25px 20px;
-      }
+      header h1 { font-size: 1.05rem; }
+      .logo-badge { width: 50px; height: 50px; }
+      .card { padding: 34px 20px 24px; }
     }
-  
-  
-  header img {
-  height: auto;
-  width: 60px; /* or 100%, max-width for responsiveness */
-  max-width: 100%;
-  border-radius: 8px; /* rounded corners */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* soft shadow */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 2px solid #fff;
-
-  }
-
-header img:hover {
-  transform: scale(1.05); /* slight zoom on hover */
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); /* stronger shadow */
-}
-
-  
-  
-  footer {
-  //margin-top: 50px;
-  background-color: #002f5e;
-  color: #ffffff;
-  text-align: center;
-  padding: 15px 0;
-  font-size: 0.9rem;
-  font-family: 'Poppins', sans-serif;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
-  position: sticky;
- top: 100%;
-  width: 100%;
-}
-
-footer small {
-  opacity: 0.8;
-}
-  
-  
-
+    @media (prefers-color-scheme: dark) {
+      :root { --card: #17202e; --text: #e8edf5; --muted: #98a2b3; --line: rgba(255,255,255,.14); --field: rgba(255,255,255,.05); }
+      .card h2 { color: #8fb8ee; }
+      .greet { color: #6fb0ff; }
+      .card input:focus { background: rgba(255,255,255,.08); }
+      .card .toggle:hover { background: rgba(255,255,255,.1); color: #fff; }
+      .caps { color: #fbbf24; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .stag, .card, header { opacity: 1; }
+    }
   </style>
 </head>
 <body>
- 
-  <header>
-    <img src="logo.jpg" alt="School Logo" />
-    <h1>Maiduguri Capital School</h1>
-  </header>
-   <main>
-  <div class="card">
-    <h2>Sign In</h2>
-    <input type="email" id="email" placeholder="Username or ID" required />
-    <input type="password" id="password" placeholder="Password or PIN" required />
-    <button id="loginBtn" >Login</button>
-        
+
+  <!-- Animated backdrop -->
+  <div class="bg" aria-hidden="true">
+    <div class="glow a"></div><div class="glow b"></div>
+    <img class="mark" src="maiduguri-capital-school-logo.svg" alt="">
+    <i class="bub" style="--x:8%;  --s:18px; --d:16s; --dl:-2s"></i>
+    <i class="bub" style="--x:22%; --s:34px; --d:22s; --dl:-9s"></i>
+    <i class="bub" style="--x:38%; --s:14px; --d:14s; --dl:-5s"></i>
+    <i class="bub" style="--x:55%; --s:26px; --d:19s; --dl:-12s"></i>
+    <i class="bub" style="--x:70%; --s:40px; --d:25s; --dl:-3s"></i>
+    <i class="bub" style="--x:84%; --s:16px; --d:17s; --dl:-8s"></i>
+    <i class="bub" style="--x:93%; --s:28px; --d:21s; --dl:-14s"></i>
   </div>
+
+  <header>
+    <div class="logo-badge">
+      <img src="maiduguri-capital-school-logo.svg" alt="Maiduguri Capital School logo" onerror="this.onerror=null;this.src='logo.jpg'" />
+    </div>
+    <h1><span>Maiduguri Capital School</span></h1>
+  </header>
+
+  <main>
+    <div class="card-wrap">
+      <div class="tilt" id="tilt">
+        <div class="card">
+          <div class="lock">
+            <svg class="i" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/><path d="M22 10v6"/></svg>
+          </div>
+          <h2 class="stag" style="--i:0">Sign In</h2>
+          <p class="greet stag" style="--i:1" id="greet">Welcome back</p>
+
+          <div class="field stag" style="--i:3">
+            <svg class="i" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="email" id="email" placeholder=" " autocomplete="username" required />
+            <label for="email">Username or ID</label>
+          </div>
+          <div class="field stag" style="--i:4">
+            <svg class="i" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="password" placeholder=" " autocomplete="current-password" required />
+            <label for="password">Password or PIN</label>
+            <button type="button" class="toggle" id="togglePw" aria-label="Show password">
+              <svg class="i eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="i off" viewBox="0 0 24 24"><path d="M17.9 17.9A10.1 10.1 0 0 1 12 19c-6.4 0-10-7-10-7a18 18 0 0 1 4.1-5M9.9 5.2A9.6 9.6 0 0 1 12 5c6.4 0 10 7 10 7a18 18 0 0 1-2.2 3.2"/><path d="m2 2 20 20"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+            </button>
+          </div>
+          <div class="caps" id="capsNote"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 3 14h5v3h8v-3h5z"/><path d="M8 21h8"/></svg>Caps Lock is on</div>
+
+          <button id="loginBtn" class="stag" style="--i:5">Login</button>
+          <div class="secure stag" style="--i:6">
+            <svg class="i" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            Secure school portal
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
- <footer>
+
+  <footer>
     <small>©Mainafly 2026</small>
   </footer>
-    
-  <script src="config.js"></script>
-    <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, query, getDocs, where, collection, doc, enableIndexedDbPersistence, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
-  import {getAuth, createUserWithEmailAndPassword, updateProfile, deleteUser, onAuthStateChanged, signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-        const firebaseConfig = {
-  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
-  authDomain: "school-in-the-box.firebaseapp.com",
-  projectId: "school-in-the-box",
-  storageBucket: "school-in-the-box.firebasestorage.app",
-  messagingSenderId: "596350496353",
-  appId: "1:596350496353:web:84c66c351700ddf0824420",
-  measurementId: "G-3MGCDH4FRF"
-};
-  
-  const stdApp = initializeApp(studentsConfig, "std"); 
-  const stdDb = getFirestore(stdApp);
 
+  <!-- UI helpers only (independent of login.js) -->
+  <script>
+    (function () {
+      var $ = function (id) { return document.getElementById(id); };
+      var pw = $("password"), t = $("togglePw"), btn = $("loginBtn"), caps = $("capsNote");
 
-   
-  const schoolId = "capital";
-    const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-      const auth = getAuth(app);
-  const db = getFirestore(app);
-  enableIndexedDbPersistence(db)
-  .catch((err) => {
-    if (err.code === 'failed-precondition') {
-      console.log("Multiple tabs open");
-    } else if (err.code === 'unimplemented') {
-      console.log("Browser not supported");
-    }
-  });
-  
-  let teachersRef;
-  let teacherDoc;
-   let teachers;
+      // Time-aware greeting
+      var h = new Date().getHours();
+      $("greet").textContent = (h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening") + ", welcome back";
 
-      
-  var schoolGeneratedUsername;
-  
- async function onLoginSuccess(user, role) {
-  
-   
-   if (!teachers[schoolGeneratedUsername]){
-     if (!(user.email=="dev@teacher."+schoolId)){
-    // await deleteUser(user);
-     alert("Not on staff list, talk to admin if you think this is a mistake");
-     return;
-     }
-   }
- 
-   
-   
-    
-   
-   if (role=="admin"){
-        window.location.href = "admin/admin.html";
-        return
-      }
-      if (role=="teacher"){
-        window.location.href = "teacher/index.html";
-        return
-      }
-      if (role=="student"){
-        window.location.href = "student/index.html";
-        return
-      }
-      if (role=="guardian"){
-        window.location.href = "guardian/index.html";
-        return
-      }
-      if (role=="alumni"){
-        window.location.href = "alumni/index.html";
-        return
-      }
-      
-      // redirect or load user-specific content here
-    }
-  //261, pin-> 6193
-  const logBtn = document.getElementById("loginBtn");
-  const logBtnS = document.getElementById("loginBtnS");
-  logBtn.onclick = signIn;
- 
-  let reg = /.*@/;
-  
- 
-  async function signInAsStd(){
-    //logBtnS.textContent = "Logging..";
-      const id = document.getElementById("email").value;
-      const pin = document.getElementById("password").value;
+      // Show / hide password
+      t.addEventListener("click", function () {
+        var show = pw.type === "password";
+        pw.type = show ? "text" : "password";
+        t.classList.toggle("on", show);
+        t.setAttribute("aria-label", show ? "Hide password" : "Show password");
+      });
 
-    let q = query(
-    collection(stdDb, "students"),
-    where("pin", "==", Number(pin)),
-    where("id", "==", id)
-    );
-    let docs = await getDocs(q);
-    let std;
-    docs.forEach(doc=>{
-      std = doc.data()
-    });
-    if (std) {
-      window.localStorage.setItem("id", std.id);
-      window.location.href = "student.html";
-    } else {
-      alert("Wrong login credential. Meet your form master/class teacher for your ID and login PIN");
-    }
-  }
-  
-  async function signIn() {
-    
-      logBtn.textContent = "Logging..";
-      const username = document.getElementById("email").value;
-    if (isStudent(username)){
-      await signInAsStd();
-      logBtn.textContent = "Login"
-      return;
-    }
-    teachersRef = doc(db, schoolId, "teachers");
-   teacherDoc = await getDoc(teachersRef);
-   teachers = teacherDoc.exists()? teacherDoc.data() : {};
+      // Enter to log in
+      document.addEventListener("keydown", function (e) { if (e.key === "Enter") btn.click(); });
 
-      const email = username.replace(/@.*/, "")+`@teacher.${schoolId}`;
-    
-     schoolGeneratedUsername = username.replace(/@.*/, "");
-      const role = username.replace(reg, "");
-      const password = document.getElementById("password").value;
+      // Caps Lock notice
+      function checkCaps(e) { if (e.getModifierState) caps.classList.toggle("show", e.getModifierState("CapsLock")); }
+      pw.addEventListener("keyup", checkCaps);
+      pw.addEventListener("keydown", checkCaps);
+      pw.addEventListener("blur", function () { caps.classList.remove("show"); });
 
+      // Spinner while login.js shows "Logging.."
+      new MutationObserver(function () {
+        btn.classList.toggle("loading", btn.textContent.indexOf("Logging") === 0);
+      }).observe(btn, { childList: true, characterData: true, subtree: true });
 
-    if (role=="capital"){
-      console.log("cap");
-        
-        signInWithEmailAndPassword(auth, email, password)
-        .then( async (userCredential) => {
-          let dRef = doc(db, schoolId, "directors");
-  let dDoc = await getDoc(dRef);
-   let dirs = dDoc.exists()? dDoc.data() : {};
-          let username = dirs[schoolGeneratedUsername].username;
-          
-          if (username=="mcs001"){
-                window.location.href = "admin/proprietress/index.html";
-                 console.log("proprietress");
-                return;
-              }
-            if (username=="mcs002"){
-                window.location.href = "admin/director/index.html";
-              return;
-              }
-            if (username=="mcs003"){
-                window.location.href = "admin/director2/index.html";
-              return;
-              }
-              return;
-      
-          
-         // onLoginSuccess(userCredential.user, role);
-        })
-        .catch( async (error) => {
-          let dRef = doc(db, schoolId, "directors");
-  let dDoc = await getDoc(dRef);
-   let dirs = dDoc.exists()? dDoc.data() : {};
-    
-          let user = dirs[schoolGeneratedUsername];
-          console.log(user.psw) 
-          //return;
-          if (user && user.psw==password){
-              await createUserWithEmailAndPassword(auth, email, password);
-             let createdUser = auth.currentUser;
-            
-              await updateProfile(createdUser, {displayName: user.name});
-            alert(user.name);
-              if (username=="mcs001"){
-                window.location.href = "admin/proprietress/index.html";
-                return;
-              }
-            if (username=="mcs002"){
-                window.location.href = "admin/director/index.html";
-              return;
-              }
-            if (username=="mcs003"){
-                window.location.href = "admin/director2/index.html";
-              return;
-              }
-              return;
-      
-          }
-          alert("Login failed: " + error.code);
+      // Gentle 3D tilt that follows the pointer (fine pointers only)
+      var tilt = $("tilt");
+      var card = document.querySelector(".card");
+      card.addEventListener("focusin", function () { document.body.classList.add("typing"); tilt.style.transform = ""; });
+      card.addEventListener("focusout", function () { document.body.classList.remove("typing"); });
+      var ok = matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (ok) {
+        document.addEventListener("pointermove", function (e) {
+          if (document.body.classList.contains("typing")) return;
+          var x = (e.clientX / innerWidth - .5) * 2, y = (e.clientY / innerHeight - .5) * 2;
+          tilt.style.transform = "rotateY(" + (x * 4) + "deg) rotateX(" + (-y * 4) + "deg)";
         });
-      return;
+        document.addEventListener("pointerleave", function () { tilt.style.transform = ""; });
       }
-
-      
-   
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          onLoginSuccess(userCredential.user, role);
-          logBtn.textContent = "Login";
-        })
-        .catch( async (error) => {
-          let user = teachers[schoolGeneratedUsername];
-          
-          if (user && user.psw==password){
-              await createUserWithEmailAndPassword(auth, email, password);
-             let createdUser = auth.currentUser;
-            
-              await updateProfile(createdUser, {displayName: user.name});
-            alert(user.name);
-              onLoginSuccess(createdUser, role);
-              return;
-      
-          }
-          alert("Login failed: " + error.code);
-          logBtn.textContent = "Login";
-        });
-    }
-
-      
-  function isStudent(id){
-    return id.includes("/");
-  }    
+    })();
   </script>
-  
+
+  <script src="config.js"></script>
+  <script type="module" src="login.js"></script>
+
 </body>
 </html>
