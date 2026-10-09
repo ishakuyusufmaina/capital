@@ -1,141 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Promotion Page</title>
+<script src="common.js"></script>
+<title>Student Promotion</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f5f7fa;
-        margin: 0;
-        padding: 20px;
-        color: #333;
-    }
-    .container {
-        max-width: 1000px;
-        margin: auto;
-        background: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #444;
-    }
-    .select-group {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
-        margin-bottom: 25px;
-    }
-    select {
-        width: 100%;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        font-size: 14px;
-        background: #fff;
-        transition: border 0.3s ease;
-    }
-    select:focus {
-        border-color: #007bff;
-        outline: none;
-    }
-    /* Table wrapper for responsiveness */
-    .table-wrapper {
-        overflow-x: auto;
-    }
-    table {
-        width: 100%;
-        min-width: 600px; /* Prevent columns from squishing too much */
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-    table thead {
-        background: #007bff;
-        color: #fff;
-    }
-    table th, table td {
-        padding: 12px;
-        text-align: center;
-        border: 1px solid #ddd;
-    }
-    table tbody tr:nth-child(even) {
-        background: #f9f9f9;
-    }
-    button {
-        display: block;
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        font-weight: bold;
-        border: none;
-        border-radius: 8px;
-        background: #28a745;
-        color: white;
-        cursor: pointer;
-        transition: background 0.3s ease;
-    }
-    button:hover {
-        background: #218838;
-    }
+:root{--primary:#007bff;--primary-hover:#0069d9;--bg:#f5f7fa;--card:#ffffff;--text:#333333;--muted:#6b7280;--border:#dde1e7;--ok:#1a7f37;--warn:#8a5a00;--warn-bg:rgba(245,165,36,.14);--warn-line:#e0a030;--bad:#c62828;--field:#ffffff;--thead:#f1f5fb;--dock:rgba(245,247,250,.94);--hover:rgba(0,0,0,.035);--shadow:0 4px 12px rgba(0,0,0,.08)}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;margin:0;padding:20px 16px 110px;line-height:1.5}
+main{max-width:980px;margin:0 auto}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.top .ic{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--primary),#005bbf);display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,123,255,.28);flex:none}
+h1{margin:0;font-size:1.7rem;font-weight:600;color:var(--primary)}
+.top p{margin:2px 0 0;color:var(--muted);font-size:.92rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+.setup{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:10px}
+.col>b{font-weight:600;color:var(--muted);font-size:.85rem}
+.arrow{color:var(--primary)}
+select{width:100%;padding:.65rem .8rem;border:1px solid var(--border);border-radius:8px;background:var(--field);color:var(--text);font-size:.95rem;outline:none;transition:border .2s}
+select:focus{border-color:var(--primary)}
+.pill{padding:.65rem .8rem;border:1px dashed var(--primary);border-radius:8px;color:var(--primary);font-size:.95rem;display:flex;gap:8px;align-items:center}
+small{color:var(--muted);min-height:1.2em}
+.notice{background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:.92rem}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.bar span{color:var(--muted);font-size:.92rem}
+button{padding:.65rem 1.3rem;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:1rem;cursor:pointer;transition:background .2s,transform .1s}
+button:hover{background:var(--primary-hover)}button:active{transform:scale(.97)}
+button:disabled{background:#d5dae2;color:#8a919c;cursor:not-allowed;transform:none}
+button.ghost{background:transparent;border:1px solid var(--border);color:var(--text);padding:.4rem .9rem;font-size:.88rem;margin-left:6px}
+button.ghost:hover{border-color:var(--primary);background:transparent}
+button.demo{margin-left:auto;display:inline-flex;align-items:center;gap:8px;color:var(--primary);border-color:var(--primary)}
+#demoVid{width:100%;max-height:70vh;border-radius:10px;background:#000;display:block}
+.box.wide{max-width:760px}
+.box a{color:var(--primary)}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 8px;border-bottom:1px solid var(--border);text-align:left;font-size:.93rem}
+th{color:var(--primary);font-weight:600;background:var(--thead)}
+tr.dim td{opacity:.55}
+tbody tr:hover td{background:var(--hover)}
+td img{width:42px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--border);display:block;background:var(--thead)}
+input[type=checkbox]{width:19px;height:19px;accent-color:var(--primary)}
+.tag{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.8rem;border:1px solid}
+.tag.ready{color:var(--ok);border-color:var(--ok)}.tag.done{color:var(--primary);border-color:var(--primary)}.tag.bad{color:var(--bad);border-color:var(--bad)}
+.empty{text-align:center;color:var(--muted);padding:32px 10px}
+.dock{position:fixed;left:0;right:0;bottom:0;background:var(--dock);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:12px 16px;display:flex;justify-content:center}
+.dock button{width:100%;max-width:520px;display:flex;gap:8px;justify-content:center;align-items:center}
+#modal,#demoModal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;padding:16px;z-index:5}
+#modal.show,#demoModal.show{display:grid}
+.box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;max-width:440px;width:100%}
+.box h2{margin:0 0 8px;font-size:1.2rem;color:var(--primary)}
+.box p{margin:6px 0;color:var(--muted)}.box p b{color:var(--text)}
+.acts{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);padding:10px 18px;border-radius:10px;background:var(--ok);color:#fff;font-weight:600;display:none;z-index:6;max-width:90%}
+#toast.bad{background:var(--bad);color:#fff}
+@media(max-width:700px){.setup{grid-template-columns:1fr}.arrow{transform:rotate(90deg);justify-self:center}.hm{display:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
+<main>
+  <header class="top">
+    <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/><path d="M22 9v6"/></svg></div>
+    <div><h1>Student Promotion</h1><p>Move pupils up to their next class for first term.</p></div>
+    <button class="ghost demo" id="demoBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M10 8.5l6 3.5-6 3.5z"/></svg>Watch demo</button>
+  </header>
 
-<div class="container">
-    <h2>Promotion Panel</h2>
+  <div id="notice" class="notice" hidden></div>
 
-    <!-- Top Selects -->
-    <div class="select-group">
-        <select id="session1">
-        
-            <option value="">Select session from</option>
-         </select>
-        <select id="session2">
-            <option value="">Select session to</option>
-        </select>
-        <select id="section">
-            <option value="">Select Section</option>
-            
-        </select>
+  <section class="card setup">
+    <div class="col">
+      <b>Promote from</b>
+      <div class="pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg><span id="fromSession">Loading…</span></div>
+      <select id="fromClass" aria-label="Current class"><option value="">-select class-</option></select>
     </div>
-
-    <!-- Table Wrapper -->
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th id="fromHead">Previous Class</th>
-                    <th id="toHead">Current Class</th>
-                    <th>Status</th>
-                    <th>Performed by</th>
-                </tr>
-            </thead>
-            <tbody id="tbody">
-                
-            </tbody>
-        </table>
+    <div class="arrow"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    <div class="col">
+      <b>Promote to</b>
+      <div class="pill"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg><span id="toSession">Loading…</span></div>
+      <select id="toClass" aria-label="Next class"><option value="">-select next class-</option></select>
+      <small id="hint"></small>
     </div>
+  </section>
 
-    <!-- Promote Button -->
-    <button id="saveBtn">Save</button>
-    <br>
-    <button id="promBtn">Promote</button>
+  <section class="card">
+    <div class="bar">
+      <span id="count">Choose a class to see its students.</span>
+      <div><button class="ghost" id="allBtn">Select all</button><button class="ghost" id="noneBtn">Clear</button></div>
+    </div>
+    <table>
+      <thead><tr><th style="width:36px"></th><th>Passport</th><th class="hm">ID</th><th>Name</th><th class="hm">Gender</th><th>Status</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div id="empty" class="empty">No students to show yet.</div>
+  </section>
+</main>
+
+<div class="dock">
+  <button id="promoteBtn" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span id="promoteTxt">Promote students</span></button>
 </div>
-    
 
-    <script src="common.js"></script>
-    <script type="module" defer>
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-  //import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, documentId, where, getDocs, query, collection, runTransaction, writeBatch, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
-  import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-      const firebaseConfig = {
+<div id="modal"><div class="box" role="dialog" aria-modal="true">
+  <h2>Confirm promotion</h2>
+  <p id="mText"></p>
+  <p>Students you leave unticked stay in their current class. Last term's records are not changed.</p>
+  <div class="acts"><button class="ghost" id="mNo">Cancel</button><button id="mYes">Promote</button></div>
+</div></div>
+<div id="demoModal"><div class="box wide" role="dialog" aria-modal="true" aria-labelledby="demoTitle">
+  <h2 id="demoTitle">How to promote students</h2>
+  <video id="demoVid" controls playsinline preload="none"></video>
+  <p id="demoErr" hidden>The video could not be played here. <a id="demoLink" target="_blank" rel="noopener">Open it in a new tab</a>.</p>
+  <div class="acts"><button class="ghost" id="demoClose" type="button">Close</button></div>
+</div></div>
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import { getFirestore, writeBatch, getDocs, collection, query, where, doc, getDoc, runTransaction, deleteField } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+
+// ===================== CAPITAL SETTINGS =====================
+// Everything school-specific lives here. Noble's copy changes these lines only.
+const schoolId = "capital";
+const ROLE_CODE = "hosec";          // staff role allowed to promote; role.resource.section = the section they run
+const DEMO_VIDEO = "promotion-demo.mp4";  // video file next to this page
+const WRITE_SECTION = true;         // also store the new class's section on the student record
+// Classes the "+1" rule cannot work out (last class of a section, names without numbers).
+// Write the left side with or without spaces, any case. Example: { "Primary 6": "JSS 1" }
+const NEXT_CLASS_RAW = {
+  // "Primary 6": "JSS 1",
+  // "Nursery 3": "Primary 1",
+};
+const firebaseConfig = {
   apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
   authDomain: "school-in-the-box.firebaseapp.com",
   projectId: "school-in-the-box",
@@ -144,255 +142,201 @@
   appId: "1:596350496353:web:84c66c351700ddf0824420",
   measurementId: "G-3MGCDH4FRF"
 };
-    
-    
-    const schoolId = "capital";
-      const app = initializeApp(firebaseConfig);
-     // const analytics = getAnalytics(app);
-      const auth = getAuth(app);
-    const db = getFirestore(app);
-    const batch = writeBatch(db);
-    
-    let user = await new Promise(resolve=>onAuthStateChanged(auth, (user)=>resolve(user)));
-    let id = user.email.replace(/@.*/, "");
-    user = (await getDoc(doc(db, schoolId, "db", "staff", id))).data();
-    //relevant roles => rroles
-    const rroles = user.roles.filter(role=> role.code=="hosec" || role.code=="hosec2");
-    
-    
-  
+// ============================================================
 
-   
-   let sessions = await getSessions();
-    sessions.forEach(s=>{
-        let year = s.year;
-        let term = terms[s.term];
-        let val = year+", "+term;
-        let opt = new Option(val);
-        opt.value = val;
-        session1.append(opt);
-        opt = new Option(val);
-        opt.value = val;
-        session2.append(opt);
-    })
-   let s1 = sessions[0];
-   let s2 = sessions[1];
-   session1.value = s2.year+", "+terms[s2.term];
-  session2.value = s1.year+", "+terms[s1.term];
-    session1.disabled = true;
-    session2.disabled = true;
-    
-    var sections = await getSections();
-    let sectionsHeading = rroles.map(role=> role.resource.section);
-    for (const sectId in sections){
-        if (!sectionsHeading.includes(sectId)) continue;
-        let opt = new Option(sectId.toUpperCase());
-        section.append(opt);
-    }
-    
-    session1.onchange = e=>{
-        let ses1 = session1.value;
-        let ses2 = session2.value;
-        let sect = section.value;
-        if (!(ses1 && ses2 && sect)) return
-       
-    }
-    session2.onchange = e=>{
-        //....
-    }
-    
-    section.onchange = async e=>{
-        let ses1 = session1.value;
-        let ses2 = session2.value;
-        let sect = section.value;
-        if (!(ses1 && ses2 && sect)) return;
-        let sectionId = sect.toLowerCase().replaceAll(".", "");
-        let sessionId = key(ses2);
-        let promotionRef = doc(db, schoolId, sectionId, sessionId, "promotion");
-        let promDoc = await getDoc(promotionRef);
-        let classes = sections[sectionId].classes;
-        let promotion;
-        if (promDoc.exists()) promotion = promDoc.data().transitions;
-        else promotion = classes.map(cls => new Object());
-        PromotionTable(promotion, classes, promotionRef, ses1, ses2);
-
-       }
-    
-    
-  async  function PromotionTable(promotion, classes, ref, ses1, ses2){
-      
-        // classes = classes.map(cls=>cls.trim());   
-      
-        tbody.innerHTML = "";
-        let selectedClasses1 =[];
-        let selectedClasses2 =[];
-        fromHead.ondblclick = e=>{
-         /* let cls = selectedClasses1[0];
-            let cls1 = cls
-            .replace(/\d+/g, (match)=> Number(match)+1 )
-            console.log(cls1);*/
-            classes.forEach((cls, i)=>{
-                promotion[i] ??= {};
-                if (promotion[i].status) return;
-                promotion[i].classFrom = cls;
-                //promotion[i].status = 0;
-            })
-            PromotionTable(promotion, classes, ref, ses1, ses2);
-            
-        }
-        toHead.ondblclick = e=>{
-         /* let cls = selectedClasses1[0];
-            let cls1 = cls
-            .replace(/\d+/g, (match)=> Number(match)+1 )
-            console.log(cls1);*/
-            promotion.forEach((transition, i)=>{
-               // transition.classTo = key(transition.classTo);
-               // transition.classFrom = key(transition.classFrom);
-                console.log(transition.classFrom);
-                if (!transition.classFrom) return;
-               // if (transition.status) return;
-                transition.classTo = transition
-                .classFrom
-                .replace(/\d+/g, (match) => Number(match)+1); 
-                transition.performedBy = user.displayName;
-                if (!classes.includes(transition.classTo)) transition.classTo = null; 
-                console.log(transition.classFrom);
-                console.log("Class To", transition.classTo);
-                if (transition.classTo)  transition.status = 1;
-                else transition.status = 0;
-                
-            })
-            PromotionTable(promotion, classes, ref, ses1, ses2);
-            
-        }
-        promotion.forEach(transition=>{
-            let row = tbody.insertRow();
-            let class1 = row.insertCell();
-            class1.innerHTML = "<select><option value=''>From</option></select>";
-            classes.forEach(cls=>{
-                let opt = new Option(cls);
-                opt.value = cls;
-                class1.firstChild.append(opt);
-            })
-            if (transition.classFrom) {
-                class1.firstChild.value = transition.classFrom;
-                selectedClasses1.push(transition.classFrom);
-            }
-           
-            let class2 = row.insertCell();
-             class2.innerHTML = "<select><option value=''>To</option></select>";
-            classes.forEach(cls=>{
-                let opt = new Option(cls);
-                opt.value = cls;
-                class2.firstChild.append(opt);
-            })
-            if (transition.classTo) class2.firstChild.value = transition.classTo;
-            class1.firstChild.onchange = e=>{
-                if (class1.firstChild.value === class2.firstChild.value || selectedClasses1.includes(class1.firstChild.value)) class1.firstChild.value = transition.classFrom;
-                else {
-                    transition.classFrom = class1.firstChild.value;
-                    selectedClasses1.push(class1.firstChild.value);
-                }
-            }
-           class2.firstChild.onchange = e=>{
-                if (class1.firstChild.value === class2.firstChild.value) class2.firstChild.value = transition.classTo;
-                else transition.classTo = class2.firstChild.value;
-               if (transition.classTo){
-                   transition.performedBy = user.name;
-                   transition.status = 1;
-                   PromotionTable(promotion, classes, ref, ses1, ses2);
-
-               }
-            }
-            
-            let status = row.insertCell();
-            const statusCode= {
-                1: "not yet promoted",
-                2: "pending",
-                3: "scheduled",
-                4: "promoted"
-            }
-            status.textContent = transition.status? statusCode[transition.status] : "not yet initiated";
-            status.textContent +=transition.size??"";
-            
-            let performedBy = row.insertCell();
-            performedBy.textContent = transition.performedBy;
-            
-        });
-        promBtn.onclick = async e=>{
-            let ses1Id = key(ses1);
-            let ses2Id = key(ses2);
-            console.log(ses1);            
-            console.log(ses2);
-            let year = ses2.split(",")[0].trim().replaceAll(" ", '');
-            console.log(year);
-            promotion = promotion.filter(t=>!!t.classFrom && !!t.classTo);
-          // return;
-            for (const t of promotion){
-                console.log(t.classFrom, t.classTo);
-                let stdsDoc = await getDoc(doc(db, schoolId, key(session1.value), key(t.classFrom), "students"));
-                let stds = stdsDoc.data()? stdsDoc.data() : {};
-              //  console.log(t.classFrom);
-                let stdWithIds = Object.values(stds).filter(std=>!!std.id)
-                let stdIds = stdWithIds.map(std => std.id);
-                //let q = query(collection(db, schoolId, "db", "students"), where(documentId(), "in", stdIds));
-              //  let stdsSnap = await getDocs(q);
-                stdWithIds.forEach((std, i)=>{
-                 //   console.log(std.id);
-                    //let std = stds[id]; //stdDoc.data();
-                    std.class = t.classTo.toLowerCase();
-                    std.yearOfLastPromotion = year;
-                    delete std.subjects;
-                    console.log(std.religion);
-                    batch.set(doc(db, schoolId, "db", "students", std.id.replaceAll("/", "_")), std);
-                });
-                t.status = "promoted with yolp: "+year;
-                let idSet = new Set(stdWithIds.map(std=>std.id));
-                if (idSet.size !== stdWithIds.length) throw "identical ids found";
-            }
-            await batch.commit();
-            saveBtn.click();
-            alert("Done!");
-            window.location.reload();
-           // await setDoc(ref, {transitions:promotion}, {merge: true});   
-         //   alert("Done!"); 
-            
-          }
-      
-       saveBtn.onclick = async e=>{
-           promotion = promotion.filter(t=>{
-               t.performedBy = user.name;
-               return !!t.classFrom && !!t.classTo
-           });
-           console.log(JSON.stringify(promotion));
-           await setDoc(ref, {transitions:promotion}, {merge: true}); 
-           alert("Saved!");
-       }
-        
-    }
-    
-  async function getSessions(){
-    let sessionsRef = doc(db, schoolId, "sessions");
-    let sessionsDoc = await getDoc(sessionsRef);
-    if (sessionsDoc.exists())
-    return sessionsDoc.data()
-    .sessions
-    .sort((a, b)=>b.no - a.no);
-    return [];
+// `terms` comes from common.js so session names match the paths Capital already uses.
+const termList = typeof terms !== "undefined" ? terms : null;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = id => document.getElementById(id);
+const key = t => String(t ?? "").trim().replaceAll(" ", "").replaceAll("/", "").replaceAll(",", "");
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const label = s => `${s.year}, ${termList[Number(s.term)]}`;
+const yr = s => String(s.year).replaceAll(" ", "");
+const NO_PIC = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 50"><rect width="42" height="50" fill="#e3e8ef"/><circle cx="21" cy="19" r="8" fill="#a9b3c1"/><path d="M5 50c0-10 7-17 16-17s16 7 16 17z" fill="#a9b3c1"/></svg>');
+const pic = url => (!url || !url.length) ? NO_PIC : url.replace("/upload/", "/upload/f_auto,q_auto/");
+const NEXT_CLASS = Object.fromEntries(Object.entries(NEXT_CLASS_RAW).map(([a, b]) => [key(a).toLowerCase(), b]));
+function toast(msg, bad) {
+  const t = $("toast"); t.textContent = msg; t.className = bad ? "bad" : ""; t.style.display = "block";
+  setTimeout(() => t.style.display = "none", 3500);
 }
-    
-async function getSections(){
-     let sectRef = doc(db, schoolId, "section");
-     let sectDoc = await getDoc(sectRef);
-     if (sectDoc.exists()) return sectDoc.data()
-     return {};
- }
+const notes = [];
+function addNote(msg) { notes.push(msg); $("notice").hidden = false; $("notice").textContent = notes.join(" "); }
 
-   
-    
-    function key(token){
-    return token.trim().replaceAll(" ","").replaceAll("/", "").replaceAll(",", "");
+// ---- sessions: source = earlier years, target = first term of the active year
+const sDoc = await getDoc(doc(db, schoolId, "sessions"));
+const all = (sDoc.exists() ? sDoc.data().sessions : []).slice().sort((a, b) => b.no - a.no);
+const active = all[0];
+const target = termList && active && all.find(s => yr(s) === yr(active) && Number(s.term) === 0);
+const last = target ? all[all.indexOf(target) + 1] : null;
+const lastOk = !!last && yr(last) !== yr(active);
+$("fromSession").textContent = lastOk ? label(last) : "No earlier session";
+$("toSession").textContent = target ? label(target) : "No first term found";
+if (!termList) addNote("common.js did not load, so term names are missing. Promotion is unavailable.");
+else if (!target) addNote("No first-term session exists for the active year, so promotion is unavailable.");
+else if (Number(active.term) !== 0) addNote(`The active session is ${termList[Number(active.term)]}. Promotion normally happens in first term.`);
+if (termList && !lastOk) addNote("There is no earlier session to promote students from.");
+const canRun = !!termList && !!target && lastOk;
+
+// ---- classes (names are trimmed so stray spaces never create a second "class")
+const rawSections = (await getDoc(doc(db, schoolId, "section"))).data() || {};
+const sections = {};
+for (const [name, s] of Object.entries(rawSections)) {
+  sections[name] = {...s, classes: (Array.isArray(s?.classes) ? s.classes : []).map(c => String(c).trim()).filter(Boolean)};
+}
+// "only" = section ids the head of section may use; "To" always lists every class so pupils can move into the next section.
+function fill(sel, only) {
+  sel.length = 1;
+  for (const [name, s] of Object.entries(sections)) {
+    if (only && !only.includes(name)) continue;
+    if (!s.classes.length) continue;
+    const g = document.createElement("optgroup"); g.label = name.toUpperCase();
+    s.classes.forEach(c => g.append(new Option(c, c))); sel.append(g);
   }
-    </script>
+}
+const sectionOf = cls => Object.keys(sections).find(k => sections[k].classes.some(c => key(c) === key(cls))) || null;
+const everyClass = Object.values(sections).flatMap(s => s.classes);
+fill($("toClass"));
+
+onAuthStateChanged(auth, async user => {
+  if (!user) return addNote("Sign in to promote students.");
+  const id = user.email.replace(/@.*/, "");
+  const staff = (await getDoc(doc(db, schoolId, "db", "staff", id))).data();
+  if (!staff) return addNote("Your staff record was not found.");
+  const mine = (staff.roles || []).filter(r => r.code === ROLE_CODE).map(r => r.resource?.section).filter(Boolean);
+  if (!mine.length) addNote("Your account has no head-of-section role, so no classes are available.");
+  fill($("fromClass"), mine);
+});
+
+// suggest next class: override list first, then same name and arm one level up (Primary 4A -> Primary 5A)
+function parse(n) { const m = n.trim().match(/^(.*?)(\d+)\s*(.*)$/); return m && {p: m[1].trim().toLowerCase(), n: +m[2], a: m[3].trim().toLowerCase()}; }
+function suggest(cls) {
+  const o = NEXT_CLASS[key(cls).toLowerCase()];
+  if (o) { const hit = everyClass.find(c => key(c).toLowerCase() === key(o).toLowerCase()); if (hit) return hit; }
+  const p = parse(cls); if (!p) return "";
+  const c = everyClass.filter(x => { const q = parse(x); return q && q.p === p.p && q.n === p.n + 1; });
+  return c.find(x => parse(x).a === p.a) || c[0] || "";
+}
+
+// ---- load students of the chosen class
+let students = new Map(), selected = new Set(), runId = 0;
+async function load() {
+  const run = ++runId;
+  students = new Map(); selected = new Set(); render();
+  const cls = $("fromClass").value, ses = last;
+  if (!cls || !ses || !canRun) return;
+  const next = suggest(cls);
+  $("toClass").value = next;
+  $("hint").textContent = next ? "" : "No automatic match. Pick the next class (or the one this class moves into).";
+  $("count").textContent = "Loading students…";
+  const snap = await getDoc(doc(db, schoolId, key(label(ses)), key(cls), "students"));
+  const list = Object.values(snap.exists() ? snap.data() : {}).filter(s => s && s.name);
+  const ids = list.map(s => s.id).filter(Boolean), cur = {};
+  for (let i = 0; i < ids.length; i += 30) {
+    const q = await getDocs(query(collection(db, schoolId, "db", "students"), where("id", "in", ids.slice(i, i + 30))));
+    q.forEach(d => cur[d.data().id] = d.data().class || "");
+  }
+  if (run !== runId) return;
+  list.forEach((s, i) => {
+    let st = "ready", note = "Ready";
+    if (!s.id) { st = "bad"; note = "No ID yet"; }
+    else if (!(s.id in cur)) { st = "bad"; note = "Not in records"; }
+    else if (key(cur[s.id]).toLowerCase() !== key(cls).toLowerCase()) { st = "done"; note = "Now in " + cur[s.id].toUpperCase(); }
+    students.set(s.id || "n" + i, {...s, st, note});
+  });
+  render();
+}
+
+function render() {
+  const rows = [...students.entries()].sort((a, b) => (a[1].name || "").localeCompare(b[1].name || ""));
+  $("rows").innerHTML = rows.map(([id, s]) => `<tr class="${s.st === "ready" ? "" : "dim"}">
+    <td><input type="checkbox" data-id="${esc(id)}" ${s.st === "ready" ? "" : "disabled"} ${selected.has(id) ? "checked" : ""} aria-label="Select ${esc(s.name)}"></td>
+    <td><img src="${esc(pic(s.picURL))}" alt="" onerror="this.onerror=null;this.src='${NO_PIC}'"></td><td class="hm">${esc(s.id || "-")}</td>
+    <td>${esc(s.name.toUpperCase())}</td><td class="hm">${esc(s.gender)}</td>
+    <td><span class="tag ${s.st}">${esc(s.note)}</span></td></tr>`).join("");
+  $("empty").style.display = rows.length ? "none" : "block";
+  if (rows.length) {
+    const ready = rows.filter(r => r[1].st === "ready").length;
+    $("count").textContent = `${selected.size} selected · ${ready} ready · ${rows.length} in class`;
+  } else if (!$("count").textContent.startsWith("Loading")) $("count").textContent = $("fromClass").value ? "No students found for this class and session." : "Choose a class to see its students.";
+  const to = $("toClass").value;
+  $("promoteBtn").disabled = !selected.size || !to || !canRun;
+  $("promoteTxt").textContent = selected.size ? `Promote ${selected.size} ${selected.size === 1 ? "student" : "students"}${to ? " to " + to : ""}` : "Promote students";
+}
+
+$("rows").onchange = e => { const id = e.target.dataset.id; if (!id) return; e.target.checked ? selected.add(id) : selected.delete(id); render(); };
+$("allBtn").onclick = () => { students.forEach((s, id) => s.st === "ready" && selected.add(id)); render(); };
+$("noneBtn").onclick = () => { selected.clear(); render(); };
+$("fromClass").onchange = load;
+$("toClass").onchange = render;
+
+// ---- promote
+$("promoteBtn").onclick = () => {
+  const from = $("fromClass").value, to = $("toClass").value;
+  if (key(from) === key(to)) return toast("Choose a different class from the one they are leaving.", true);
+  const ses = last;
+  $("mText").innerHTML = `Promote <b>${selected.size}</b> student(s) from <b>${esc(from)}</b> (${esc(label(ses))}) to <b>${esc(to)}</b> (${esc(label(target))})?`;
+  $("modal").classList.add("show");
+};
+$("mNo").onclick = () => $("modal").classList.remove("show");
+
+// ---- demo video (loads only when opened)
+const vid = $("demoVid");
+$("demoLink").href = DEMO_VIDEO;
+vid.onerror = () => { $("demoErr").hidden = false; };
+function closeDemo() { vid.pause(); $("demoModal").classList.remove("show"); }
+$("demoBtn").onclick = () => {
+  if (!vid.getAttribute("src")) vid.src = DEMO_VIDEO;
+  $("demoErr").hidden = true;
+  $("demoModal").classList.add("show");
+  $("demoClose").focus();
+};
+$("demoClose").onclick = closeDemo;
+$("demoModal").onclick = e => { if (e.target === $("demoModal")) closeDemo(); };
+document.addEventListener("keydown", e => { if (e.key === "Escape") { $("modal").classList.remove("show"); closeDemo(); } });
+$("mYes").onclick = async () => {
+  const from = $("fromClass").value, to = $("toClass").value, ids = [...selected];
+  const section = sectionOf(to);
+  $("mYes").disabled = true; $("mYes").textContent = "Promoting…";
+  try {
+    // 1. update each student's current class in the main records (400 per batch, under Firestore's 500 limit)
+    for (let i = 0; i < ids.length; i += 400) {
+      const b = writeBatch(db);
+      ids.slice(i, i + 400).forEach(id => b.update(doc(db, schoolId, "db", "students", id.replaceAll("/", "_")),
+        {class: to.toLowerCase(), yearOfLastPromotion: yr(target), lastPromoted: label(target), subjects: deleteField(),
+         ...(WRITE_SECTION && section ? {section} : {})}));
+      await b.commit();
+    }
+    // 2. add them to the new class list for first term and remove them from their old class list this term
+    const base = key(label(target));
+    const tRef = doc(db, schoolId, base, key(to), "students");
+    const oRef = doc(db, schoolId, base, key(from), "students");
+    await runTransaction(db, async tx => {
+      const [tSnap, oSnap] = [await tx.get(tRef), await tx.get(oRef)];
+      const stamp = label(target), tData = {};
+      Object.entries(tSnap.exists() ? tSnap.data() : {}).forEach(([k, v]) => { if (v && v.lastPromoted === stamp) tData[k] = v; });
+      ids.forEach(id => {
+        const s = students.get(id), e = {name: s.name, gender: s.gender ?? "", id, picURL: s.picURL ?? "", religion: s.religion ?? "", lastPromoted: stamp};
+        if (WRITE_SECTION && section) e.section = section;
+        tData[id] = e;
+      });
+      tx.set(tRef, tData);
+      if (oSnap.exists()) {
+        const o = oSnap.data(); let hit = false;
+        ids.forEach(id => { if (id in o) { delete o[id]; hit = true; } });
+        if (hit) tx.set(oRef, o);
+      }
+    });
+    $("modal").classList.remove("show");
+    toast(`${ids.length} promoted to ${to}`);
+    await load();
+  } catch (err) {
+    console.error(err);
+    toast("Promotion failed: " + err.message, true);
+  }
+  $("mYes").disabled = false; $("mYes").textContent = "Promote";
+};
+</script>
 </body>
 </html>
