@@ -10,7 +10,7 @@
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif;margin:0;padding:20px 16px 110px;line-height:1.5}
 main{max-width:980px;margin:0 auto}
-.top{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
 .top .ic{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--primary),#005bbf);display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,123,255,.28);flex:none}
 h1{margin:0;font-size:1.7rem;font-weight:600;color:var(--primary)}
 .top p{margin:2px 0 0;color:var(--muted);font-size:.92rem}
@@ -31,6 +31,10 @@ button:hover{background:var(--primary-hover)}button:active{transform:scale(.97)}
 button:disabled{background:#d5dae2;color:#8a919c;cursor:not-allowed;transform:none}
 button.ghost{background:transparent;border:1px solid var(--border);color:var(--text);padding:.4rem .9rem;font-size:.88rem;margin-left:6px}
 button.ghost:hover{border-color:var(--primary);background:transparent}
+button.demo{margin-left:auto;display:inline-flex;align-items:center;gap:8px;color:var(--primary);border-color:var(--primary)}
+#demoVid{width:100%;max-height:70vh;border-radius:10px;background:#000;display:block}
+.box.wide{max-width:760px}
+.box a{color:var(--primary)}
 :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 table{width:100%;border-collapse:collapse}
 th,td{padding:10px 8px;border-bottom:1px solid var(--border);text-align:left;font-size:.93rem}
@@ -44,8 +48,8 @@ input[type=checkbox]{width:19px;height:19px;accent-color:var(--primary)}
 .empty{text-align:center;color:var(--muted);padding:32px 10px}
 .dock{position:fixed;left:0;right:0;bottom:0;background:var(--dock);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:12px 16px;display:flex;justify-content:center}
 .dock button{width:100%;max-width:520px;display:flex;gap:8px;justify-content:center;align-items:center}
-#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;padding:16px;z-index:5}
-#modal.show{display:grid}
+#modal,#demoModal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;padding:16px;z-index:5}
+#modal.show,#demoModal.show{display:grid}
 .box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;max-width:440px;width:100%}
 .box h2{margin:0 0 8px;font-size:1.2rem;color:var(--primary)}
 .box p{margin:6px 0;color:var(--muted)}.box p b{color:var(--text)}
@@ -61,6 +65,7 @@ input[type=checkbox]{width:19px;height:19px;accent-color:var(--primary)}
   <header class="top">
     <div class="ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/><path d="M22 9v6"/></svg></div>
     <div><h1>Student Promotion</h1><p>Move pupils up to their next class for first term.</p></div>
+    <button class="ghost demo" id="demoBtn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M10 8.5l6 3.5-6 3.5z"/></svg>Watch demo</button>
   </header>
 
   <div id="notice" class="notice" hidden></div>
@@ -103,6 +108,12 @@ input[type=checkbox]{width:19px;height:19px;accent-color:var(--primary)}
   <p>Students you leave unticked stay in their current class. Last term's records are not changed.</p>
   <div class="acts"><button class="ghost" id="mNo">Cancel</button><button id="mYes">Promote</button></div>
 </div></div>
+<div id="demoModal"><div class="box wide" role="dialog" aria-modal="true" aria-labelledby="demoTitle">
+  <h2 id="demoTitle">How to promote students</h2>
+  <video id="demoVid" controls playsinline preload="none"></video>
+  <p id="demoErr" hidden>The video could not be played here. <a id="demoLink" target="_blank" rel="noopener">Open it in a new tab</a>.</p>
+  <div class="acts"><button class="ghost" id="demoClose" type="button">Close</button></div>
+</div></div>
 <div id="toast"></div>
 
 <script type="module">
@@ -114,6 +125,7 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 // Everything school-specific lives here. Noble's copy changes these lines only.
 const schoolId = "capital";
 const ROLE_CODE = "hosec";          // staff role allowed to promote; role.resource.section = the section they run
+const DEMO_VIDEO = "promotion-demo.mp4";  // video file next to this page
 const WRITE_SECTION = true;         // also store the new class's section on the student record
 // Classes the "+1" rule cannot work out (last class of a section, names without numbers).
 // Write the left side with or without spaces, any case. Example: { "Primary 6": "JSS 1" }
@@ -268,7 +280,21 @@ $("promoteBtn").onclick = () => {
   $("modal").classList.add("show");
 };
 $("mNo").onclick = () => $("modal").classList.remove("show");
-document.addEventListener("keydown", e => { if (e.key === "Escape") $("modal").classList.remove("show"); });
+
+// ---- demo video (loads only when opened)
+const vid = $("demoVid");
+$("demoLink").href = DEMO_VIDEO;
+vid.onerror = () => { $("demoErr").hidden = false; };
+function closeDemo() { vid.pause(); $("demoModal").classList.remove("show"); }
+$("demoBtn").onclick = () => {
+  if (!vid.getAttribute("src")) vid.src = DEMO_VIDEO;
+  $("demoErr").hidden = true;
+  $("demoModal").classList.add("show");
+  $("demoClose").focus();
+};
+$("demoClose").onclick = closeDemo;
+$("demoModal").onclick = e => { if (e.target === $("demoModal")) closeDemo(); };
+document.addEventListener("keydown", e => { if (e.key === "Escape") { $("modal").classList.remove("show"); closeDemo(); } });
 $("mYes").onclick = async () => {
   const from = $("fromClass").value, to = $("toClass").value, ids = [...selected];
   const section = sectionOf(to);
