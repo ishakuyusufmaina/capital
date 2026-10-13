@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloud Storage and Billing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --old: #94a3b8;
+      --new: #0284c7;
+      --pay: #16a34a;
+      --pay-hover: #15803d;
+      --danger: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 70px 16px 24px;
+      font-family: "Poppins", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .dashboard {
+      position: relative;
+      width: 420px;
+      max-width: 100%;
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+      padding: 64px 32px 32px;
+    }
+    .logo {
+      position: absolute;
+      top: -50px;
+      left: calc(50% - 50px);
+      width: 100px;
+      height: 100px;
+      border-radius: 20%;
+      background: var(--card);
+    }
+    h1 {
+      margin: 0 0 4px;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .sub {
+      margin: 0 0 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* Old vs new breakdown */
+    .split { margin-bottom: 8px; }
+    .bar {
+      display: flex;
+      height: 14px;
+      border-radius: 7px;
+      overflow: hidden;
+      background: var(--line);
+    }
+    .bar span { display: block; height: 100%; transition: width .4s ease; }
+    #barOld { background: var(--old); }
+    #barNew { background: var(--new); }
+    .legend {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .legend div { font-size: 0.8rem; color: var(--muted); }
+    .legend strong {
+      display: block;
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .legend .dot {
+      display: inline-block;
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    .legend .right { text-align: right; }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.95rem;
+    }
+    .stat:first-of-type { margin-top: 16px; border-top: 1px solid var(--line); }
+    .label { color: #475569; font-weight: 500; }
+    .value { font-weight: 600; color: var(--new); }
+    .stat.due .value { color: var(--text); font-size: 1.1rem; }
+
+    .pay-box { margin-top: 22px; }
+    .pay-box label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+    .pay-box input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font: inherit;
+      font-size: 0.95rem;
+    }
+    .pay-box input:focus-visible {
+      outline: 2px solid var(--new);
+      outline-offset: 1px;
+    }
+    .hint { margin: 6px 0 0; font-size: 0.78rem; color: var(--muted); }
+
+    button {
+      width: 100%;
+      margin-top: 16px;
+      padding: 13px;
+      font: inherit;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #fff;
+      background: var(--pay);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background .2s ease;
+    }
+    button:hover:not(:disabled) { background: var(--pay-hover); }
+    button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+
+    .notice {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      display: none;
+    }
+    .notice.error { display: block; background: #fef2f2; color: var(--danger); }
+    .notice.warn  { display: block; background: #fffbeb; color: #92400e; }
+    .loading { text-align: center; color: var(--muted); padding: 30px 0; }
+  </style>
+</head>
+<body>
+  <main class="dashboard">
+    <img class="logo" src="../maiduguri-capital-school-logo.svg" alt="School logo" />
+    <h1>Cloud Storage and Billing</h1>
+    <p class="sub">Pay for students added since your last payment.</p>
+
+    <div id="loading" class="loading">Loading your account…</div>
+
+    <div id="content" hidden>
+      <div class="split">
+        <div class="bar" role="img" aria-label="Previously billed versus new students">
+          <span id="barOld"></span><span id="barNew"></span>
+        </div>
+        <div class="legend">
+          <div>
+            <span class="dot" style="background:var(--old)"></span>Already billed
+            <strong id="oldCount">0</strong>
+          </div>
+          <div class="right">
+            New<span class="dot" style="background:var(--new);margin:0 0 0 6px"></span>
+            <strong id="newCount">0</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat">
+        <span class="label">Total students</span>
+        <span id="totalCount" class="value">0</span>
+      </div>
+      <div class="stat">
+        <span class="label">Rate per student</span>
+        <span id="rate" class="value">₦0</span>
+      </div>
+      <div class="stat">
+        <span class="label">Due for new students</span>
+        <span id="due" class="value">₦0</span>
+      </div>
+      <div class="stat due">
+        <span class="label">Still to pay</span>
+        <span id="amount" class="value">₦0</span>
+      </div>
+
+      <div class="pay-box">
+        <label for="payCount">Students to pay for</label>
+        <input type="number" id="payCount" min="1" step="1" inputmode="numeric" />
+        <p class="hint">Starts at the students your credit does not cover. Increase it to pay for extra capacity in advance.</p>
+      </div>
+
+      <button id="payBtn" type="button">Pay now</button>
+      <div id="notice" class="notice" role="alert"></div>
+    </div>
+  </main>
+
+  <script type="module">
+    // ---- Config -------------------------------------------------------
+ //   const WORKER_URL = "https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev"; // <- set this
+      const WORKER_URL = "https://init-pay-jamb.yusufmainaishaku.workers.dev/"; // <- set this
+ 
+ 
+    const schoolId = "capital";
+
+    // Student counts
+    const oldCount = 5000;  // already billed
+    const newCount = 321;  // new since last payment
+
+    // Display only. The worker recalculates the real amount on the server.
+    const rate = schoolId === "capital" ? 200 : 250;
+
+    // ---- Elements -----------------------------------------------------
+    const $ = (id) => document.getElementById(id);
+    const el = {
+      loading: $("loading"), content: $("content"),
+      oldCount: $("oldCount"), newCount: $("newCount"), totalCount: $("totalCount"),
+      rate: $("rate"), amount: $("amount"), due: $("due"),
+      barOld: $("barOld"), barNew: $("barNew"),
+      payCount: $("payCount"), payBtn: $("payBtn"), notice: $("notice")
+    };
+    const fmt = (n) => n.toLocaleString("en-NG");
+    const naira = (n) => "₦" + fmt(n);
+
+    function showNotice(type, message) {
+      el.notice.className = "notice " + type;
+      el.notice.textContent = message;
+    }
+
+    // ---- Credit (stored locally) -------------------------------------
+    const PAID_KEY = `amountPaid:${schoolId}`;
+    const PENDING_KEY = `pendingPayment:${schoolId}`;
+
+    function readNumber(key) {
+      try {
+        const n = Number(localStorage.getItem(key));
+        return Number.isFinite(n) && n > 0 ? n : 0;
+      } catch { return 0; }
+    }
+    function writeItem(key, value) {
+      try { localStorage.setItem(key, value); } catch {}
+    }
+    function removeItem(key) {
+      try { localStorage.removeItem(key); } catch {}
+    }
+
+    // Paystack sends the person back with ?reference=... after payment.
+    // If it matches the payment we started, record the amount as paid.
+    function recordPaymentIfReturned() {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get("reference") || params.get("trxref");
+      if (!ref) return;
+
+      let pending = null;
+      try { pending = JSON.parse(localStorage.getItem(PENDING_KEY)); } catch {}
+
+      if (pending && pending.reference === ref && pending.amount > 0) {
+        writeItem(PAID_KEY, readNumber(PAID_KEY) + pending.amount);
+        removeItem(PENDING_KEY);
+        showNotice("warn", `Payment of ${naira(pending.amount)} recorded. Thank you.`);
+      }
+      history.replaceState(null, "", window.location.pathname);
+    }
+
+    // ---- Load data ----------------------------------------------------
+    const billed = oldCount;
+    const newStudents = newCount;
+    const total = billed + newStudents;
+    let credit = 0;
+    let remainingStudents = 0;
+
+    function init() {
+      recordPaymentIfReturned();
+      credit = readNumber(PAID_KEY);
+
+      const due = newStudents * rate;
+      remainingStudents = Math.max(0, Math.ceil((due - credit) / rate));
+
+      renderBreakdown();
+      el.due.textContent = naira(due);
+      el.payCount.value = remainingStudents || "";
+      updateAmount();
+      el.loading.hidden = true;
+      el.content.hidden = false;
+    }
+
+    function renderBreakdown() {
+      el.oldCount.textContent = fmt(billed);
+      el.newCount.textContent = fmt(newStudents);
+      el.totalCount.textContent = fmt(total);
+      el.rate.textContent = naira(rate) + " / student";
+      const oldPct = total ? (billed / total) * 100 : 0;
+      el.barOld.style.width = oldPct + "%";
+      el.barNew.style.width = (total ? 100 - oldPct : 0) + "%";
+    }
+
+    function payCount() {
+      const n = parseInt(el.payCount.value, 10);
+      return Number.isInteger(n) && n > 0 ? n : 0;
+    }
+
+    function updateAmount() {
+      const n = payCount();
+      el.amount.textContent = naira(n * rate);
+      el.payBtn.disabled = n === 0;
+    }
+
+    el.payCount.addEventListener("input", updateAmount);
+
+    // ---- Invoke worker ------------------------------------------------
+    el.payBtn.addEventListener("click", async () => {
+      const numberOfStudents = payCount();
+      if (!numberOfStudents) return;
+
+      el.payBtn.disabled = true;
+      el.payBtn.textContent = "Redirecting to payment…";
+      el.notice.className = "notice";
+
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ schoolId, numberOfStudents })
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.paymentUrl) {
+          throw new Error(data.message || data.error || "Could not start payment.");
+        }
+        writeItem(PENDING_KEY, JSON.stringify({
+          reference: data.reference,
+          amount: data.amount
+        }));
+        window.location.href = data.paymentUrl;
+      } catch (err) {
+        showNotice("error", err.message + " Please try again.");
+        el.payBtn.textContent = "Pay now";
+        updateAmount();
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
