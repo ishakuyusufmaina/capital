@@ -194,15 +194,19 @@
         <span class="label">Rate per student</span>
         <span id="rate" class="value">₦0</span>
       </div>
+      <div class="stat">
+        <span class="label">Due for new students</span>
+        <span id="due" class="value">₦0</span>
+      </div>
       <div class="stat due">
-        <span class="label">Amount to pay</span>
+        <span class="label">Still to pay</span>
         <span id="amount" class="value">₦0</span>
       </div>
 
       <div class="pay-box">
         <label for="payCount">Students to pay for</label>
         <input type="number" id="payCount" min="1" step="1" inputmode="numeric" />
-        <p class="hint">Starts at your new students. Increase it to pay for extra capacity in advance.</p>
+        <p class="hint">Starts at the students your credit does not cover. Increase it to pay for extra capacity in advance.</p>
       </div>
 
       <button id="payBtn" type="button">Pay now</button>
@@ -212,12 +216,15 @@
 
   <script type="module">
     // ---- Config -------------------------------------------------------
-    const WORKER_URL = "https://init-pay-jamb.yusufmainaishaku.workers.dev/"; // <- set this
+ //   const WORKER_URL = "https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev"; // <- set this
+      const WORKER_URL = "https://init-pay.yusufmainaishaku.workers.dev/"; // <- set this
+ 
+ 
     const schoolId = "capital";
 
     // Student counts
     const oldCount = 5000;  // already billed
-    const newCount = 332;  // new since last payment
+    const newCount = 321;  // new since last payment
 
     // Display only. The worker recalculates the real amount on the server.
     const rate = schoolId === "capital" ? 200 : 250;
@@ -227,7 +234,7 @@
     const el = {
       loading: $("loading"), content: $("content"),
       oldCount: $("oldCount"), newCount: $("newCount"), totalCount: $("totalCount"),
-      rate: $("rate"), amount: $("amount"),
+      rate: $("rate"), amount: $("amount"), due: $("due"),
       barOld: $("barOld"), barNew: $("barNew"),
       payCount: $("payCount"), payBtn: $("payBtn"), notice: $("notice")
     };
@@ -239,14 +246,58 @@
       el.notice.textContent = message;
     }
 
+    // ---- Credit (stored locally) -------------------------------------
+    const PAID_KEY = `amountPaid:${schoolId}`;
+    const PENDING_KEY = `pendingPayment:${schoolId}`;
+
+    function readNumber(key) {
+      try {
+        const n = Number(localStorage.getItem(key));
+        return Number.isFinite(n) && n > 0 ? n : 0;
+      } catch { return 0; }
+    }
+    function writeItem(key, value) {
+      try { localStorage.setItem(key, value); } catch {}
+    }
+    function removeItem(key) {
+      try { localStorage.removeItem(key); } catch {}
+    }
+
+    // Paystack sends the person back with ?reference=... after payment.
+    // If it matches the payment we started, record the amount as paid.
+    function recordPaymentIfReturned() {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get("reference") || params.get("trxref");
+      if (!ref) return;
+
+      let pending = null;
+      try { pending = JSON.parse(localStorage.getItem(PENDING_KEY)); } catch {}
+
+      if (pending && pending.reference === ref && pending.amount > 0) {
+        writeItem(PAID_KEY, readNumber(PAID_KEY) + pending.amount);
+        removeItem(PENDING_KEY);
+        showNotice("warn", `Payment of ${naira(pending.amount)} recorded. Thank you.`);
+      }
+      history.replaceState(null, "", window.location.pathname);
+    }
+
     // ---- Load data ----------------------------------------------------
     const billed = oldCount;
     const newStudents = newCount;
     const total = billed + newStudents;
+    let credit = 0;
+    let remainingStudents = 0;
 
     function init() {
+      recordPaymentIfReturned();
+      credit = readNumber(PAID_KEY);
+
+      const due = newStudents * rate;
+      remainingStudents = Math.max(0, Math.ceil((due - credit) / rate));
+
       renderBreakdown();
-      el.payCount.value = newStudents;
+      el.due.textContent = naira(due);
+      el.payCount.value = remainingStudents || "";
       updateAmount();
       el.loading.hidden = true;
       el.content.hidden = false;
@@ -295,6 +346,10 @@
         if (!res.ok || !data.paymentUrl) {
           throw new Error(data.message || data.error || "Could not start payment.");
         }
+        writeItem(PENDING_KEY, JSON.stringify({
+          reference: data.reference,
+          amount: data.amount
+        }));
         window.location.href = data.paymentUrl;
       } catch (err) {
         showNotice("error", err.message + " Please try again.");
