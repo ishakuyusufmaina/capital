@@ -223,8 +223,8 @@
     const schoolId = "capital";
 
     // Student counts
-    const oldCount = 5000;  // already billed
-    const newCount = 321;  // new since last payment
+    const oldCount = 5000 + 321;  // already billed
+    const newCount = 0;  // new since last payment
 
     // Display only. The worker recalculates the real amount on the server.
     const rate = schoolId === "capital" ? 200 : 250;
