@@ -59,7 +59,7 @@
      <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, setDoc, getDoc, getDocs, collection, writeBatch} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, doc, setDoc, getDoc, getDocs, collection} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
  const firebaseConfig = {
@@ -79,9 +79,21 @@
       const auth = getAuth(app);
       const db = getFirestore(app);
 
-  const teachersSnap = await getDocs(collection(db, schoolId, "db", "teachersV2"));
+  // Snapshot of the school's teachers, {id, name}[], at schoolId/school-teachers.
+  // Created once from teachersV2; afterwards the teachers collection is not read in bulk.
+  const schoolTeachersRef = doc(db, schoolId, "school-teachers");
+  let schoolTeachersDoc = await getDoc(schoolTeachersRef);
+  let teacherList;
+  if (schoolTeachersDoc.exists()) {
+    teacherList = schoolTeachersDoc.data().teachers ?? [];
+  } else {
+    const snap = await getDocs(collection(db, schoolId, "db", "teachersV2"));
+    teacherList = [];
+    snap.forEach(d => teacherList.push({ id: d.id, name: d.data().name ?? d.id }));
+    await setDoc(schoolTeachersRef, { teachers: teacherList });
+  }
   const teachers = {};
-  teachersSnap.forEach(d => teachers[d.id] = d.data());
+  teacherList.forEach(t => teachers[t.id] = t);
   let sectionRef = doc(db, schoolId, "section");
   let sectionDoc = await getDoc(sectionRef);
  let sections = sectionDoc.exists()? sectionDoc.data() : {};
@@ -89,7 +101,7 @@
      
   let user = await new Promise(async resolve=> onAuthStateChanged(auth, user=> resolve(user)));
   let id = user.email.replace(/@.*/, "");
-  const teacher = teachers[id];
+  const teacher = (await getDoc(doc(db, schoolId, "db", "teachersV2", id))).data();
 
 
   let sectKeys = teacher.role.hos.sections; //JSON.parse(localStorage.getItem("sections"));
