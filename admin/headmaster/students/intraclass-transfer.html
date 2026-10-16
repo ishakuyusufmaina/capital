@@ -93,7 +93,7 @@
   onAuthStateChanged(auth, async user => {
     if (!user) return;
     const id = user.email.replace(/@.*/, "");
-    const teacher = (await getDoc(doc(db, schoolId, "teachers"))).data()?.[id];
+    const teacher = (await getDoc(doc(db, schoolId, "db", "teachersV2", id))).data();
     const hosSects = teacher?.role?.hos?.sections ?? [];
     fromSelect.length = 1;
     hosSects.forEach(k => {
