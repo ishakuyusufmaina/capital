@@ -156,6 +156,7 @@ details ol li::before {
   font-weight: bold;
 }
 
+  .section-title { text-transform: capitalize; margin: 1.5rem 0 .5rem; font-size: 1.2rem; }
   </style>  
 </head>
 
@@ -163,22 +164,13 @@ details ol li::before {
   <h1>
     Class Teachers
   </h1>
-  <table>
-    <tr>
-      <th>Class</th>
-      <th>Class Teacher</th>
-    </tr>
-    
-    <tbody id="table">
-      
-    </tbody>
-  </table>
+  <div id="sections"></div>
   <button id="save">Save</button>
   
     <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, setDoc, getDoc, getDocs, collection, writeBatch} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where, writeBatch, arrayUnion, arrayRemove} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
       const firebaseConfig = {
@@ -196,105 +188,122 @@ details ol li::before {
       const analytics = getAnalytics(app);
       const auth = getAuth(app);
     const db = getFirestore(app);
-  
-  const teachersSnap = await getDocs(collection(db, schoolId, "db", "teachersV2"));
-  const teachers = {};
-  teachersSnap.forEach(d => teachers[d.id] = d.data());
-  let sectionDoc = await getDoc(doc(db, schoolId, "section"));
-  
-  onAuthStateChanged(auth, user=>{
-    if (!user) return;
-    let id = user.email.replace(/@.*/, "");
-    let teacher = teachers[id];
-    
-    if (!teacher.role) return;
-    if (!teacher.role.hos) return;
-    if (!teacher.role.hos.sections) return;
-    
-   let sections =  teacher.role.hos.sections;
-   var combSectsTeachers = []; 
-  
-    if (sectionDoc.exists()){
-        let sectionsData = sectionDoc.data();
-     // let sectKeys = Object.keys(sections).sort();
-    //for (let i = 0; i< sectKeys.length; i++){
-    //  let section = sectKeys[i];
-      let classes = [];
-      sections.forEach(section=>{
-        let sect = sectionsData[section];
-        classes = classes.concat(sect.classes.sort());
-        combSectsTeachers = combSectsTeachers.concat(sect.teachers);
-      });
-      
-            classes.forEach(clas=>{
-              let row = table.insertRow();
-              let td = row.insertCell();
-              td.innerHTML = clas;
-              let tchListD = row.insertCell();
-              tchListD.innerHTML = "<span>none</span>";
-              let details = document.createElement("details");
-              details.innerHTML = `
-              <summary>Assign new</summary>
-              `;
-              details.querySelector("summary").onclick = e=>{
-                e.target.scrollIntoView();
-              }
-              details.name = "teachers";
-              let tchList = document.createElement("ul");
-              Object.keys(teachers).sort((a,b)=>teachers[a].name.localeCompare(teachers[b].name)).forEach(tId => {
-                let teacher = teachers[tId];
-                if (!combSectsTeachers.map(t=>t.id).includes(tId)) return;
-               // let teacher = teachers[username];
-                let list = document.createElement("li");
-                list.innerHTML = teacher.name + "<hr>";
-                tchList.append(list);
-                teacher.role = teacher.role ?? {};
-                teacher.role.fm = teacher.role.fm ?? [];
-                let fmRole = new Set(teacher.role.fm);
-                teacher.role.fm = Array.from(fmRole);
-         /* teachers[username].role = {};
-          return*/
-                 let updateFM = ()=>{
-                   let fm= tchListD.querySelector("span");
-                   fm.textContent = teacher.name;
-                   let username = fm.getAttribute("data-username");
-                   fm.setAttribute("data-username", teacher.username);
-                   if (!teacher.role.fm.includes(clas)) 
-                   teacher.role.fm.push(clas);
-                   return username;
-               }
-                if (teacher.role.fm.includes(clas)){
-                  updateFM();
-                }
-                list.onclick = e=>{
-                  let username = updateFM();
-               //index = teachers[username].role.fm.indexOf(clas);
-                  
-                  details.open = false;
-                  list.parentElement.parentElement.scrollIntoView(false);
-                  if (!username) return;
-                  let index = teachers[username].role.fm.indexOf(clas);
-                  teachers[username].role.fm.splice(index, 1);
-                }
-              
-            });
-              details.append(tchList);
-              tchListD.append(details);
-            })
-     
-      save.onclick = async e=>{
-       // alert(); return;
-        const batch = writeBatch(db);
-        Object.keys(teachers).forEach(tid => batch.set(doc(db, schoolId, "db", "teachersV2", tid), {role: teachers[tid].role ?? {}}, {merge: true}));
-        await batch.commit();
-        alert("saved!");
-      }
-    //}
-    }
-  
-  
+  const teachersCol = collection(db, schoolId, "db", "teachersV2");
+  // Each section the head oversees has its own list: schoolId/db/{sectionId}/fm-list
+  const fmListRefOf = sectionId => doc(db, schoolId, "db", sectionId, "fm-list");
 
-    
+  // One-time seed for a section: build its fm-list from teachers' role.fm,
+  // queried by the section's classes (never reads the whole teachers collection).
+  async function seedFmList(sectionId, sectionClasses) {
+    const list = {};
+    for (let i = 0; i < sectionClasses.length; i += 30) {
+      const snap = await getDocs(query(teachersCol, where("role.fm", "array-contains-any", sectionClasses.slice(i, i + 30))));
+      snap.forEach(d => {
+        const t = d.data();
+        (t.role?.fm ?? []).forEach(c => {
+          if (sectionClasses.includes(c)) list[c] = { name: t.name, id: d.id };
+        });
+      });
+    }
+    await setDoc(fmListRefOf(sectionId), list);
+    return list;
+  }
+
+  onAuthStateChanged(auth, async user => {
+    if (!user) return;
+    const id = user.email.replace(/@.*/, "");
+    const teacher = (await getDoc(doc(db, schoolId, "db", "teachersV2", id))).data();
+    const hosSections = teacher?.role?.hos?.sections;
+    if (!hosSections) return;
+
+    const sectionDoc = await getDoc(doc(db, schoolId, "section"));
+    if (!sectionDoc.exists()) return;
+    const sectionsData = sectionDoc.data();
+
+    const states = []; // one per section: {sectionId, original, changes}
+    const container = document.getElementById("sections");
+
+    for (const sectionId of hosSections) {
+      const sect = sectionsData[sectionId];
+      if (!sect) continue;
+      const classes = [...(sect.classes ?? [])].sort();
+      const fmDoc = await getDoc(fmListRefOf(sectionId));
+      const fmList = fmDoc.exists() ? fmDoc.data() : await seedFmList(sectionId, classes);
+
+      const candidates = {}; // id -> name, from this section's teacher list
+      (sect.teachers ?? []).forEach(t => candidates[t.id] = t.name);
+      const candidateIds = Object.keys(candidates).sort((a, b) => candidates[a].localeCompare(candidates[b]));
+
+      const state = { sectionId, original: {}, changes: {} };
+      classes.forEach(c => { if (fmList[c]) state.original[c] = fmList[c]; });
+      states.push(state);
+
+      // presentation: a titled table per section
+      const title = document.createElement("h2");
+      title.className = "section-title";
+      title.textContent = sectionId;
+      const tbl = document.createElement("table");
+      tbl.innerHTML = "<tr><th>Class</th><th>Class Teacher</th></tr>";
+      const tbody = document.createElement("tbody");
+      tbl.append(tbody);
+      container.append(title, tbl);
+
+      classes.forEach(clas => {
+        const row = tbody.insertRow();
+        row.insertCell().textContent = clas;
+        const cell = row.insertCell();
+        const span = document.createElement("span");
+        span.textContent = state.original[clas]?.name ?? "none";
+        cell.append(span);
+
+        const details = document.createElement("details");
+        details.innerHTML = `<summary>Assign new</summary>`;
+        details.querySelector("summary").onclick = e => e.target.scrollIntoView();
+        details.name = "teachers";
+        const ul = document.createElement("ul");
+        candidateIds.forEach(tId => {
+          const li = document.createElement("li");
+          li.innerHTML = candidates[tId] + "<hr>";
+          li.onclick = () => {
+            details.open = false;
+            li.parentElement.parentElement.scrollIntoView(false);
+            const current = state.changes[clas] ?? state.original[clas];
+            if (current?.id === tId) return;
+            span.textContent = candidates[tId];
+            if (state.original[clas]?.id === tId) delete state.changes[clas]; // back to stored value
+            else state.changes[clas] = { name: candidates[tId], id: tId };
+          };
+          ul.append(li);
+        });
+        details.append(ul);
+        cell.append(details);
+      });
+    }
+
+    save.onclick = async () => {
+      const batch = writeBatch(db);
+      let count = 0;
+      states.forEach(({ sectionId, original, changes }) => {
+        Object.keys(changes).forEach(clas => {
+          const next = changes[clas];
+          const prev = original[clas];
+          batch.set(fmListRefOf(sectionId), { [clas]: next }, { merge: true });
+          if (prev?.id) batch.update(doc(db, schoolId, "db", "teachersV2", prev.id), "role.fm", arrayRemove(clas));
+          batch.update(doc(db, schoolId, "db", "teachersV2", next.id), "role.fm", arrayUnion(clas));
+          count++;
+        });
+      });
+      if (!count) { alert("No changes to save."); return; }
+      try {
+        await batch.commit();
+        states.forEach(st => {
+          Object.keys(st.changes).forEach(c => { st.original[c] = st.changes[c]; delete st.changes[c]; });
+        });
+        alert("saved!");
+      } catch (e) {
+        alert("Save failed: " + e.message);
+      }
+    };
   });
   </script>
 </body>
