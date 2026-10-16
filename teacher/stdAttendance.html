@@ -142,8 +142,6 @@ display: inline-block;
   
   const schoolId = "capital";
     let sessionsRef = doc(db, schoolId, "sessions");
-let teachersRef = doc(db, schoolId, "teachers");
-  let teachersDoc = await getDoc(teachersRef);
   let sectionRef = doc(db, schoolId, "section");
   let sectionDoc = await getDoc(sectionRef);
   const attendance = {};
@@ -248,15 +246,18 @@ let teachersRef = doc(db, schoolId, "teachers");
   }
   
   
-  onAuthStateChanged(auth, user=>{
+  onAuthStateChanged(auth, async user=>{
     let reg = /@.*/;
     if (user){
       let id = user.email.replace(reg, "");
-      if (teachersDoc.exists()){
-       teacher = teachersDoc.data()[id];
-       // alert(teacher.name);
+      // Each teacher has their own document: capital/db/teachersV2/{teacherId}
+      try {
+        const teacherSnap = await getDoc(doc(db, schoolId, "db", "teachersV2", id));
+        if (teacherSnap.exists()) teacher = teacherSnap.data();
+      } catch (e) {
+        console.log("Could not load teacher record: " + (e.code || e.message));
       }
-      
+
     }
     else window.location.href = "../signin.html";
     
