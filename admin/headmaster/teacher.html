@@ -4,551 +4,432 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-  <title>Teachers - Name, Username, Password</title>
+  <title>Subject load</title>
   <style>
-  *{
-    box-sizing: border-box;
-  }
-    body {
-      background-color: #f4f7fa;
-        font-family: Arial, sans-serif;
-      padding: 20px;
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f6fb; --surface: #ffffff; --text: #1c2433; --muted: #667085;
+      --border: #e1e6ef; --primary: #3f51b5; --primary-hover: #34429a; --primary-soft: #e8ebfa;
+      --danger: #c62828; --danger-soft: #fdecea; --success: #1b7f4b; --warn: #9a5b00; --warn-soft: #fff1d6;
+      --shadow: 0 6px 20px rgba(16, 24, 40, .12);
     }
-  select {
-       font-family: Arial, sans-serif;
-  }
-
-    form {
-      max-width: 800px;
-      margin: auto;
-    }
-
-    input {
-      padding: 8px;
-      border: 1px solid #333;
-      border-radius: 5px;
-  
-    }
-
-    
-
-    .p-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th, td{
-      padding: 10px;
-      border: 1px solid #333;
-      text-align: center;
-    }
- h1, .save-container {
-    display: inline-block;
- }
-  .save-container {
-    float: right;
-  }
-
-    .center {
-      text-align: center;
-      margin-top: 15px;
-    }
-  
-  
-    .p-table {
-  min-width: 600px; /* ensures large enough width for scrolling */
-}
-
-.table-container {
-  overflow-x: auto;
-  margin: 30px auto;
-}
-  
-  .subject > select {
-    width: 100%;
-    border: none;
-    text-align: right;
-    margin-bottom: 0;
-    margin-top: 20px;
-    border: 0.5px solid;
-    border-top: none;
-    border-radius: 18px;
-    display: inline-block;
-    min-height: 250px;
-   
-   
-  }
-#subjHead {
-  text-align: center;
-}
-  
-  .cell-table * {
-      
-      border-collapse: collapse;
-      margin-top: 20px;
-    border: none;
-    }
-button {
-      margin-top: 1.5rem;
-      width: 100%;
-      padding: 0.7rem;
-      background-color: #3f51b5;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #5c6bc0;
-    }
-  
-  button.delete {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button.delete:hover {
-  background-color: #c82333;
-}
-  
-  
-  
-  
-/* Modal background overlay */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* semi-transparent background */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  display: none;
-}
-
-/* Modal content styling */
-.modal-content {
-  border: none;
-  border-radius: 10px;
-  padding: 2rem;
-  background: #fff;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  min-width: 300px;
-  max-width: 90%;
-}
-
-/* Header */
-.modal-content h3 {
-  margin-top: 0;
-  font-size: 1.5rem;
-  color: #333;
-}
-
-/* Inputs */
-.modal-content input {
-  width: 100%;
-  padding: 0.5rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 1rem;
-}
-
-/* Buttons */
-.modal-content button {
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-top: 1rem;
-  width: fit-content;
-}
-
-/* Close Button styling (optional) */
-#closeBtn {
-  width: fit-content;
-  background-color: #f44336;
-  float: right;
-  margin-bottom: 1rem;
-}
-
-/* Add hover effect */
-.modal-content button:hover {
-  opacity: 0.9;
-}
-  
-  #message {
-    display: none;
-    color: green;
-  }
-  .show#message {
-    display: block;
-  }
-  .error#message {
-    color: red;
-
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #12151c; --surface: #1b2030; --text: #e8ecf5; --muted: #9aa4b8;
+        --border: #2c3347; --primary: #6577e6; --primary-hover: #7a8aee; --primary-soft: #262d4d;
+        --danger: #ef6b6b; --danger-soft: #3a2024; --success: #4cc38a; --warn: #f0b860; --warn-soft: #382c14;
+        --shadow: 0 6px 20px rgba(0, 0, 0, .5);
       }
-  
-  a {
-    font-size: 1.2rem;
-    color: #4a90e2;
-  }
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.4;
+    }
+    .page { max-width: 960px; margin: 0 auto; padding: 16px 16px 110px; }
 
+    .header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .header h1 { font-size: 1.5rem; margin: 0; flex: 1; }
+    .back {
+      width: 40px; height: 40px; display: grid; place-items: center; border-radius: 10px;
+      color: var(--primary); background: var(--surface); border: 1px solid var(--border); text-decoration: none;
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); font: inherit; font-size: .95rem; font-weight: 500;
+      cursor: pointer; text-decoration: none; transition: background .15s, opacity .15s;
+    }
+    .btn:hover:not(:disabled) { background: var(--primary-soft); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .btn.primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+    .btn.danger:hover:not(:disabled) { background: var(--danger); opacity: .9; }
+    .btn.small { padding: 4px 10px; font-size: .8rem; }
+    .btn:focus-visible, input:focus-visible, .back:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+    .who {
+      display: flex; align-items: center; gap: 14px; padding: 14px 16px; margin-bottom: 14px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    }
+    .avatar {
+      flex: none; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+      background: var(--primary-soft); color: var(--primary); font-weight: 700;
+    }
+    .who-name { font-weight: 700; font-size: 1.1rem; overflow-wrap: anywhere; }
+    .who-meta { color: var(--muted); font-size: .9rem; }
+
+    .notice { padding: 12px 14px; border-radius: 10px; margin-bottom: 12px; font-size: .95rem; }
+    .notice.error { background: var(--danger-soft); color: var(--danger); }
+    .notice.info { background: var(--primary-soft); }
+
+    .toolbar { margin-bottom: 12px; position: relative; }
+    .toolbar i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    input[type=search] {
+      width: 100%; padding: 10px 12px 10px 36px; font: inherit; color: var(--text);
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; align-items: start; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+    .card.active { border-color: var(--primary); }
+    .card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .card-title { font-weight: 600; flex: 1; overflow-wrap: anywhere; }
+    .count { font-size: .75rem; padding: 2px 8px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); font-weight: 600; white-space: nowrap; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { position: relative; }
+    .chip input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+    .chip span {
+      display: block; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border);
+      font-size: .9rem; user-select: none; transition: background .12s, color .12s;
+    }
+    .chip input:checked + span { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .chip input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .chip:hover input:not(:checked) + span { background: var(--primary-soft); }
+
+    .empty { text-align: center; color: var(--muted); padding: 40px 16px; background: var(--surface); border: 1px dashed var(--border); border-radius: 12px; }
+    .skeleton { height: 120px; border-radius: 12px; border: 1px solid var(--border); background: linear-gradient(90deg, var(--surface), var(--primary-soft), var(--surface)); background-size: 200% 100%; animation: shimmer 1.3s infinite; }
+    @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+    .savebar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--surface);
+      border-top: 1px solid var(--border); box-shadow: 0 -4px 16px rgba(16, 24, 40, .08);
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    }
+    .savebar-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
+    .savebar-inner span { flex: 1; font-weight: 500; }
+
+    dialog { border: none; border-radius: 16px; padding: 0; width: calc(100% - 32px); max-width: 420px; background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+    dialog::backdrop { background: rgba(10, 14, 24, .55); }
+    .dlg { padding: 22px; }
+    .dlg h2 { margin: 0 0 6px; font-size: 1.2rem; }
+    .dlg p { margin: 0 0 14px; color: var(--muted); }
+    .dlg-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+    .toasts { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 100; display: grid; gap: 8px; width: min(420px, calc(100% - 24px)); pointer-events: none; }
+    .toast { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); animation: toast-in .2s ease-out; pointer-events: auto; }
+    .toast.out { opacity: 0; transform: translateY(-6px); transition: .25s; }
+    .toast.success i { color: var(--success); } .toast.error i { color: var(--danger); } .toast.info i { color: var(--primary); }
+    .toast.error { border-color: var(--danger); }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </head>
 <body>
-
-  <h1>Subject Teacher</h1>
-  <div class="save-container" >
-      <button id="save">Save</button>
+  <div class="page">
+    <div class="header">
+      <a class="back" href="teacher-list.html" aria-label="Back to teachers"><i class="fas fa-arrow-left"></i></a>
+      <h1>Subject load</h1>
     </div>
-  <form id="teacherForm" >
-    <div class="table-container">
-    <table class="p-table">
-      <thead>
-        <tr>
-       
-          <th>Name</th>
-          <th id="subjHead"> 
-            <table>
-              <tr>
-                <th>Subject</th>
-                <th>Class</th>
-              </tr>
-            </table>
-          </th>
-        </tr>
-      </thead>
-      <tbody id="fieldContainer">
-        
-      </tbody>
-    </table>
+
+    <div id="notice" class="notice" hidden></div>
+
+    <div class="who" id="who" hidden>
+      <div class="avatar" id="avatar"></div>
+      <div>
+        <div class="who-name" id="whoName"></div>
+        <div class="who-meta" id="whoMeta"></div>
+      </div>
+    </div>
+
+    <div class="toolbar" id="toolbar" hidden>
+      <i class="fas fa-search"></i>
+      <input id="search" type="search" placeholder="Search subjects" aria-label="Search subjects">
+    </div>
+
+    <div class="grid" id="grid" aria-label="Subjects">
+      <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+    </div>
   </div>
-    <div>
-      <button type="button" id="add" onclick="addField()">Add Teacher</button>
+
+  <div class="savebar" id="savebar" hidden>
+    <div class="savebar-inner">
+      <span>Unsaved changes</span>
+      <button type="button" id="discard" class="btn">Discard</button>
+      <button type="button" id="save" class="btn primary">Save changes</button>
     </div>
-       
-  </form>
-  
-  
-  
-      <!-- Modal -->
-  <div id="modal" class="modal">
-  <dialog open class="modal-content">
-   <h3>Create Teacher Account</h3>
-    <p id="message">message</p>
-    <input id="nameIn" placeholder="Name">
-    <br>
-    <input id="usernameIn" placeholder="Username">
-    <br>
-    <button id="createBtn">Create</button>
-    <button id="closeBtn">Close</button>
+  </div>
 
+  <dialog id="confirmDialog" aria-labelledby="cTitle">
+    <div class="dlg">
+      <h2 id="cTitle"></h2>
+      <p id="cBody"></p>
+      <div class="dlg-actions">
+        <button type="button" id="cCancel" class="btn">Cancel</button>
+        <button type="button" id="cOk" class="btn primary">Confirm</button>
+      </div>
+    </div>
   </dialog>
-</div>
 
-    <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
   import {getFirestore, doc, getDoc, updateDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
-  import {getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-     // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
- const firebaseConfig = {
-  apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
-  authDomain: "school-in-the-box.firebaseapp.com",
-  projectId: "school-in-the-box",
-  storageBucket: "school-in-the-box.firebasestorage.app",
-  messagingSenderId: "596350496353",
-  appId: "1:596350496353:web:84c66c351700ddf0824420",
-  measurementId: "G-3MGCDH4FRF"
-};
-  
-  
+  import {getAuth, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyCm_DSZaYVQCt0ubBwRkE9nOTryJayxH0w",
+    authDomain: "school-in-the-box.firebaseapp.com",
+    projectId: "school-in-the-box",
+    storageBucket: "school-in-the-box.firebasestorage.app",
+    messagingSenderId: "596350496353",
+    appId: "1:596350496353:web:84c66c351700ddf0824420",
+    measurementId: "G-3MGCDH4FRF"
+  };
+
   const schoolId = "capital";
-  const test = false;
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
-  
-  
- add.textContent = "Loading.."; 
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const $ = id => document.getElementById(id);
+  const gridEl = $("grid"), searchEl = $("search"), saveBtn = $("save"), discardBtn = $("discard"),
+        saveBar = $("savebar"), noticeEl = $("notice"), toastsEl = $("toasts");
+
+  // ---------- feedback helpers (no alert / confirm) ----------
+  function toast(text, type = "success") {
+    const icons = { success: "fa-circle-check", error: "fa-circle-exclamation", info: "fa-circle-info" };
+    const el = document.createElement("div");
+    el.className = "toast " + type;
+    el.setAttribute("role", type === "error" ? "alert" : "status");
+    const icon = document.createElement("i");
+    icon.className = "fas " + icons[type];
+    const span = document.createElement("span");
+    span.textContent = text;
+    el.append(icon, span);
+    toastsEl.append(el);
+    setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 300); }, type === "error" ? 6000 : 3500);
+  }
+
+  function showNotice(text, type) {
+    noticeEl.textContent = text;
+    noticeEl.className = "notice " + type;
+    noticeEl.hidden = false;
+  }
+
+  function confirmDialog({ title, body, confirmText = "Confirm", danger = false }) {
+    return new Promise(resolve => {
+      const dlg = $("confirmDialog");
+      $("cTitle").textContent = title;
+      $("cBody").textContent = body;
+      const ok = $("cOk");
+      ok.textContent = confirmText;
+      ok.className = "btn " + (danger ? "danger" : "primary");
+      let result = false;
+      ok.onclick = () => { result = true; dlg.close(); };
+      $("cCancel").onclick = () => dlg.close();
+      dlg.onclick = e => { if (e.target === dlg) dlg.close(); };
+      dlg.onclose = () => resolve(result);
+      dlg.showModal();
+    });
+  }
+
+  function fatal(text) {
+    gridEl.innerHTML = "";
+    saveBar.hidden = true;
+    showNotice(text, "error");
+    throw new Error(text);
+  }
+
+  // ---------- load ----------
   const params = new URLSearchParams(window.location.search);
   const teacherId = params.get("username");
-  console.log(teacherId);
-   const user = await new Promise(resolve=> onAuthStateChanged(auth, user=>resolve(user)));
+  if (!teacherId) fatal("No teacher selected. Open this page from the teacher list.");
+
+  const user = await new Promise(resolve => onAuthStateChanged(auth, user => resolve(user)));
   if (!user) {
     window.location.href = "../signin.html";
     throw new Error("Not signed in");
   }
-  let headId = user.email.replace(/@.*/, "");
-
-  let sectionRef = doc(db, schoolId, "section");
-  let sectionDoc = await getDoc(sectionRef);
-  var subjectDict = new Map();
+  const headId = user.email.replace(/@.*/, "");
 
   // Each teacher has their own document: capital/db/teachersV2/{teacherId}
-  if (!teacherId) {
-    alert("No teacher selected. Open this page from the teacher list.");
-    throw new Error("Missing username parameter");
-  }
-  const headSnap = await getDoc(doc(db, schoolId, "db", "teachersV2", headId));
+  const sectionRef = doc(db, schoolId, "section");
   const teacherRef = doc(db, schoolId, "db", "teachersV2", teacherId);
-  const teacherSnap = await getDoc(teacherRef);
-  if (!headSnap.exists()) {
-    alert("Your account record was not found. Talk to your admin.");
-    throw new Error("Head record not found");
+  let sectionDoc, headSnap, teacherSnap;
+  try {
+    [sectionDoc, headSnap, teacherSnap] = await Promise.all([
+      getDoc(sectionRef),
+      getDoc(doc(db, schoolId, "db", "teachersV2", headId)),
+      getDoc(teacherRef)
+    ]);
+  } catch (err) {
+    console.error(err);
+    fatal("Could not load the data (" + (err.code || err.message) + "). Check your connection and reload.");
   }
-  if (!teacherSnap.exists()) {
-    alert("Teacher record not found: " + teacherId);
-    throw new Error("Teacher record not found");
-  }
+  if (!headSnap.exists()) fatal("Your account record was not found. Talk to your admin.");
+  if (!teacherSnap.exists()) fatal("Teacher record not found: " + teacherId);
+
   const head = headSnap.data();
   const teacher = teacherSnap.data();
-  teacher.username = teacherId;
-  const teachers = { [teacherId]: teacher };   // only the teacher being edited
   const rsects = head.role?.hos?.sections ?? [];
-  
-  let subjs = [];
-  
-  if (sectionDoc.exists()){
-  let sections = sectionDoc.data();
-    rsects.forEach(key=>{
-    let section = sections[key];
-    let subjects = section.subjects.sort((a, b)=>a.localeCompare(b));
-    
-    let classes = section.classes.sort();
-      
-    subjects.forEach(subject=>{
-      if (!subjs.includes(subject))
-      subjs.push(subject)
-    
-      if (subjectDict.has(subject))
-      subjectDict.set(subject, subjectDict.get(subject).concat(classes));
-      else
-      subjectDict.set(subject, classes);
-      
-    })
-  });
-  
-  }
 
-  
-  function presentTeachers(teachers){
-  //console.log(teachers["kachalla"].name);
-    let container = document.getElementById('fieldContainer');
-    container.innerHTML = "";
-    let an=0;
-   // let vals = Object.values(teachers).sort((a, b) => a.name.localeCompare(b.name) );
-    
-      [teachers[teacherId]].forEach(val=>{
-      let teacher = val;
-      
-      teacher.load ??= {};
-      subjs.forEach(subj =>{
-        teacher.load[subj] ??=[];
-        teacher.load[subj] = teacher.load[subj].sort();
-      })
-            
-      addField(teacher);
-      
-    }); 
-    
-  }
-  
- 
-  
-    presentTeachers(teachers)
-  
-  add.textContent = "Teacher Loaded";
-  save.onclick = async e=>{
-    save.innerHTML = "Saving..";
-    try { await updateDoc(teacherRef, "load", teacher.load); save.innerHTML = "Saved!"; } catch (err) { console.error(err); save.innerHTML = "Failed: " + (err.code || err.message); }
-    setTimeout(_=>save.innerHTML = "Save", 2500);
-  }
-  
-  usernameIn.oninput = e=>{
-    let val = usernameIn.value;
-    val = val.replaceAll(" ", "").toLowerCase();
-    usernameIn.value=val;
-  }
-  
-  add.onclick =  e=>{
-    return;
-    openModal();
-    createBtn.onclick = e=>{
-      let name = nameIn.value;
-        let username = usernameIn.value;
-        if (!username) return;
-        if (!name) return;
-      
-        if (teachers[username]){
-          message.innerHTML = username + " alreay exists as "+teachers[username].name;
-          message.classList.add("show", "error");
-          setTimeout(e=>message.classList.remove("show", "error"), 2000);
-          return;
-        }
-        let teacher = {
-          name: name,
-          psw: "123456",
-          username: username,
-          load: {}
-       }
-        addField(teacher);
-      teachers[username] = teacher;
-        nameIn.value="";
-        usernameIn.value = "";
-        message.innerHTML = `${name}'s account has been created!`;
-        message.classList.add("show");
-       setTimeout(e=>message.classList.remove("show"), 2000);
-
-    }
-    
-    closeBtn.onclick = closeModal;
-   
-  }
- 
-    function addField(teacher) {
-      const container = document.getElementById('fieldContainer');
-      const row = document.createElement('tr');
-      row.classList.add("entry");
-      
-      let name = teacher.name;
-      let psw = teacher.psw;
-      let username = teacher.username;
-     
-      row.innerHTML = `
-     
-          <td><input type="text" disabled class="name" value="${name}" name="name" placeholder="Name"></td>
-       <td class="subject">
-          <table class="cell-table">
-              <tr>
-                
-              </tr>
-              <tbody
-
-              </tbody>
-            </table>
-            <select data-username="${username}" multiple class="subjectSelect">
-               
-            </select>
-            
-          </td>
-     
- 
-          `;
-
-      container.appendChild(row);
-    
-      let subject = row.querySelector(".subjectSelect");
-      
-      subjectDict.forEach((classes, subj)=>{
-        
-        if (teacher.load[subj] && teacher.load[subj].length){
-          let intbody = row.querySelector("table>tbody");
-        intbody.innerHTML += `
-        <tr>
-          <td>${subj}</td>
-          <td>${teacher.load[subj].toString().replaceAll(",", ",<br>")}</td>
-        </tr>
-        `;
-        }
-        let optGroup = document.createElement("optgroup");
-        optGroup.label = subj;
-        new Set(classes).forEach(clas=>{
-          let opt = document.createElement("option");
-          opt.innerHTML = clas;
-          optGroup.append(opt);
-          
-          try {
-          if (teacher.load[subj].includes(clas)){
-            let intbody = subject.parentElement.querySelector("table>tbody");
-            
-           let kSubj = subj.replaceAll(" ", "");
-            let subjRow = intbody.getElementsByClassName(kSubj);
-       
-           opt.selected = true;
-          }
-          } catch (e){
-            //console.log(teacher.name, "is not taking", subj);
-          }
-          
-          
-        });
-        subject.append(optGroup);
-        
+  // subject -> classes (across all the head's sections that teach it)
+  const subjectDict = new Map();
+  if (sectionDoc.exists()) {
+    const sections = sectionDoc.data();
+    rsects.forEach(key => {
+      const section = sections[key];
+      if (!section) return;
+      const classes = [...(section.classes ?? [])].sort();
+      [...(section.subjects ?? [])].forEach(subject => {
+        subjectDict.set(subject, (subjectDict.get(subject) ?? []).concat(classes));
       });
-      
-      subject.addEventListener("change", e =>{
-    
-        let subjDict  = new Map();
-    let inTable = e.target.parentElement.querySelector("table");
-    let tBody = inTable.querySelector("tbody");
-    let un = subject.getAttribute("data-username");
-    let optionElms = Array.from(subject.selectedOptions);
-    const kept = {};
-    Object.keys(teachers[un].load ?? {}).forEach(k=>{
-      if (!subjectDict.has(k)) kept[k] = teachers[un].load[k];
     });
-    teachers[un].load = kept;
+  }
+  const managed = [...subjectDict.keys()].sort((a, b) => a.localeCompare(b));
 
-    optionElms.forEach(opt => {
-      let key = opt.parentElement.label;
-      let val = opt.textContent;
-      if (subjDict.has(key))
-      subjDict.get(key).push(val);
-      else subjDict.set(key, [val]);
-      teachers[un].load[key] ??=[];
-      teachers[un].load[key].push(val);
-      
-    })
-    tBody.innerHTML = "";
-      subjDict.forEach((val, key)=>{
-        tBody.innerHTML +=`
-          <tr>
-                <td>${key}</td>
-                <td>${val.toString().replaceAll(",", ", ")}</td>
-           </tr>
-        `;
-               
-    });
+  // selected[subject] = classes ticked here. outside[subject] = classes the teacher has for that
+  // subject in sections this head doesn't manage; those are left untouched on save.
+  const load0 = teacher.load ?? {};
+  const selected = new Map(), outside = new Map();
+  managed.forEach(subj => {
+    const available = new Set(subjectDict.get(subj));
+    const current = Array.isArray(load0[subj]) ? load0[subj] : [];
+    selected.set(subj, new Set(current.filter(c => available.has(c))));
+    outside.set(subj, current.filter(c => !available.has(c)));
   });
-       }
 
-    function deleteField(btn) {
-      const row = btn.closest('tr');
-      let username = row.querySelector(".username > input").value;
-      delete teachers[username];
-      //alert(teachers[username]);
-      //btn.textContent = "removing..";
-      //presentTeachers(teachers);
-     row.remove();
-    }
-  
-    function openModal() {
-    modal.style = "display: block";
+  function buildLoad() {
+    const out = {};
+    Object.keys(load0).forEach(k => { if (!subjectDict.has(k)) out[k] = load0[k]; });  // not ours: keep
+    managed.forEach(subj => {
+      const all = [...outside.get(subj), ...selected.get(subj)].sort();
+      if (all.length) out[subj] = all;                                                   // empty subjects aren't stored
+    });
+    return out;
+  }
+  let savedJson = JSON.stringify(buildLoad());
+
+  // ---------- header ----------
+  const name = teacher.name ?? teacherId;
+  $("avatar").textContent = name.trim().split(/\s+/).slice(0, 2).map(w => w[0] ?? "").join("").toUpperCase() || "?";
+  $("whoName").textContent = name;
+  $("who").hidden = false;
+
+  function updateMeta() {
+    let classes = 0, subjects = 0;
+    selected.forEach(set => { if (set.size) { subjects++; classes += set.size; } });
+    $("whoMeta").textContent = `@${teacherId} · ${subjects} subject${subjects === 1 ? "" : "s"}, ${classes} class${classes === 1 ? "" : "es"} selected`;
   }
 
-    function closeModal() {
-      document.getElementById("modal").style = "display: none";
+  function updateDirty() {
+    saveBar.hidden = JSON.stringify(buildLoad()) === savedJson;
+    updateMeta();
+  }
+
+  // ---------- subject cards ----------
+  const cards = [];
+  function buildCard(subj) {
+    const classes = [...new Set(subjectDict.get(subj))];
+    const card = document.createElement("section");
+    card.className = "card";
+    const head = document.createElement("div");
+    head.className = "card-head";
+    const title = document.createElement("div");
+    title.className = "card-title";
+    title.textContent = subj;
+    const count = document.createElement("span");
+    count.className = "count";
+    const allBtn = document.createElement("button");
+    allBtn.type = "button"; allBtn.className = "btn small"; allBtn.textContent = "All";
+    allBtn.setAttribute("aria-label", `Select all classes for ${subj}`);
+    const noneBtn = document.createElement("button");
+    noneBtn.type = "button"; noneBtn.className = "btn small"; noneBtn.textContent = "None";
+    noneBtn.setAttribute("aria-label", `Clear classes for ${subj}`);
+    head.append(title, count, allBtn, noneBtn);
+
+    const chips = document.createElement("div");
+    chips.className = "chips";
+    const boxes = classes.map(clas => {
+      const label = document.createElement("label");
+      label.className = "chip";
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.checked = selected.get(subj).has(clas);
+      const text = document.createElement("span");
+      text.textContent = clas;
+      label.append(box, text);
+      chips.append(label);
+      box.onchange = () => {
+        if (box.checked) selected.get(subj).add(clas); else selected.get(subj).delete(clas);
+        refresh();
+      };
+      return { clas, box };
+    });
+
+    function refresh() {
+      const n = selected.get(subj).size;
+      count.textContent = `${n} of ${classes.length}`;
+      card.classList.toggle("active", n > 0);
+      updateDirty();
     }
-    
-  
- 
+    allBtn.onclick = () => { boxes.forEach(({ clas, box }) => { box.checked = true; selected.get(subj).add(clas); }); refresh(); };
+    noneBtn.onclick = () => { boxes.forEach(({ clas, box }) => { box.checked = false; selected.get(subj).delete(clas); }); refresh(); };
+
+    card.append(head, chips);
+    refresh();
+    cards.push({ subj, card });
+    return card;
+  }
+
+  gridEl.innerHTML = "";
+  if (!managed.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = rsects.length
+      ? "There are no subjects set up for your sections yet."
+      : "You are not head of any section, so there are no subjects to assign.";
+    gridEl.append(empty);
+    if (!rsects.length) showNotice("You are not head of any section.", "info");
+    updateMeta();
+  } else {
+    managed.forEach(subj => gridEl.append(buildCard(subj)));
+    $("toolbar").hidden = managed.length < 6;
+  }
+
+  searchEl.oninput = () => {
+    const q = searchEl.value.trim().toLowerCase();
+    cards.forEach(({ subj, card }) => { card.hidden = !!q && !subj.toLowerCase().includes(q); });
+  };
+
+  // ---------- save / discard ----------
+  saveBtn.onclick = async () => {
+    const load = buildLoad();
+    saveBtn.disabled = discardBtn.disabled = true;
+    saveBtn.textContent = "Saving…";
+    try {
+      await updateDoc(teacherRef, "load", load);
+      savedJson = JSON.stringify(load);
+      toast("Subject load saved.");
+    } catch (err) {
+      console.error(err);
+      toast("Save failed: " + (err.code || err.message) + ". Your selections are still here, so you can try again.", "error");
+    } finally {
+      saveBtn.disabled = discardBtn.disabled = false;
+      saveBtn.textContent = "Save changes";
+      updateDirty();
+    }
+  };
+
+  discardBtn.onclick = async () => {
+    const ok = await confirmDialog({
+      title: "Discard changes?",
+      body: "Your unsaved selections will be lost.",
+      confirmText: "Discard",
+      danger: true
+    });
+    if (ok) window.location.reload();
+  };
+
+  window.addEventListener("beforeunload", e => {
+    if (!saveBar.hidden) { e.preventDefault(); e.returnValue = ""; }
+  });
   </script>
 </body>
 </html>

@@ -4,281 +4,224 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-  <title>Teachers - Name, Username, Password</title>
+  <title>Teachers</title>
   <style>
-  *{
-    box-sizing: border-box;
-  }
-    body {
-      background-color: #f4f7fa;
-        font-family: Arial, sans-serif;
-      padding: 20px;
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f6fb; --surface: #ffffff; --text: #1c2433; --muted: #667085;
+      --border: #e1e6ef; --primary: #3f51b5; --primary-hover: #34429a; --primary-soft: #e8ebfa;
+      --danger: #c62828; --danger-soft: #fdecea; --success: #1b7f4b; --success-soft: #e3f5ec;
+      --warn: #9a5b00; --warn-soft: #fff1d6; --shadow: 0 6px 20px rgba(16, 24, 40, .12);
     }
-  select {
-       font-family: Arial, sans-serif;
-  }
-
-    form {
-      max-width: 800px;
-      margin: auto;
-    }
-
-    input {
-      padding: 8px;
-      border: 1px solid #333;
-      border-radius: 5px;
-  
-    }
-
-    
-
-    .p-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th, td{
-      padding: 10px;
-      border: 1px solid #333;
-      text-align: center;
-    }
- h1, .save-container {
-    display: inline-block;
- }
-  .save-container {
-    float: right;
-  }
-
-    .center {
-      text-align: center;
-      margin-top: 15px;
-    }
-  
-  
-    .p-table {
-  min-width: 600px; /* ensures large enough width for scrolling */
-}
-
-.table-container {
-  overflow-x: auto;
-  margin: 30px auto;
-}
-  
-  .subject > select {
-    width: 100%;
-    border: none;
-    text-align: right;
-    margin-bottom: 0;
-    margin-top: 20px;
-    border: 0.5px solid;
-    border-top: none;
-    border-radius: 18px;
-   
-   
-  }
-#subjHead {
-  text-align: center;
-}
-  
-  .cell-table * {
-      
-      border-collapse: collapse;
-      margin-top: 20px;
-    border: none;
-    }
-button {
-      margin-top: 1.5rem;
-      width: 100%;
-      padding: 0.7rem;
-      background-color: #3f51b5;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #5c6bc0;
-    }
-  
-  button.delete {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button.delete:hover {
-  background-color: #c82333;
-}
-  
-  
-  
-  
-/* Modal background overlay */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* semi-transparent background */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  display: none;
-}
-
-/* Modal content styling */
-.modal-content {
-  border: none;
-  border-radius: 10px;
-  padding: 2rem;
-  background: #fff;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  min-width: 300px;
-  max-width: 90%;
-}
-
-/* Header */
-.modal-content h3 {
-  margin-top: 0;
-  font-size: 1.5rem;
-  color: #333;
-}
-
-/* Inputs */
-.modal-content input {
-  width: 100%;
-  padding: 0.5rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 1rem;
-}
-
-/* Buttons */
-.modal-content button {
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-top: 1rem;
-  width: fit-content;
-}
-
-/* Close Button styling (optional) */
-#closeBtn {
-  width: fit-content;
-  background-color: #f44336;
-  float: right;
-  margin-bottom: 1rem;
-}
-
-/* Add hover effect */
-.modal-content button:hover {
-  opacity: 0.9;
-}
-  
-  #message {
-    display: none;
-    color: green;
-  }
-  .show#message {
-    display: block;
-  }
-  .error#message {
-    color: red;
-
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #12151c; --surface: #1b2030; --text: #e8ecf5; --muted: #9aa4b8;
+        --border: #2c3347; --primary: #6577e6; --primary-hover: #7a8aee; --primary-soft: #262d4d;
+        --danger: #ef6b6b; --danger-soft: #3a2024; --success: #4cc38a; --success-soft: #17302a;
+        --warn: #f0b860; --warn-soft: #382c14; --shadow: 0 6px 20px rgba(0, 0, 0, .5);
       }
-  
-  a {
-    font-size: 1.2rem;
-    color: #4a90e2;
-  }
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      line-height: 1.4;
+    }
+    .page { max-width: 860px; margin: 0 auto; padding: 16px 16px 110px; }
 
-  
-  .modal-content select {
-    width: 100%;
-    padding: 0.5rem;
-    margin-top: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-  }
+    /* header */
+    .header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .header h1 { font-size: 1.5rem; margin: 0; flex: 1; }
+    .home {
+      width: 40px; height: 40px; display: grid; place-items: center; border-radius: 10px;
+      color: var(--primary); background: var(--surface); border: 1px solid var(--border); text-decoration: none;
+    }
+
+    /* buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); font: inherit; font-size: .95rem; font-weight: 500;
+      cursor: pointer; text-decoration: none; transition: background .15s, opacity .15s;
+    }
+    .btn:hover:not(:disabled) { background: var(--primary-soft); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .btn.primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+    .btn.danger:hover:not(:disabled) { opacity: .9; background: var(--danger); }
+    .btn.small { padding: 6px 12px; font-size: .85rem; }
+    .btn.danger-outline { color: var(--danger); }
+    .btn.danger-outline:hover:not(:disabled) { background: var(--danger-soft); }
+    .btn:focus-visible, input:focus-visible, select:focus-visible, .home:focus-visible {
+      outline: 2px solid var(--primary); outline-offset: 2px;
+    }
+
+    /* toolbar */
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .search { position: relative; flex: 1; min-width: 180px; }
+    .search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    .search input { padding-left: 36px; }
+    input, select {
+      width: 100%; padding: 10px 12px; font: inherit; color: var(--text);
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    }
+    .toolbar select { width: auto; }
+    .count { color: var(--muted); font-size: .9rem; white-space: nowrap; }
+
+    /* notice banner */
+    .notice { padding: 12px 14px; border-radius: 10px; margin-bottom: 12px; font-size: .95rem; }
+    .notice.error { background: var(--danger-soft); color: var(--danger); }
+    .notice.info { background: var(--primary-soft); color: var(--text); }
+
+    /* teacher list */
+    .list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    .row {
+      display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    }
+    .row.unsaved { border-left: 4px solid var(--warn); }
+    .row.removed { border-left: 4px solid var(--danger); opacity: .75; }
+    .row.removed .name { text-decoration: line-through; }
+    .avatar {
+      flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
+      background: var(--primary-soft); color: var(--primary); font-weight: 700; font-size: .95rem;
+    }
+    .info { flex: 1; min-width: 0; }
+    .name-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .name { font-weight: 600; overflow-wrap: anywhere; }
+    .username { color: var(--muted); font-size: .88rem; overflow-wrap: anywhere; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .chip { font-size: .75rem; padding: 2px 8px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); text-transform: capitalize; }
+    .badge { font-size: .72rem; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+    .badge.warn { background: var(--warn-soft); color: var(--warn); }
+    .badge.danger { background: var(--danger-soft); color: var(--danger); }
+    .actions { display: flex; gap: 8px; flex: none; }
+    .empty { text-align: center; color: var(--muted); padding: 40px 16px; background: var(--surface); border: 1px dashed var(--border); border-radius: 12px; }
+    .empty i { font-size: 1.8rem; display: block; margin-bottom: 8px; opacity: .6; }
+    .skeleton { height: 66px; border-radius: 12px; background: linear-gradient(90deg, var(--surface), var(--primary-soft), var(--surface)); background-size: 200% 100%; animation: shimmer 1.3s infinite; border: 1px solid var(--border); }
+    @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+    /* sticky save bar */
+    .savebar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+      background: var(--surface); border-top: 1px solid var(--border); box-shadow: 0 -4px 16px rgba(16, 24, 40, .08);
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    }
+    .savebar-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
+    .savebar-inner span { flex: 1; font-weight: 500; }
+
+    /* dialogs */
+    dialog { border: none; border-radius: 16px; padding: 0; width: calc(100% - 32px); max-width: 440px; background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+    dialog::backdrop { background: rgba(10, 14, 24, .55); }
+    .dlg { padding: 22px; }
+    .dlg h2 { margin: 0 0 6px; font-size: 1.2rem; }
+    .dlg p { margin: 0 0 14px; color: var(--muted); }
+    .field { display: grid; gap: 6px; margin-bottom: 14px; }
+    .field label { font-size: .85rem; font-weight: 600; }
+    .hint { font-size: .8rem; color: var(--muted); }
+    .dlg-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+    .dlg-msg { min-height: 1.3em; margin: 0 0 8px; font-size: .9rem; }
+    .dlg-msg.success { color: var(--success); }
+    .dlg-msg.error { color: var(--danger); }
+
+    /* toasts */
+    .toasts { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 100; display: grid; gap: 8px; width: min(420px, calc(100% - 24px)); pointer-events: none; }
+    .toast {
+      display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px;
+      background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow);
+      animation: toast-in .2s ease-out; pointer-events: auto;
+    }
+    .toast.out { opacity: 0; transform: translateY(-6px); transition: .25s; }
+    .toast.success i { color: var(--success); } .toast.error i { color: var(--danger); } .toast.info i { color: var(--primary); }
+    .toast.error { border-color: var(--danger); }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } }
+
+    @media (max-width: 560px) {
+      .row { flex-wrap: wrap; }
+      .actions { width: 100%; justify-content: flex-end; }
+      .header h1 { font-size: 1.3rem; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </head>
 <body>
-  <a href="admin.html"><i class="fas fa-home"></i></a>
-
-  <h1>Teachers</h1>
-  <div class="save-container" >
-      <button id="save">Save</button>
+  <div class="page">
+    <div class="header">
+      <a class="home" href="admin.html" aria-label="Back to admin"><i class="fas fa-home"></i></a>
+      <h1>Teachers</h1>
+      <button type="button" id="add" class="btn primary" disabled><i class="fas fa-plus"></i> Add teacher</button>
     </div>
-  <div id="teacherForm" >
-    <div class="table-container">
-    <table class="p-table">
-      <thead>
-        <tr>
-          <th>SN</th>
-          <th>Name</th>
-          <!--th id="subjHead"> 
-            <table>
-              <tr>
-                <th>Subject</th>
-                <th>Class</th>
-              </tr>
-            </table>
-          </th-->
-          <th>Username</th>
-          
-          <!--th>Password</th-->
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="fieldContainer">
-        
-      </tbody>
-    </table>
+
+    <div id="notice" class="notice" hidden></div>
+
+    <div class="toolbar" id="toolbar">
+      <div class="search">
+        <i class="fas fa-search"></i>
+        <input id="search" type="search" placeholder="Search by name or username" aria-label="Search teachers">
+      </div>
+      <select id="sectionFilter" aria-label="Filter by section" hidden></select>
+      <span class="count" id="count" aria-live="polite"></span>
+    </div>
+
+    <ul class="list" id="list" aria-label="Teachers">
+      <li class="skeleton"></li><li class="skeleton"></li><li class="skeleton"></li>
+    </ul>
   </div>
-    <div>
-      <button type="button" id="add" onclick="addField()">Add Teacher</button>
-    </div>
-       
-  </form>
-  
-  
-  
-      <!-- Modal -->
-  <div id="modal" class="modal">
-  <dialog open class="modal-content">
-   <h3>Create Teacher Account</h3>
-    <p id="message">message</p>
-    <select id="sectionIn"></select>
-    <br>
-    <input id="nameIn" placeholder="Name">
-    <br>
-    <input id="usernameIn" placeholder="Username">
-    <br>
-    <button id="createBtn">Create</button>
-    <button id="closeBtn">Close</button>
 
+  <div class="savebar" id="savebar" hidden>
+    <div class="savebar-inner">
+      <span id="saveInfo"></span>
+      <button type="button" id="discard" class="btn">Discard</button>
+      <button type="button" id="save" class="btn primary">Save changes</button>
+    </div>
+  </div>
+
+  <!-- Add teacher -->
+  <dialog id="createDialog" aria-labelledby="createTitle">
+    <form id="createForm" class="dlg" novalidate>
+      <h2 id="createTitle">Add a teacher</h2>
+      <p>Creates an account if the username is new, or adds an existing teacher to the section.</p>
+      <div class="field">
+        <label for="sectionIn">Section</label>
+        <select id="sectionIn"></select>
+      </div>
+      <div class="field">
+        <label for="nameIn">Name</label>
+        <input id="nameIn" autocomplete="off" placeholder="e.g. Ada Obi">
+      </div>
+      <div class="field">
+        <label for="usernameIn">Username</label>
+        <input id="usernameIn" autocomplete="off" autocapitalize="none" placeholder="e.g. adaobi">
+        <span class="hint">Lowercase, no spaces.</span>
+      </div>
+      <p class="dlg-msg" id="dlgMsg" role="status"></p>
+      <div class="dlg-actions">
+        <button type="button" id="closeBtn" class="btn">Done</button>
+        <button type="submit" id="createBtn" class="btn primary">Add teacher</button>
+      </div>
+    </form>
   </dialog>
-</div>
+
+  <!-- Confirm -->
+  <dialog id="confirmDialog" aria-labelledby="cTitle">
+    <div class="dlg">
+      <h2 id="cTitle"></h2>
+      <p id="cBody"></p>
+      <div class="dlg-actions">
+        <button type="button" id="cCancel" class="btn">Cancel</button>
+        <button type="button" id="cOk" class="btn primary">Confirm</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, getDoc, collection, writeBatch, updateDoc, arrayUnion, arrayRemove, FieldPath} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, doc, getDoc, collection, writeBatch, runTransaction, updateDoc, arrayUnion, arrayRemove, deleteField as deleteFieldValue, FieldPath} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
  const firebaseConfig = {
@@ -299,14 +242,65 @@ button.delete:hover {
       const auth = getAuth(app);
       const db = getFirestore(app);
 
+  const $ = id => document.getElementById(id);
+  const listEl = $("list"), countEl = $("count"), searchEl = $("search"), sectionFilter = $("sectionFilter"),
+        saveBtn = $("save"), addBtn = $("add"), discardBtn = $("discard"), saveBar = $("savebar"),
+        saveInfo = $("saveInfo"), noticeEl = $("notice"), toastsEl = $("toasts");
 
- add.textContent = "Loading..";
- const user = await new Promise(resolve=> onAuthStateChanged(auth, user=>resolve(user)));
- if (!user) {
-   window.location.href = "../signin.html";
-   throw new Error("Not signed in");
- }
- let headId = user.email.replace(/@.*/, "");
+  // ---------- feedback helpers (no alert / confirm) ----------
+  function toast(text, type = "success") {
+    const icons = { success: "fa-circle-check", error: "fa-circle-exclamation", info: "fa-circle-info" };
+    const el = document.createElement("div");
+    el.className = "toast " + type;
+    el.setAttribute("role", type === "error" ? "alert" : "status");
+    const icon = document.createElement("i");
+    icon.className = "fas " + icons[type];
+    const span = document.createElement("span");
+    span.textContent = text;
+    el.append(icon, span);
+    toastsEl.append(el);
+    setTimeout(() => { el.classList.add("out"); setTimeout(() => el.remove(), 300); }, type === "error" ? 6000 : 3500);
+  }
+
+  function showNotice(text, type) {
+    noticeEl.textContent = text;
+    noticeEl.className = "notice " + type;
+    noticeEl.hidden = false;
+  }
+
+  function confirmDialog({ title, body, confirmText = "Confirm", danger = false }) {
+    return new Promise(resolve => {
+      const dlg = $("confirmDialog");
+      $("cTitle").textContent = title;
+      $("cBody").textContent = body;
+      const ok = $("cOk");
+      ok.textContent = confirmText;
+      ok.className = "btn " + (danger ? "danger" : "primary");
+      let result = false;
+      ok.onclick = () => { result = true; dlg.close(); };
+      $("cCancel").onclick = () => dlg.close();
+      dlg.onclick = e => { if (e.target === dlg) dlg.close(); };   // backdrop click cancels
+      dlg.onclose = () => resolve(result);
+      dlg.showModal();
+    });
+  }
+
+  function fatal(text) {
+    listEl.innerHTML = "";
+    $("toolbar").hidden = true;
+    saveBar.hidden = true;
+    addBtn.disabled = true;
+    showNotice(text, "error");
+    throw new Error(text);
+  }
+
+  // ---------- load ----------
+  const user = await new Promise(resolve => onAuthStateChanged(auth, user => resolve(user)));
+  if (!user) {
+    window.location.href = "../signin.html";
+    throw new Error("Not signed in");
+  }
+  const headId = user.email.replace(/@.*/, "");
 
   // Teacher accounts: capital/db/teachersV2/{teacherId}
   // (only read for the head's own record, and checked when creating an account)
@@ -317,16 +311,19 @@ button.delete:hover {
   }
 
   const sectionRef = doc(db, schoolId, "section");
-  const sectionDoc = await getDoc(sectionRef);
-
-  const head = await getTeacher(headId);
-  if (!head) {
-    alert("Your account record was not found. Talk to your admin.");
-    throw new Error("Head record not found");
+  let sectionDoc, head;
+  try {
+    [sectionDoc, head] = await Promise.all([getDoc(sectionRef), getTeacher(headId)]);
+  } catch (err) {
+    console.error(err);
+    fatal("Could not load your data (" + (err.code || err.message) + "). Check your connection and reload.");
   }
+  if (!head) fatal("Your account record was not found. Talk to your admin.");
+
   const rsects = head.role?.hos?.sections ?? [];
   const sections = sectionDoc.exists() ? sectionDoc.data() : {}; // object: sectionId => section
-  const mySections = rsects.filter(key=> sections[key]);
+  const mySections = rsects.filter(key => sections[key]);
+  const sectionLabel = sk => sections[sk]?.name ?? sk;
 
   // One entry per (section, teacher) pair. The list shown is built from these:
   //   section.teachers = [{id, name}, ...]
@@ -334,79 +331,325 @@ button.delete:hover {
   const entries = [];
   const toRemove = [];            // saved entries removed on this page: delete on Save
   const newRecords = new Map();   // id -> account record to create on Save
+  const pendingSnapshot = [];     // {id, name} created but not yet added to school-teachers
+  const pendingCleanup = [];      // {sectionKey, id} removed from a section, load/FM not yet cleared
 
-  mySections.forEach(sk=>{
-    (sections[sk].teachers ?? []).forEach(t=>{
+  mySections.forEach(sk => {
+    (sections[sk].teachers ?? []).forEach(t => {
       entries.push({ sectionKey: sk, elem: t, saved: true });
     });
   });
 
-  // Section choices for the "create" dialog
-  mySections.forEach(sk=>{
+  // Section choices for the "add" dialog and the list filter
+  mySections.forEach(sk => {
     const opt = document.createElement("option");
     opt.value = sk;
-    opt.textContent = sections[sk].name ?? sk;
-    sectionIn.append(opt);
+    opt.textContent = sectionLabel(sk);
+    $("sectionIn").append(opt);
   });
-
-  function flash(text, isError){
-    message.textContent = text;
-    message.classList.add("show");
-    message.classList.toggle("error", !!isError);
-    setTimeout(_=>message.classList.remove("show", "error"), 2500);
+  if (mySections.length > 1) {
+    sectionFilter.hidden = false;
+    sectionFilter.innerHTML = '<option value="">All sections</option>';
+    mySections.forEach(sk => {
+      const opt = document.createElement("option");
+      opt.value = sk;
+      opt.textContent = sectionLabel(sk);
+      sectionFilter.append(opt);
+    });
   }
 
-  function presentTeachers(){
-    let container = document.getElementById('fieldContainer');
-    container.innerHTML = "";
+  // ---------- rendering ----------
+  function pendingIds() {
+    const ids = new Set();
+    entries.filter(en => !en.saved).forEach(en => ids.add(String(en.elem.id)));
+    toRemove.forEach(en => ids.add(String(en.elem.id)));
+    pendingSnapshot.forEach(p => ids.add(String(p.id)));
+    pendingCleanup.forEach(p => ids.add(String(p.id)));
+    return ids;
+  }
+
+  function updateSaveBar() {
+    const n = pendingIds().size;
+    saveBar.hidden = n === 0;
+    saveInfo.textContent = n === 1 ? "1 teacher with unsaved changes" : `${n} teachers with unsaved changes`;
+  }
+
+  function initials(name) {
+    return String(name).trim().split(/\s+/).slice(0, 2).map(w => w[0] ?? "").join("").toUpperCase() || "?";
+  }
+
+  function render() {
     // one row per teacher, even if listed in several of the head's sections
     const byId = new Map();
-    entries.forEach(en=>{
+    entries.forEach(en => {
       const id = String(en.elem.id);
-      if (!byId.has(id)) byId.set(id, { name: en.elem.name ?? id, username: id });
+      if (!byId.has(id)) byId.set(id, { id, name: en.elem.name ?? id, sections: new Set(), unsaved: false, removed: false });
+      const row = byId.get(id);
+      row.sections.add(en.sectionKey);
+      if (!en.saved) row.unsaved = true;
     });
-    [...byId.values()]
-      .sort((a, b) => String(a.name).localeCompare(String(b.name)))
-      .forEach(t=> addField(t));
+    toRemove.forEach(en => {
+      const id = String(en.elem.id);
+      if (!byId.has(id)) byId.set(id, { id, name: en.elem.name ?? id, sections: new Set(), unsaved: false, removed: true });
+      if (byId.get(id).removed) byId.get(id).sections.add(en.sectionKey);
+    });
+
+    const q = searchEl.value.trim().toLowerCase();
+    const sf = sectionFilter.value;
+    const rows = [...byId.values()]
+      .filter(r => !q || String(r.name).toLowerCase().includes(q) || r.id.toLowerCase().includes(q))
+      .filter(r => !sf || r.sections.has(sf))
+      .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+
+    const total = [...byId.values()].filter(r => !r.removed).length;
+    countEl.textContent = total === 1 ? "1 teacher" : `${total} teachers`;
+
+    listEl.innerHTML = "";
+    if (!rows.length) {
+      const li = document.createElement("li");
+      li.className = "empty";
+      li.innerHTML = '<i class="fas fa-user-group"></i>';
+      const msg = document.createElement("div");
+      msg.textContent = byId.size ? "No teachers match your search." : "No teachers in your sections yet.";
+      li.append(msg);
+      listEl.append(li);
+    }
+    rows.forEach(r => listEl.append(buildRow(r)));
+    updateSaveBar();
   }
 
+  function buildRow(r) {
+    const li = document.createElement("li");
+    li.className = "row" + (r.removed ? " removed" : r.unsaved ? " unsaved" : "");
 
- presentTeachers();
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.textContent = initials(r.name);
 
-  add.textContent = "New Teacher";
-  save.onclick = async e=>{
-    const adds = entries.filter(en=> !en.saved);
-    if (!newRecords.size && !toRemove.length && !adds.length) {
-      save.innerHTML = "No changes";
-      setTimeout(_=>save.innerHTML = "Save", 1500);
+    const info = document.createElement("div");
+    info.className = "info";
+    const nameLine = document.createElement("div");
+    nameLine.className = "name-line";
+    const name = document.createElement("span");
+    name.className = "name";
+    name.textContent = r.name;
+    nameLine.append(name);
+    if (r.removed || r.unsaved) {
+      const badge = document.createElement("span");
+      badge.className = "badge " + (r.removed ? "danger" : "warn");
+      badge.textContent = r.removed ? "Will be removed" : "Not saved";
+      nameLine.append(badge);
+    }
+    const username = document.createElement("div");
+    username.className = "username";
+    username.textContent = "@" + r.id;
+    const chips = document.createElement("div");
+    chips.className = "chips";
+    [...r.sections].forEach(sk => {
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.textContent = sectionLabel(sk);
+      chips.append(chip);
+    });
+    info.append(nameLine, username, chips);
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+    if (r.removed) {
+      const undo = document.createElement("button");
+      undo.type = "button";
+      undo.className = "btn small";
+      undo.textContent = "Undo";
+      undo.onclick = () => undoRemove(r.id);
+      actions.append(undo);
+    } else {
+      const assign = document.createElement("a");
+      assign.className = "btn small";
+      assign.href = `teacher.html?username=${encodeURIComponent(r.id)}`;
+      assign.textContent = "Assign";
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "btn small danger-outline";
+      remove.textContent = "Remove";
+      remove.onclick = () => removeTeacher(r.id, r.name);
+      actions.append(assign, remove);
+    }
+
+    li.append(avatar, info, actions);
+    return li;
+  }
+
+  searchEl.oninput = render;
+  sectionFilter.onchange = render;
+
+  // ---------- remove / undo ----------
+  // Removing takes the teacher out of your section(s). Their account record is NOT deleted,
+  // but their load and class-teacher roles for those sections' classes are cleared on Save.
+  async function removeTeacher(id, name) {
+    const plural = mySections.length > 1;
+    const ok = await confirmDialog({
+      title: `Remove ${name}?`,
+      body: `${name} will be taken out of your section${plural ? "s" : ""}. Their account is kept, but their load and class-teacher roles in ${plural ? "these sections" : "this section"} are cleared. Nothing changes until you save.`,
+      confirmText: "Remove",
+      danger: true
+    });
+    if (!ok) return;
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const en = entries[i];
+      if (String(en.elem.id) !== id) continue;
+      entries.splice(i, 1);
+      if (en.saved) toRemove.push(en);   // already in the section: remove on Save
+    }
+    // Created here and never saved: nothing to create any more
+    if (!entries.some(en => String(en.elem.id) === id)) newRecords.delete(id);
+    render();
+  }
+
+  function undoRemove(id) {
+    for (let i = toRemove.length - 1; i >= 0; i--) {
+      if (String(toRemove[i].elem.id) === id) entries.push(toRemove.splice(i, 1)[0]);
+    }
+    render();
+  }
+
+  // ---------- save ----------
+  saveBtn.onclick = async () => {
+    const adds = entries.filter(en => !en.saved);
+    if (!newRecords.size && !toRemove.length && !adds.length && !pendingSnapshot.length && !pendingCleanup.length) {
+      toast("No changes to save.", "info");
       return;
     }
 
-    save.innerHTML = "Saving..";
+    saveBtn.disabled = discardBtn.disabled = true;
+    saveBtn.textContent = "Saving…";
     try {
       // 1. account records for brand-new teachers
       if (newRecords.size) {
         const batch = writeBatch(db);
-        newRecords.forEach((record, id)=> batch.set(doc(teachersCol, id), record));
+        newRecords.forEach((record, id) => batch.set(doc(teachersCol, id), record));
         await batch.commit();
+        newRecords.forEach((record, id) => pendingSnapshot.push({ id, name: record.name }));
         newRecords.clear();
+      }
+      // 1b. keep the school-teachers snapshot (used by tsa.html) in step with new accounts
+      if (pendingSnapshot.length) {
+        await addToSchoolTeachers(pendingSnapshot);
+        pendingSnapshot.length = 0;
       }
       // 2. take removed teachers out of their sections
       if (toRemove.length) {
         await changeSectionTeachers(toRemove, arrayRemove);
+        toRemove.forEach(en => pendingCleanup.push({ sectionKey: en.sectionKey, id: String(en.elem.id) }));
         toRemove.length = 0;
+      }
+      // 2b. clear the removed teachers' load / form-master roles for those sections' classes
+      if (pendingCleanup.length) {
+        await cleanupRemoved(pendingCleanup);
+        pendingCleanup.length = 0;
       }
       // 3. put added teachers into their sections
       if (adds.length) {
         await changeSectionTeachers(adds, arrayUnion);
-        adds.forEach(en=> en.saved = true);
+        adds.forEach(en => en.saved = true);
       }
-      save.innerHTML = "Saved!";
+      toast("Changes saved.");
     } catch (err) {
       console.error(err);
-      save.innerHTML = "Failed: " + (err.code || err.message);
+      toast("Save failed: " + (err.code || err.message) + ". Your changes are still here, so you can try again.", "error");
+    } finally {
+      saveBtn.disabled = discardBtn.disabled = false;
+      saveBtn.textContent = "Save changes";
+      render();
     }
-    setTimeout(_=>save.innerHTML = "Save", 2500);
+  };
+
+  discardBtn.onclick = async () => {
+    const ok = await confirmDialog({
+      title: "Discard changes?",
+      body: "All unsaved changes on this page will be lost.",
+      confirmText: "Discard",
+      danger: true
+    });
+    if (ok) window.location.reload();
+  };
+
+  window.addEventListener("beforeunload", e => {
+    if (pendingIds().size) { e.preventDefault(); e.returnValue = ""; }
+  });
+
+  // A teacher removed from a section loses everything tied to that section's classes:
+  //   teachersV2/{id}.load[subject]  (classes taken out; a subject left empty is dropped)
+  //   teachersV2/{id}.role.fm        (classes taken out)
+  //   {sectionId}/fm-list            (class entries where they are the form master are deleted)
+  // Safe to retry: it only ever removes.
+  async function cleanupRemoved(items) {
+    const classesById = new Map();  // teacher id -> Set of classes to clear
+    const fmBySection = new Map();  // sectionId -> Set of teacher ids
+    items.forEach(({ sectionKey, id })=>{
+      if (!classesById.has(id)) classesById.set(id, new Set());
+      (sections[sectionKey]?.classes ?? []).forEach(c=> classesById.get(id).add(c));
+      if (!fmBySection.has(sectionKey)) fmBySection.set(sectionKey, new Set());
+      fmBySection.get(sectionKey).add(id);
+    });
+
+    for (const [id, classes] of classesById) {
+      await runTransaction(db, async tx=>{
+        const ref = doc(teachersCol, id);
+        const snap = await tx.get(ref);
+        if (!snap.exists()) return;
+        const t = snap.data();
+        const args = [];
+
+        if (t.load && typeof t.load === "object") {
+          const next = {};
+          let changed = false;
+          Object.entries(t.load).forEach(([subject, v])=>{
+            if (!Array.isArray(v)) { next[subject] = v; return; }
+            const kept = v.filter(c=> !classes.has(c));
+            if (kept.length === v.length) { next[subject] = v; return; }
+            changed = true;
+            if (kept.length) next[subject] = kept;   // otherwise the subject is dropped
+          });
+          if (changed) args.push("load", next);
+        }
+
+        const fm = t.role?.fm;
+        if (Array.isArray(fm)) {
+          const kept = fm.filter(c=> !classes.has(c));
+          if (kept.length !== fm.length) args.push(new FieldPath("role", "fm"), kept);
+        }
+
+        if (args.length) tx.update(ref, ...args);
+      });
+    }
+
+    for (const [sk, ids] of fmBySection) {
+      const ref = doc(db, schoolId, "db", sk, "fm-list");
+      const snap = await getDoc(ref);
+      if (!snap.exists()) continue;
+      const sectionClasses = sections[sk]?.classes ?? [];
+      const args = [];
+      Object.entries(snap.data()).forEach(([cls, v])=>{
+        if (sectionClasses.includes(cls) && ids.has(String(v?.id))) args.push(new FieldPath(cls), deleteFieldValue());
+      });
+      if (args.length) await updateDoc(ref, ...args);
+    }
+  }
+
+  // capital/school-teachers = { teachers: [{id, name}, ...] }, a snapshot of all teachers.
+  // Account records are never deleted on this page, so only creations touch it.
+  // If the snapshot doesn't exist yet, tsa.html builds it (including these teachers) on first load.
+  async function addToSchoolTeachers(items) {
+    const ref = doc(db, schoolId, "school-teachers");
+    await runTransaction(db, async tx=>{
+      const snap = await tx.get(ref);
+      if (!snap.exists()) return;
+      const list = snap.data().teachers ?? [];
+      items.forEach(({ id, name })=>{
+        if (!list.some(t=> t.id === id)) list.push({ id, name });
+      });
+      tx.set(ref, { teachers: list });
+    });
   }
 
   // arrayUnion / arrayRemove edit just the listed elements of section.teachers,
@@ -422,115 +665,80 @@ button.delete:hover {
     await updateDoc(sectionRef, ...args);
   }
 
-  usernameIn.oninput = e=>{
-    let val = usernameIn.value;
-    val = val.replaceAll(" ", "").replaceAll("/", "").toLowerCase();
-    usernameIn.value=val;
+  // ---------- add teacher dialog ----------
+  const createDialog = $("createDialog"), nameIn = $("nameIn"), usernameIn = $("usernameIn"),
+        sectionIn = $("sectionIn"), createBtn = $("createBtn"), dlgMsg = $("dlgMsg");
+
+  function setDlgMsg(text, type) {
+    dlgMsg.textContent = text;
+    dlgMsg.className = "dlg-msg " + (type ?? "");
   }
 
-  add.onclick =  e=>{
-    if (!mySections.length) {
-      alert("You are not head of any section.");
-      return;
-    }
-    openModal();
-    createBtn.onclick = async e=>{
-      let name = nameIn.value.trim();
-      let username = usernameIn.value;
-      let sk = sectionIn.value;
-      if (!username) return;
-      if (!name) return;
-      if (!sk) return;
+  usernameIn.oninput = () => {
+    usernameIn.value = usernameIn.value.replaceAll(" ", "").replaceAll("/", "").toLowerCase();
+  };
 
-      createBtn.disabled = true;
-      try {
-        if (entries.some(en=> String(en.elem.id) === username && en.sectionKey === sk)) {
-          flash(username + " is already in this section!", true);
-          return;
-        }
+  addBtn.onclick = () => {
+    setDlgMsg("");
+    createDialog.showModal();
+    nameIn.focus();
+  };
+  $("closeBtn").onclick = () => createDialog.close();
+  createDialog.onclick = e => { if (e.target === createDialog) createDialog.close(); };
 
-        // Does this username already have an account? (checked in Firestore, not just this list)
-        let existing = newRecords.get(username) ?? await getTeacher(username);
-        let finalName = existing?.name ?? name;
-        if (!existing) newRecords.set(username, {
-          name: name,
-          psw: "123456",
-          username: username,
-          load: {}
-        });
+  $("createForm").onsubmit = async e => {
+    e.preventDefault();
+    const name = nameIn.value.trim();
+    const username = usernameIn.value;
+    const sk = sectionIn.value;
+    if (!sk) return setDlgMsg("Choose a section.", "error");
+    if (!name) { nameIn.focus(); return setDlgMsg("Enter the teacher's name.", "error"); }
+    if (!username) { usernameIn.focus(); return setDlgMsg("Enter a username.", "error"); }
 
-        // Re-adding something removed earlier on this page just cancels the removal
-        const k = toRemove.findIndex(r=> r.sectionKey === sk && String(r.elem.id) === username);
-        if (k >= 0) entries.push({ ...toRemove.splice(k, 1)[0] });
-        else entries.push({ sectionKey: sk, elem: { id: username, name: finalName }, saved: false });
-
-        presentTeachers();
-        nameIn.value="";
-        usernameIn.value = "";
-        flash(existing
-          ? `${username} already has an account (${existing.name}). Added to the section, press Save.`
-          : `${name}'s account has been created! Press Save to keep it.`);
-      } catch (err) {
-        flash("Could not add teacher: " + (err.code || err.message), true);
-      } finally {
-        createBtn.disabled = false;
+    createBtn.disabled = true;
+    try {
+      if (entries.some(en => String(en.elem.id) === username && en.sectionKey === sk)) {
+        setDlgMsg(`${username} is already in this section.`, "error");
+        return;
       }
+
+      // Does this username already have an account? (checked in Firestore, not just this list)
+      const existing = newRecords.get(username) ?? await getTeacher(username);
+      const finalName = existing?.name ?? name;
+      if (!existing) newRecords.set(username, {
+        name: name,
+        psw: "123456",
+        username: username,
+        load: {}
+      });
+
+      // Re-adding something removed earlier on this page just cancels the removal
+      const k = toRemove.findIndex(r => r.sectionKey === sk && String(r.elem.id) === username);
+      if (k >= 0) entries.push({ ...toRemove.splice(k, 1)[0] });
+      else entries.push({ sectionKey: sk, elem: { id: username, name: finalName }, saved: false });
+
+      render();
+      nameIn.value = "";
+      usernameIn.value = "";
+      nameIn.focus();
+      setDlgMsg(existing
+        ? `${username} already has an account (${existing.name}); added to the section. Save to keep it.`
+        : `${name} added. Save to create the account.`, "success");
+    } catch (err) {
+      setDlgMsg("Could not add teacher: " + (err.code || err.message), "error");
+    } finally {
+      createBtn.disabled = false;
     }
+  };
 
-    closeBtn.onclick = closeModal;
-
+  // ---------- ready ----------
+  if (!mySections.length) {
+    showNotice("You are not head of any section, so there are no teachers to manage here.", "info");
+    addBtn.disabled = true;
+  } else {
+    addBtn.disabled = false;
   }
-
-    function addField(teacher) {
-      const container = document.getElementById('fieldContainer');
-      const row = document.createElement('tr');
-      row.classList.add("entry");
-
-      let name = teacher.name;
-      let psw = teacher.psw;
-      let username = teacher.username;
-
-      row.innerHTML = `
-       <td class="sn"></td>
-          <td><input type="text" disabled class="name" value="${name}" name="name" placeholder="Name"></td>
-          <td class="username"><input disabled value="${username}" class="username" name="username" placeholder="Username"></td>
-          <td><button class="assign">assign</button><button class="delete" type="button" onclick="deleteField(this)">remove</button></td>
-          `;
-
-      container.appendChild(row);
-       row.querySelector(".sn").textContent = container.children.length;
-      row.querySelector(".assign").onclick = e=> window.location.href = `teacher.html?username=${username}`;
-
-      row.querySelector(".delete").onclick = e=>deleteField(e.target);
-
-       }
-
-    // Removing takes the teacher out of your section(s). Their account record is NOT deleted.
-    function deleteField(btn) {
-      const row = btn.closest('tr');
-      let username = row.querySelector(".username > input").value;
-      let name = row.querySelector(".name").value;
-      if (!confirm(`Remove ${name} from your section${mySections.length > 1 ? "s" : ""}? Press Save to apply. Their account is kept.`)) return;
-      for (let i = entries.length - 1; i >= 0; i--) {
-        const en = entries[i];
-        if (String(en.elem.id) !== username) continue;
-        entries.splice(i, 1);
-        if (en.saved) toRemove.push(en);   // already in the section: remove on Save
-      }
-      // Created here and never saved: nothing to create any more
-      if (!entries.some(en=> String(en.elem.id) === username)) newRecords.delete(username);
-      presentTeachers();
-    }
-
-    function openModal() {
-    modal.style = "display: block";
-  }
-
-    function closeModal() {
-      document.getElementById("modal").style = "display: none";
-    }
-
-
+  render();
 
 </script>
 </body>
