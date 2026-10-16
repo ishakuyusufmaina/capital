@@ -162,11 +162,9 @@ button.delete:hover {
   const analytics = getAnalytics(app);
   const auth = getAuth(app);
   const db = getFirestore(app);
-  let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
-  let teachers = teachersDoc.data();
   let user = await new Promise(async resolve=> onAuthStateChanged(auth, user=> resolve(user)));
   let id = user.email.replace(/@.*/, "");
-  const teacher = teachers[id];
+  const teacher = (await getDoc(doc(db, schoolId, "db", "teachersV2", id))).data();
   let data;
   
   

@@ -264,7 +264,7 @@ button.delete:hover {
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, doc, getDoc, updateDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
  const firebaseConfig = {
@@ -291,18 +291,37 @@ button.delete:hover {
   const teacherId = params.get("username");
   console.log(teacherId);
    const user = await new Promise(resolve=> onAuthStateChanged(auth, user=>resolve(user)));
- let headId = user.email.replace(/@.*/, "");
+  if (!user) {
+    window.location.href = "../signin.html";
+    throw new Error("Not signed in");
+  }
+  let headId = user.email.replace(/@.*/, "");
 
-  
-    //let sessionsRef = doc(db, schoolId, "sessions");
-    let sectionRef = doc(db, schoolId, "section");
+  let sectionRef = doc(db, schoolId, "section");
   let sectionDoc = await getDoc(sectionRef);
   var subjectDict = new Map();
-     let teachersRef = doc(db, schoolId, "teachers");
-    let teachersDoc = await getDoc(teachersRef);
-const teachers = teachersDoc.data();
-  const head = teachers[headId];
-  const rsects = head.role.hos.sections;
+
+  // Each teacher has their own document: capital/db/teachersV2/{teacherId}
+  if (!teacherId) {
+    alert("No teacher selected. Open this page from the teacher list.");
+    throw new Error("Missing username parameter");
+  }
+  const headSnap = await getDoc(doc(db, schoolId, "db", "teachersV2", headId));
+  const teacherRef = doc(db, schoolId, "db", "teachersV2", teacherId);
+  const teacherSnap = await getDoc(teacherRef);
+  if (!headSnap.exists()) {
+    alert("Your account record was not found. Talk to your admin.");
+    throw new Error("Head record not found");
+  }
+  if (!teacherSnap.exists()) {
+    alert("Teacher record not found: " + teacherId);
+    throw new Error("Teacher record not found");
+  }
+  const head = headSnap.data();
+  const teacher = teacherSnap.data();
+  teacher.username = teacherId;
+  const teachers = { [teacherId]: teacher };   // only the teacher being edited
+  const rsects = head.role?.hos?.sections ?? [];
   
   let subjs = [];
   
@@ -358,9 +377,8 @@ const teachers = teachersDoc.data();
   add.textContent = "Teacher Loaded";
   save.onclick = async e=>{
     save.innerHTML = "Saving..";
-    await setDoc(teachersRef, teachers);
-    save.innerHTML = "Saved!";
-    setTimeout(_=>save.innerHTML = "Save", 1500);
+    try { await updateDoc(teacherRef, "load", teacher.load); save.innerHTML = "Saved!"; } catch (err) { console.error(err); save.innerHTML = "Failed: " + (err.code || err.message); }
+    setTimeout(_=>save.innerHTML = "Save", 2500);
   }
   
   usernameIn.oninput = e=>{
@@ -482,7 +500,11 @@ const teachers = teachersDoc.data();
     let tBody = inTable.querySelector("tbody");
     let un = subject.getAttribute("data-username");
     let optionElms = Array.from(subject.selectedOptions);
-    teachers[un].load = {};
+    const kept = {};
+    Object.keys(teachers[un].load ?? {}).forEach(k=>{
+      if (!subjectDict.has(k)) kept[k] = teachers[un].load[k];
+    });
+    teachers[un].load = kept;
 
     optionElms.forEach(opt => {
       let key = opt.parentElement.label;

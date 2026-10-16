@@ -178,7 +178,7 @@ details ol li::before {
     <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, doc, setDoc, getDoc, getDocs, collection, writeBatch} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
       const firebaseConfig = {
@@ -197,8 +197,9 @@ details ol li::before {
       const auth = getAuth(app);
     const db = getFirestore(app);
   
-  let teacherDoc = await getDoc(doc(db, schoolId, "teachers"));
-  let teachers = teacherDoc.exists()? teacherDoc.data() : {};
+  const teachersSnap = await getDocs(collection(db, schoolId, "db", "teachersV2"));
+  const teachers = {};
+  teachersSnap.forEach(d => teachers[d.id] = d.data());
   let sectionDoc = await getDoc(doc(db, schoolId, "section"));
   
   onAuthStateChanged(auth, user=>{
@@ -283,8 +284,9 @@ details ol li::before {
      
       save.onclick = async e=>{
        // alert(); return;
-        let teachersRef = doc(db, schoolId, "teachers");
-        await setDoc(teachersRef, teachers);
+        const batch = writeBatch(db);
+        Object.keys(teachers).forEach(tid => batch.set(doc(db, schoolId, "db", "teachersV2", tid), {role: teachers[tid].role ?? {}}, {merge: true}));
+        await batch.commit();
         alert("saved!");
       }
     //}

@@ -127,12 +127,11 @@ const firebaseConfig = {
   
 let sectionRef = doc(db, schoolId, "section");
   let sectionDoc = await getDoc(sectionRef);
-let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
   
 
   let user = auth.currentUser;
   let id = user.email.replace(/@.*/, "");
-   let hos = teachersDoc.data()[id];
+   let hos = (await getDoc(doc(db, schoolId, "db", "teachersV2", id))).data();
   const sections = {};
   var srp;
   var scoreInterpretations;

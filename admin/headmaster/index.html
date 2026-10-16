@@ -473,7 +473,6 @@ const schoolId= "capital";
     sess.innerHTML = sessions[0].year + ", " +terms[sessions[0].term]
         }
   
-  let teachersDoc = await getDoc(doc(db, schoolId, "teachers"));
     
 
 
@@ -586,8 +585,12 @@ const schoolId= "capital";
     code.textContent = c;
     
     let id = user.email.replace(/@.*/, "");
-    let teachers = teachersDoc.data();
-    let teacher = teachers[id];
+    let teacherDoc = await getDoc(doc(db, schoolId, "db", "teachersV2", id));
+    if (!teacherDoc.exists()) {
+      console.error("No teacher record found for", id);
+      return;
+    }
+    let teacher = teacherDoc.data();
  //   alert(teacher.adminFunctions);
      
  

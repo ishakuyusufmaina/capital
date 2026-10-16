@@ -166,21 +166,18 @@
   var section;
   var periods = [0, 6, 6, 6, 6, 5, 0];
   const sectionRef = doc(db, schoolId, "section");
-  const teachersRef = doc(db, schoolId, "teachers");
   var sections;
   
   onAuthStateChanged(auth, async user=>{
     if (!user) return;
 
-  let teachersDoc = await getDoc(teachersRef);
   let sectionDoc = await getDoc(sectionRef);
   
   if (sectionDoc.exists()){
     sections = sectionDoc.data();
   }
   let id = user.email.replace(/@.*/, "");
- let teachers = teachersDoc.data();
- let teacher = teachers[id];
+ let teacher = (await getDoc(doc(db, schoolId, "db", "teachersV2", id))).data();
  
   
   

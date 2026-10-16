@@ -59,7 +59,7 @@
      <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, doc, setDoc, getDoc, getDocs, collection, writeBatch} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
  const firebaseConfig = {
@@ -79,8 +79,9 @@
       const auth = getAuth(app);
       const db = getFirestore(app);
 
-    let teachersRef = doc(db, schoolId, "teachers");
-  let teachersDoc = await getDoc(teachersRef);
+  const teachersSnap = await getDocs(collection(db, schoolId, "db", "teachersV2"));
+  const teachers = {};
+  teachersSnap.forEach(d => teachers[d.id] = d.data());
   let sectionRef = doc(db, schoolId, "section");
   let sectionDoc = await getDoc(sectionRef);
  let sections = sectionDoc.exists()? sectionDoc.data() : {};
@@ -88,7 +89,6 @@
      
   let user = await new Promise(async resolve=> onAuthStateChanged(auth, user=> resolve(user)));
   let id = user.email.replace(/@.*/, "");
-  let teachers = teachersDoc.exists()? teachersDoc.data() : {};
   const teacher = teachers[id];
 
 

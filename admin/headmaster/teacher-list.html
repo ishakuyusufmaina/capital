@@ -206,6 +206,15 @@ button.delete:hover {
     color: #4a90e2;
   }
 
+  
+  .modal-content select {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+  }
   </style>
 </head>
 <body>
@@ -254,6 +263,8 @@ button.delete:hover {
   <dialog open class="modal-content">
    <h3>Create Teacher Account</h3>
     <p id="message">message</p>
+    <select id="sectionIn"></select>
+    <br>
     <input id="nameIn" placeholder="Name">
     <br>
     <input id="usernameIn" placeholder="Username">
@@ -267,7 +278,7 @@ button.delete:hover {
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import {getFirestore, doc, setDoc, getDoc} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import {getFirestore, doc, getDoc, collection, writeBatch, updateDoc, arrayUnion, arrayRemove, FieldPath} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
   import {getAuth, signOut, onAuthStateChanged, createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
      // import {getDatabase, set, ref, onValue, child, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
  const firebaseConfig = {
@@ -279,127 +290,209 @@ button.delete:hover {
   appId: "1:596350496353:web:84c66c351700ddf0824420",
   measurementId: "G-3MGCDH4FRF"
 };
-  
-  
+
+
   const schoolId = "capital";
   const test = true;
       const app = initializeApp(firebaseConfig);
       const analytics = getAnalytics(app);
       const auth = getAuth(app);
       const db = getFirestore(app);
-  
-  
- add.textContent = "Loading.."; 
- const user = await new Promise(resolve=> onAuthStateChanged(auth, user=>resolve(user)));
- let headId = user.email.replace(/@.*/, "");
-  
-    //let sessionsRef = doc(db, schoolId, "sessions");
-    let sectionRef = doc(db, schoolId, "section");
-  let sectionDoc = await getDoc(sectionRef);
-  var subjectDict = new Map();
-  let teachersRef = doc(db, schoolId, "teachers");
-  let teachersDoc = await getDoc(teachersRef);
 
-  const teachers = teachersDoc.data();
-  const head = teachers[headId];
-  let rsects = head.role.hos.sections;
-  let sectTeachers = [];
- // console.log(JSON.stringify(head));
-  
-  let subjs = [];
-  
-  if (sectionDoc.exists()){
-  let sections = sectionDoc.data();
-    rsects.forEach(key=>{
-    let section = sections[key];
-    let subjects = section.subjects.sort();
-      sectTeachers = sectTeachers.concat(section.teachers.map(t=>t.id));
-  });
-  
+
+ add.textContent = "Loading..";
+ const user = await new Promise(resolve=> onAuthStateChanged(auth, user=>resolve(user)));
+ if (!user) {
+   window.location.href = "../signin.html";
+   throw new Error("Not signed in");
+ }
+ let headId = user.email.replace(/@.*/, "");
+
+  // Teacher accounts: capital/db/teachersV2/{teacherId}
+  // (only read for the head's own record, and checked when creating an account)
+  const teachersCol = collection(db, schoolId, "db", "teachersV2");
+  async function getTeacher(id) {
+    const snap = await getDoc(doc(teachersCol, id));
+    return snap.exists() ? snap.data() : null;
   }
 
-  
-  function presentTeachers(teachers){
+  const sectionRef = doc(db, schoolId, "section");
+  const sectionDoc = await getDoc(sectionRef);
+
+  const head = await getTeacher(headId);
+  if (!head) {
+    alert("Your account record was not found. Talk to your admin.");
+    throw new Error("Head record not found");
+  }
+  const rsects = head.role?.hos?.sections ?? [];
+  const sections = sectionDoc.exists() ? sectionDoc.data() : {}; // object: sectionId => section
+  const mySections = rsects.filter(key=> sections[key]);
+
+  // One entry per (section, teacher) pair. The list shown is built from these:
+  //   section.teachers = [{id, name}, ...]
+  // elem is the exact object stored in the section, which arrayRemove needs.
+  const entries = [];
+  const toRemove = [];            // saved entries removed on this page: delete on Save
+  const newRecords = new Map();   // id -> account record to create on Save
+
+  mySections.forEach(sk=>{
+    (sections[sk].teachers ?? []).forEach(t=>{
+      entries.push({ sectionKey: sk, elem: t, saved: true });
+    });
+  });
+
+  // Section choices for the "create" dialog
+  mySections.forEach(sk=>{
+    const opt = document.createElement("option");
+    opt.value = sk;
+    opt.textContent = sections[sk].name ?? sk;
+    sectionIn.append(opt);
+  });
+
+  function flash(text, isError){
+    message.textContent = text;
+    message.classList.add("show");
+    message.classList.toggle("error", !!isError);
+    setTimeout(_=>message.classList.remove("show", "error"), 2500);
+  }
+
+  function presentTeachers(){
     let container = document.getElementById('fieldContainer');
     container.innerHTML = "";
-    let vals = Object.values(teachers); //.sort((a, b) => a.name.localeCompare(b.name) );
-   vals = vals.filter(t=> sectTeachers.includes(t.username))
-    vals.sort((a, b) => a.name.localeCompare(b.name) );
-    
-      vals.forEach(val=>{
-      let teacher = val
-      teacher.load ??= {};      
-      addField(teacher);
-      
-    }); 
+    // one row per teacher, even if listed in several of the head's sections
+    const byId = new Map();
+    entries.forEach(en=>{
+      const id = String(en.elem.id);
+      if (!byId.has(id)) byId.set(id, { name: en.elem.name ?? id, username: id });
+    });
+    [...byId.values()]
+      .sort((a, b) => String(a.name).localeCompare(String(b.name)))
+      .forEach(t=> addField(t));
   }
-  
-  
- presentTeachers(teachers)
-  
+
+
+ presentTeachers();
+
   add.textContent = "New Teacher";
   save.onclick = async e=>{
-    if (!Object.values(teachers)) return;
-    if (!Object.values(teachers).length) return;
-    
+    const adds = entries.filter(en=> !en.saved);
+    if (!newRecords.size && !toRemove.length && !adds.length) {
+      save.innerHTML = "No changes";
+      setTimeout(_=>save.innerHTML = "Save", 1500);
+      return;
+    }
+
     save.innerHTML = "Saving..";
-    await setDoc(teachersRef, teachers);
-    save.innerHTML = "Saved!";
-    setTimeout(_=>save.innerHTML = "Save", 1500);
+    try {
+      // 1. account records for brand-new teachers
+      if (newRecords.size) {
+        const batch = writeBatch(db);
+        newRecords.forEach((record, id)=> batch.set(doc(teachersCol, id), record));
+        await batch.commit();
+        newRecords.clear();
+      }
+      // 2. take removed teachers out of their sections
+      if (toRemove.length) {
+        await changeSectionTeachers(toRemove, arrayRemove);
+        toRemove.length = 0;
+      }
+      // 3. put added teachers into their sections
+      if (adds.length) {
+        await changeSectionTeachers(adds, arrayUnion);
+        adds.forEach(en=> en.saved = true);
+      }
+      save.innerHTML = "Saved!";
+    } catch (err) {
+      console.error(err);
+      save.innerHTML = "Failed: " + (err.code || err.message);
+    }
+    setTimeout(_=>save.innerHTML = "Save", 2500);
   }
-  
+
+  // arrayUnion / arrayRemove edit just the listed elements of section.teachers,
+  // so nobody else's changes to the section are overwritten.
+  async function changeSectionTeachers(items, op) {
+    const bySection = new Map();
+    items.forEach(it=>{
+      if (!bySection.has(it.sectionKey)) bySection.set(it.sectionKey, []);
+      bySection.get(it.sectionKey).push(it.elem);
+    });
+    const args = [];
+    bySection.forEach((elems, sk)=> args.push(new FieldPath(sk, "teachers"), op(...elems)));
+    await updateDoc(sectionRef, ...args);
+  }
+
   usernameIn.oninput = e=>{
     let val = usernameIn.value;
-    val = val.replaceAll(" ", "").toLowerCase();
+    val = val.replaceAll(" ", "").replaceAll("/", "").toLowerCase();
     usernameIn.value=val;
   }
-  
+
   add.onclick =  e=>{
+    if (!mySections.length) {
+      alert("You are not head of any section.");
+      return;
+    }
     openModal();
-    createBtn.onclick = e=>{
-      let name = nameIn.value;
-        let username = usernameIn.value;
-        if (!username) return;
-        if (!name) return;
-      
-        if (teachers[username]){
-          message.innerHTML = username + " alreay exists!";
-          message.classList.add("show", "error");
-          setTimeout(e=>message.classList.remove("show", "error"), 2000);
+    createBtn.onclick = async e=>{
+      let name = nameIn.value.trim();
+      let username = usernameIn.value;
+      let sk = sectionIn.value;
+      if (!username) return;
+      if (!name) return;
+      if (!sk) return;
+
+      createBtn.disabled = true;
+      try {
+        if (entries.some(en=> String(en.elem.id) === username && en.sectionKey === sk)) {
+          flash(username + " is already in this section!", true);
           return;
         }
-        let teacher = {
+
+        // Does this username already have an account? (checked in Firestore, not just this list)
+        let existing = newRecords.get(username) ?? await getTeacher(username);
+        let finalName = existing?.name ?? name;
+        if (!existing) newRecords.set(username, {
           name: name,
           psw: "123456",
           username: username,
           load: {}
-       }
-        addField(teacher);
-      teachers[username] = teacher;
-        nameIn.value="";
-       usernameIn.value = "";
-        message.innerHTML = `${name}'s account has been created!`;
-       message.classList.add("show");
-       setTimeout(e=>message.classList.remove("show"), 2000);
+        });
 
+        // Re-adding something removed earlier on this page just cancels the removal
+        const k = toRemove.findIndex(r=> r.sectionKey === sk && String(r.elem.id) === username);
+        if (k >= 0) entries.push({ ...toRemove.splice(k, 1)[0] });
+        else entries.push({ sectionKey: sk, elem: { id: username, name: finalName }, saved: false });
+
+        presentTeachers();
+        nameIn.value="";
+        usernameIn.value = "";
+        flash(existing
+          ? `${username} already has an account (${existing.name}). Added to the section, press Save.`
+          : `${name}'s account has been created! Press Save to keep it.`);
+      } catch (err) {
+        flash("Could not add teacher: " + (err.code || err.message), true);
+      } finally {
+        createBtn.disabled = false;
+      }
     }
-    
+
     closeBtn.onclick = closeModal;
-   
+
   }
- 
+
     function addField(teacher) {
       const container = document.getElementById('fieldContainer');
       const row = document.createElement('tr');
       row.classList.add("entry");
-      
+
       let name = teacher.name;
       let psw = teacher.psw;
       let username = teacher.username;
-     
+
       row.innerHTML = `
        <td class="sn"></td>
-          <td><input type="text" disabled class="name" value="${name}" name="name" placeholder="Name"></td>   
+          <td><input type="text" disabled class="name" value="${name}" name="name" placeholder="Name"></td>
           <td class="username"><input disabled value="${username}" class="username" name="username" placeholder="Username"></td>
           <td><button class="assign">assign</button><button class="delete" type="button" onclick="deleteField(this)">remove</button></td>
           `;
@@ -409,17 +502,26 @@ button.delete:hover {
       row.querySelector(".assign").onclick = e=> window.location.href = `teacher.html?username=${username}`;
 
       row.querySelector(".delete").onclick = e=>deleteField(e.target);
-      
+
        }
 
+    // Removing takes the teacher out of your section(s). Their account record is NOT deleted.
     function deleteField(btn) {
       const row = btn.closest('tr');
       let username = row.querySelector(".username > input").value;
-      delete teachers[username];
-      presentTeachers(teachers);
-     // row.remove();
+      let name = row.querySelector(".name").value;
+      if (!confirm(`Remove ${name} from your section${mySections.length > 1 ? "s" : ""}? Press Save to apply. Their account is kept.`)) return;
+      for (let i = entries.length - 1; i >= 0; i--) {
+        const en = entries[i];
+        if (String(en.elem.id) !== username) continue;
+        entries.splice(i, 1);
+        if (en.saved) toRemove.push(en);   // already in the section: remove on Save
+      }
+      // Created here and never saved: nothing to create any more
+      if (!entries.some(en=> String(en.elem.id) === username)) newRecords.delete(username);
+      presentTeachers();
     }
-  
+
     function openModal() {
     modal.style = "display: block";
   }
@@ -427,9 +529,9 @@ button.delete:hover {
     function closeModal() {
       document.getElementById("modal").style = "display: none";
     }
-    
-  
- 
-  </script>
+
+
+
+</script>
 </body>
 </html>

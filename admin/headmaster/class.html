@@ -106,8 +106,7 @@ var section;
  onAuthStateChanged(auth, async user=>{ 
        if (!user) return;
        let id = user.email.replace(/@.*/, "");
-      let teachers = (await getDoc(doc(db, schoolId, "teachers"))).data()
-       let teacher = teachers[id];
+       let teacher = (await getDoc(doc(db, schoolId, "db", "teachersV2", id))).data();
        if (sectionDoc.exists()){
            let sections = sectionDoc.data();
            let hosSects = teacher.role.hos.sections;
