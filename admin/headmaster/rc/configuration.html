@@ -195,8 +195,6 @@
       const analytics = getAnalytics(app);
       const auth = getAuth(app);
       const db = getFirestore(app);
-  let teachersRef = doc(db, schoolId, "teachers");
-  let teachersDoc = await getDoc(teachersRef);
   let sectionRef = doc(db, schoolId, "section");
   let sectionDoc = await getDoc(sectionRef);
   let sections = sectionDoc.exists()? sectionDoc.data() : {};
@@ -205,8 +203,7 @@
   var aInterpretations =[];
   let user = await new Promise(async resolve=> onAuthStateChanged(auth, user=> resolve(user)));
   let id = user.email.replace(/@.*/, "");
-  let teachers = teachersDoc.exists()? teachersDoc.data() : {};
-  const teacher = teachers[id];
+  const teacher = (await getDoc(doc(db, schoolId, "db", "teachersV2", id))).data();
   let sectKeys = teacher.role.hos.sections; //JSON.parse(localStorage.getItem("sections"));
 
   sectKeys.forEach(k=>{
