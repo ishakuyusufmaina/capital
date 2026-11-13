@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interaction tracker</title>
+<style>
+:root{
+  --bg:#f3f5f7;--panel:#fff;--ink:#16202a;--mute:#5d6b78;--line:#d5dce2;
+  --move:#1769e0;--drag:#e08a00;--click:#e0372b;--warn-bg:#fff3cd;--warn-ink:#5c4400;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#14191e;--panel:#1d242b;--ink:#e8edf1;--mute:#93a1ad;--line:#33404b;
+  --move:#5aa2ff;--drag:#ffb340;--click:#ff6b5e;--warn-bg:#3a3014;--warn-ink:#ffe08a}
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;display:flex;flex-direction:column;gap:10px;padding:12px;background:var(--bg);color:var(--ink);
+  font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding-right:84px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+h1{font-size:17px;margin:0}
+.meta{color:var(--mute);font-size:13px;font-variant-numeric:tabular-nums}
+.spacer{flex:1}
+button{font:inherit;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+button:focus-visible{outline:2px solid var(--move);outline-offset:2px}
+.banner{display:none;background:var(--warn-bg);color:var(--warn-ink);border-radius:6px;padding:8px 12px}
+.banner.show{display:block}
+.stage{position:relative;flex:1;min-height:240px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.log{height:130px;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;
+  font:12.5px/1.5 ui-monospace,Menlo,Consolas,monospace}
+.log div{white-space:nowrap}
+.log{padding-right:84px}
+.float{position:fixed;right:10px;z-index:5;font-size:12px;padding:3px 9px;opacity:.8}
+#tgTop{top:10px}#tgLog{bottom:10px}
+body.hide-top header,body.hide-log .log{display:none}
+.log .click{color:var(--click)}
+.log .drag{color:var(--drag)}
+.log .nav{color:var(--mute)}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header id="top">
+  <h1>Interaction tracker</h1>
+  <span class="meta" id="page">–</span>
+  <span class="spacer"></span>
+  <button id="clear" type="button">Clear marks</button>
+</header>
+<div class="banner" id="banner" role="alert"></div>
+<div class="stage" id="stage">
+  <iframe id="frame" title="Tracked page"></iframe>
+  <canvas id="cv" aria-hidden="true"></canvas>
+</div>
+<div class="log" id="log" role="log" aria-live="off"></div>
+<button class="float" id="tgTop" type="button" aria-expanded="true" aria-controls="top">Hide bar</button>
+<button class="float" id="tgLog" type="button" aria-expanded="true" aria-controls="log">Hide log</button>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---- Config -------------------------------------------------------------
+  const START_PAGE   = 'signin.html';   // must be same-origin (same folder, same http origin)
+  const TRAIL_MS     = 1500;            // how long move/drag trails stay visible
+  const RIPPLE_MS    = 1200;
+  const KEEP_MS      = 4000;            // marks older than this are discarded
+  const MAX_LOG      = 200;
+  const DRAG_THRESHOLD_PX = 3;
+
+  // ---- Elements -----------------------------------------------------------
+  const $ = id => document.getElementById(id);
+  const frame = $('frame'), cv = $('cv'), ctx = cv.getContext('2d');
+  const stage = $('stage'), logEl = $('log'), pageEl = $('page'), banner = $('banner');
+
+  // ---- State --------------------------------------------------------------
+  /** @type {{x:number,y:number,t:number,kind:'move'|'drag'|'click',stroke:number}[]} */
+  let marks = [];
+  let stroke = 0;                 // increments to break lines (new page, button release, drag start)
+  let pressed = null;             // {x,y,dragging} while a button is held
+  let detach = null;              // removes listeners from the current iframe document
+
+  // ---- Helpers ------------------------------------------------------------
+  const showBanner = msg => { banner.textContent = msg; banner.classList.toggle('show', !!msg); };
+
+  function describe(el) {
+    if (!el || !el.tagName) return '?';
+    let s = el.tagName.toLowerCase();
+    if (el.id) s += '#' + el.id;
+    else if (typeof el.className === 'string' && el.className.trim())
+      s += '.' + el.className.trim().split(/\s+/)[0];
+    return s;
+  }
+
+  function log(kind, text) {
+    const row = document.createElement('div');
+    row.className = kind;
+    row.textContent = text;
+    logEl.appendChild(row);
+    while (logEl.childElementCount > MAX_LOG) logEl.firstElementChild.remove();
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function push(kind, x, y) {
+    marks.push({ x, y, t: performance.now(), kind, stroke });
+  }
+
+  // ---- Canvas sizing (HiDPI + responsive) --------------------------------
+  function resize() {
+    const r = stage.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+    cv.width = Math.max(1, Math.round(r.width * d));
+    cv.height = Math.max(1, Math.round(r.height * d));
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  new ResizeObserver(resize).observe(stage);
+
+  // ---- Pointer state machine ---------------------------------------------
+  function endPress(x, y) {
+    if (pressed && pressed.dragging) log('drag', 'drag end');
+    pressed = null; stroke++;
+  }
+  function press(x, y) {
+    pressed = { x, y, dragging: false }; stroke++;
+    push('move', x, y);
+  }
+  function move(x, y, held) {
+    if (!held && pressed) endPress(x, y);                       // missed a release
+    if (held && !pressed) pressed = { x, y, dragging: false };  // button was already down
+    if (pressed && !pressed.dragging &&
+        Math.hypot(x - pressed.x, y - pressed.y) >= DRAG_THRESHOLD_PX) {
+      pressed.dragging = true; stroke++;
+      log('drag', 'drag start');
+    }
+    push(pressed && pressed.dragging ? 'drag' : 'move', x, y);
+  }
+
+  // ---- Attaching to the iframe -------------------------------------------
+  const CROSS_MSG = 'Cannot access the page: it is not same-origin. Serve this file and ' + START_PAGE +
+    ' from the same folder over http(s).';
+  let attachedDoc = null;
+
+  function updateLabel() {
+    const doc = frame.contentDocument;
+    if (!doc) return;
+    const path = doc.location.pathname.split('/').pop() || doc.location.pathname;
+    pageEl.textContent = path + (doc.title ? ' – ' + doc.title : '');
+  }
+
+  function attach(doc, win) {
+    if (detach) { try { detach(); } catch (_) {} detach = null; }
+    attachedDoc = doc;
+    pressed = null; stroke++;
+    showBanner('');
+    updateLabel();
+    log('nav', 'page loaded: ' + (doc.location.pathname.split('/').pop() || doc.location.pathname));
+
+    const notTouch = e => e.pointerType !== 'touch';
+    const first = e => (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]);
+
+    // Listeners sit on the iframe *window* in the capture phase, so the page cannot
+    // swallow them with stopPropagation(). Touch uses touch events, because the browser
+    // cancels pointer events as soon as a touch starts scrolling the page.
+    const handlers = {
+      pointerdown:  e => { if (notTouch(e) && e.button === 0) press(e.clientX, e.clientY); },
+      pointermove:  e => { if (notTouch(e)) move(e.clientX, e.clientY, (e.buttons & 1) === 1); },
+      pointerup:    e => { if (notTouch(e)) endPress(e.clientX, e.clientY); },
+      touchstart:   e => { const t = first(e); if (t) press(t.clientX, t.clientY); },
+      touchmove:    e => { const t = first(e); if (t) move(t.clientX, t.clientY, true); },
+      touchend:     e => { const t = first(e); endPress(t ? t.clientX : 0, t ? t.clientY : 0); },
+      touchcancel:  e => { const t = first(e); endPress(t ? t.clientX : 0, t ? t.clientY : 0); },
+      // Native HTML5 drag (images, links, selected text) cancels pointer events and fires dragover.
+      dragover:     e => move(e.clientX, e.clientY, true),
+      dragend:      e => endPress(e.clientX, e.clientY),
+      drop:         e => endPress(e.clientX, e.clientY),
+      click:        e => {
+        push('click', e.clientX, e.clientY);
+        log('click', `click <${describe(e.target)}>`);
+      },
+      pagehide:     () => { pressed = null; stroke++; },
+    };
+    const opts = { capture: true, passive: true };
+    for (const [type, fn] of Object.entries(handlers)) win.addEventListener(type, fn, opts);
+    detach = () => {
+      for (const [type, fn] of Object.entries(handlers)) win.removeEventListener(type, fn, opts);
+    };
+  }
+
+  // Runs every frame and on load: attaches as soon as a new document exists, instead of
+  // waiting for every image and script to finish loading (the old cause of "works sometimes").
+  function sync() {
+    const doc = frame.contentDocument, win = frame.contentWindow;
+    if (!doc || !win || doc === attachedDoc) return;
+    let href;
+    try { href = doc.location.href; } catch (_) { return; }
+    if (href === 'about:blank') return;
+    attach(doc, win);
+  }
+
+  // Releasing the button outside the iframe never reaches the iframe document.
+  window.addEventListener('pointerup', () => { if (pressed) { pressed = null; stroke++; } }, true);
+  window.addEventListener('blur', () => { pressed = null; stroke++; });
+
+  frame.addEventListener('load', () => {
+    sync();
+    if (!frame.contentDocument) showBanner(CROSS_MSG);   // null means cross-origin or blocked
+    updateLabel();
+  });
+  frame.addEventListener('error', () => showBanner('Failed to load ' + START_PAGE + '.'));
+
+  // ---- Rendering ----------------------------------------------------------
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  function draw(now) {
+    sync();
+    const w = cv.width, h = cv.height;
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, w, h); ctx.restore();
+
+    const cMove = css('--move'), cDrag = css('--drag'), cClick = css('--click');
+    while (marks.length && now - marks[0].t > KEEP_MS) marks.shift();
+
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    for (let i = 1; i < marks.length; i++) {
+      const a = marks[i - 1], b = marks[i];
+      if (a.stroke !== b.stroke || b.kind === 'click' || a.kind === 'click') continue;
+      const age = now - b.t;
+      if (age > TRAIL_MS) continue;
+      ctx.globalAlpha = 1 - age / TRAIL_MS;
+      ctx.strokeStyle = b.kind === 'drag' ? cDrag : cMove;
+      ctx.lineWidth = b.kind === 'drag' ? 4 : 2;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    }
+
+    for (const m of marks) {
+      if (m.kind !== 'click') continue;
+      const p = (now - m.t) / RIPPLE_MS;
+      if (p >= 1) continue;
+      ctx.globalAlpha = 1 - p; ctx.strokeStyle = ctx.fillStyle = cClick; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(m.x, m.y, 6 + p * 30, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(m.x, m.y, 4, 0, Math.PI * 2); ctx.fill();
+    }
+
+    const last = marks[marks.length - 1];
+    if (last && last.kind !== 'click' && now - last.t < 3000) {
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = last.kind === 'drag' ? cDrag : cMove;
+      ctx.beginPath(); ctx.arc(last.x, last.y, last.kind === 'drag' ? 7 : 5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+
+  // ---- Boot ---------------------------------------------------------------
+  const wire = (btn, cls, name) => btn.addEventListener('click', () => {
+    const hidden = document.body.classList.toggle(cls);
+    btn.textContent = (hidden ? 'Show ' : 'Hide ') + name;
+    btn.setAttribute('aria-expanded', String(!hidden));
+  });
+  wire($('tgTop'), 'hide-top', 'bar');
+  wire($('tgLog'), 'hide-log', 'log');
+  $('clear').addEventListener('click', () => { marks = []; logEl.textContent = ''; });
+
+  if (location.protocol === 'file:') {
+    showBanner('Opened from file://. Browsers treat each local file as its own origin, so tracking will be blocked. ' +
+      'Run a local server in this folder (for example: python -m http.server) and open http://localhost:8000/.');
+  }
+  resize();
+  requestAnimationFrame(draw);
+  frame.src = START_PAGE;
+})();
+</script>
+</body>
+</html>
