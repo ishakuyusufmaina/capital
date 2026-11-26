@@ -101,14 +101,20 @@
   
   let sectionRef = doc(db, schoolId, "section");
 let sectionDoc = await getDoc(sectionRef);
-var section;
+const sections = sectionDoc.exists() ? sectionDoc.data() : {};
+function getSection(cls){
+  const c = (cls || "").trim().toLowerCase();
+  return Object.keys(sections).find(k =>
+    (sections[k].classes || []).some(x => x.trim().toLowerCase() === c)
+  ) ?? null;
+}
   
  onAuthStateChanged(auth, async user=>{ 
        if (!user) return;
        let id = user.email.replace(/@.*/, "");
-       let teacher = (await getDoc(doc(db, schoolId, "db", "teachersV2", id))).data();
+      let teachers = (await getDoc(doc(db, schoolId, "teachers"))).data()
+       let teacher = teachers[id];
        if (sectionDoc.exists()){
-           let sections = sectionDoc.data();
            let hosSects = teacher.role.hos.sections;
            let keys = Object.keys(sections);
            hosSects.forEach(key=>{
@@ -117,11 +123,6 @@ var section;
                let classes = sections[key].classes;
                classes.forEach(clas=>optG.innerHTML +=`<option>${clas}</option>`);
                classSelect.append(optG);
-               classSelect.addEventListener("change", _=>{
-               if (!classes.includes(classSelect.value)) return;
-               section = key;
-               console.log(section);
-             })
            });
        }
        
@@ -565,8 +566,8 @@ function isEqual(a, b) {
         picURL: student.picURL || "",    
         id: student.id,
         sessions: arrayUnion(sessionSelect.value.toLowerCase()),
-        section,
-        religion: student.religion || none
+        section: getSection(classSelect.value),
+        religion: student.religion || "none"
      }
      
       const stdRef = doc(stdDb, "students", student.id.replaceAll("/", "_"))
@@ -584,7 +585,7 @@ function isEqual(a, b) {
         picURL: student.picURL || "",    
         id: student.id,
         sessions: arrayUnion(sessionSelect.value.toLowerCase()),
-        section,
+        section: getSection(classSelect.value),
         pin: generate4DigitInteger(),
         religion: student.religion || "none"
       }
